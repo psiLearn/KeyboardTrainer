@@ -10,7 +10,7 @@ module LessonRepository =
     let getAllLessons () =
         async {
             use conn = DbContext.createConnection()
-            do! conn.OpenAsync() |> Async.AwaitTask
+            conn.Open()
             
             let query = "SELECT id, title, difficulty, content_type, language, content, created_at, updated_at FROM lessons ORDER BY created_at DESC"
             
@@ -48,24 +48,26 @@ module LessonRepository =
     let getLessonById (id: Guid) =
         async {
             use conn = DbContext.createConnection()
-            do! conn.OpenAsync() |> Async.AwaitTask
+            conn.Open()
             
             let query = "SELECT id, title, difficulty, content_type, language, content, created_at, updated_at FROM lessons WHERE id = @id"
             let param = {| id = id |}
             
-            let! result = 
-                conn.QuerySingleOrDefaultAsync<{| Id: Guid; Title: string; Difficulty: string; Content_type: string; Language: string; Content: string; Created_at: DateTime; Updated_at: DateTime |}>
+            let! results = 
+                conn.QueryAsync<{| Id: Guid; Title: string; Difficulty: string; Content_type: string; Language: string; Content: string; Created_at: DateTime; Updated_at: DateTime |}>
                     (query, param)
                 |> Async.AwaitTask
             
+            let result = results |> Seq.tryHead
             return 
-                if result = null then None
-                else
+                match result with
+                | None -> None
+                | Some r ->
                     Some {
-                        Id = result.Id
-                        Title = result.Title
+                        Id = r.Id
+                        Title = r.Title
                         Difficulty = 
-                            match result.Difficulty with
+                            match r.Difficulty with
                             | "A1" -> A1
                             | "A2" -> A2
                             | "B1" -> B1
@@ -73,14 +75,14 @@ module LessonRepository =
                             | "C1" -> C1
                             | _ -> A1
                         ContentType = 
-                            match result.Content_type with
+                            match r.Content_type with
                             | "words" -> Words
                             | "sentences" -> Sentences
                             | _ -> Words
                         Language = French
-                        Content = result.Content
-                        CreatedAt = result.Created_at
-                        UpdatedAt = result.Updated_at
+                        Content = r.Content
+                        CreatedAt = r.Created_at
+                        UpdatedAt = r.Updated_at
                     }
         }
 
@@ -88,7 +90,7 @@ module LessonRepository =
     let createLesson (dto: LessonCreateDto) =
         async {
             use conn = DbContext.createConnection()
-            do! conn.OpenAsync() |> Async.AwaitTask
+            conn.Open()
             
             let id = Guid.NewGuid()
             let now = DateTime.UtcNow
@@ -104,7 +106,7 @@ module LessonRepository =
                 title = dto.Title
                 difficulty = dto.Difficulty.ToString()
                 content_type = dto.ContentType.ToString()
-                language = "French"
+                language = dto.Language.ToString()
                 content = dto.TextContent
                 created_at = now
                 updated_at = now
@@ -142,12 +144,12 @@ module LessonRepository =
     let updateLesson (id: Guid) (dto: LessonCreateDto) =
         async {
             use conn = DbContext.createConnection()
-            do! conn.OpenAsync() |> Async.AwaitTask
+            conn.Open()
             
             let query = """
                 UPDATE lessons 
                 SET title = @title, difficulty = @difficulty, content_type = @content_type, 
-                    content = @content, updated_at = @updated_at
+                    language = @language, content = @content, updated_at = @updated_at
                 WHERE id = @id
                 RETURNING id, title, difficulty, content_type, language, content, created_at, updated_at
             """
@@ -157,23 +159,26 @@ module LessonRepository =
                 title = dto.Title
                 difficulty = dto.Difficulty.ToString()
                 content_type = dto.ContentType.ToString()
+                language = dto.Language.ToString()
                 content = dto.TextContent
                 updated_at = DateTime.UtcNow
             |}
             
-            let! result = 
-                conn.QuerySingleOrDefaultAsync<{| Id: Guid; Title: string; Difficulty: string; Content_type: string; Language: string; Content: string; Created_at: DateTime; Updated_at: DateTime |}>
+            let! results = 
+                conn.QueryAsync<{| Id: Guid; Title: string; Difficulty: string; Content_type: string; Language: string; Content: string; Created_at: DateTime; Updated_at: DateTime |}>
                     (query, param)
                 |> Async.AwaitTask
             
+            let result = results |> Seq.tryHead
             return 
-                if result = null then None
-                else
+                match result with
+                | None -> None
+                | Some r ->
                     Some {
-                        Id = result.Id
-                        Title = result.Title
+                        Id = r.Id
+                        Title = r.Title
                         Difficulty = 
-                            match result.Difficulty with
+                            match r.Difficulty with
                             | "A1" -> A1
                             | "A2" -> A2
                             | "B1" -> B1
@@ -181,14 +186,14 @@ module LessonRepository =
                             | "C1" -> C1
                             | _ -> A1
                         ContentType = 
-                            match result.Content_type with
+                            match r.Content_type with
                             | "words" -> Words
                             | "sentences" -> Sentences
                             | _ -> Words
                         Language = French
-                        Content = result.Content
-                        CreatedAt = result.Created_at
-                        UpdatedAt = result.Updated_at
+                        Content = r.Content
+                        CreatedAt = r.Created_at
+                        UpdatedAt = r.Updated_at
                     }
         }
 
@@ -196,7 +201,7 @@ module LessonRepository =
     let deleteLesson (id: Guid) =
         async {
             use conn = DbContext.createConnection()
-            do! conn.OpenAsync() |> Async.AwaitTask
+            conn.Open()
             
             let query = "DELETE FROM lessons WHERE id = @id"
             let param = {| id = id |}

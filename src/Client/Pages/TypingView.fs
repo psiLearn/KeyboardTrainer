@@ -103,8 +103,12 @@ module TypingView =
 
         | Backspace ->
             if model.TypingState = InProgress && model.CurrentCharIndex > 0 then
-                let newInput = model.UserInput.[0..model.CurrentCharIndex - 2]
                 let newIndex = model.CurrentCharIndex - 1
+                let newInput = 
+                    if newIndex > 0 then
+                        model.UserInput.[0..newIndex - 1]
+                    else
+                        ""
                 let newErrors = Map.remove newIndex model.Errors
                 
                 { model with 

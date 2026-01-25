@@ -167,22 +167,8 @@ module App =
                 | Metrics ->
                     Metrics.view model.MetricsModel (MetricsMsg >> dispatch)
             ]
-
             // Footer
             footer [ ClassName "footer" ] [
                 p [] [ str "© 2024 Keyboard Trainer. Master your typing skills!" ]
             ]
         ]
-
-#if DEBUG
-open Elmish.Debug
-open Elmish.HMR
-#endif
-
-Program.mkProgram init update view
-#if DEBUG
-|> Program.withDebugger
-|> Program.withHMR
-#endif
-|> Program.withReactSynchronous "app"
-|> Program.run

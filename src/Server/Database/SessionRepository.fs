@@ -10,15 +10,16 @@ module SessionRepository =
     let createSession (dto: SessionCreateDto) =
         async {
             use conn = DbContext.createConnection()
-            do! conn.OpenAsync() |> Async.AwaitTask
+            conn.Open()
             
             let id = Guid.NewGuid()
+            let now = DateTime.UtcNow
             
             // Convert Map to JSON string for JSONB storage
             let perKeyErrorsJson = 
                 dto.PerKeyErrors
                 |> Map.toList
-                |> List.map (fun (k, v) -> sprintf "\"%s\":%d" k v)
+                |> List.map (fun (k, v) -> sprintf "\"%d\":%d" k v)
                 |> String.concat ","
                 |> fun s -> "{" + s + "}"
             
@@ -31,14 +32,14 @@ module SessionRepository =
             let param = {|
                 id = id
                 lesson_id = dto.LessonId
-                started_at = dto.StartedAt
-                ended_at = dto.EndedAt
-                wpm = dto.Wpm
-                cpm = dto.Cpm
+                started_at = now
+                ended_at = now
+                wpm = float dto.Wpm
+                cpm = float dto.Cpm
                 accuracy = dto.Accuracy
                 error_count = dto.ErrorCount
                 per_key_errors = perKeyErrorsJson
-                created_at = DateTime.UtcNow
+                created_at = now
             |}
             
             let! result = 
@@ -72,7 +73,7 @@ module SessionRepository =
     let getSessionsByLessonId (lessonId: Guid) =
         async {
             use conn = DbContext.createConnection()
-            do! conn.OpenAsync() |> Async.AwaitTask
+            conn.Open()
             
             let query = """
                 SELECT id, lesson_id, started_at, ended_at, wpm, cpm, accuracy, error_count, per_key_errors, created_at 
@@ -108,7 +109,7 @@ module SessionRepository =
     let getLastSession () =
         async {
             use conn = DbContext.createConnection()
-            do! conn.OpenAsync() |> Async.AwaitTask
+            conn.Open()
             
             let query = """
                 SELECT id, lesson_id, started_at, ended_at, wpm, cpm, accuracy, error_count, per_key_errors, created_at 
@@ -117,24 +118,26 @@ module SessionRepository =
                 LIMIT 1
             """
             
-            let! result = 
-                conn.QuerySingleOrDefaultAsync<{| Id: Guid; Lesson_id: Guid; Started_at: DateTime; Ended_at: DateTime; Wpm: float; Cpm: float; Accuracy: float; Error_count: int; Per_key_errors: string; Created_at: DateTime |}>
+            let! results = 
+                conn.QueryAsync<{| Id: Guid; Lesson_id: Guid; Started_at: DateTime; Ended_at: DateTime; Wpm: float; Cpm: float; Accuracy: float; Error_count: int; Per_key_errors: string; Created_at: DateTime |}>
                     (query)
                 |> Async.AwaitTask
             
+            let result = results |> Seq.tryHead
             return
-                if result = null then None
-                else
+                match result with
+                | None -> None
+                | Some r ->
                     Some {
-                        Id = result.Id
-                        LessonId = result.Lesson_id
-                        StartedAt = result.Started_at
-                        EndedAt = result.Ended_at
-                        Wpm = result.Wpm
-                        Cpm = result.Cpm
-                        Accuracy = result.Accuracy
-                        ErrorCount = result.Error_count
+                        Id = r.Id
+                        LessonId = r.Lesson_id
+                        StartedAt = r.Started_at
+                        EndedAt = r.Ended_at
+                        Wpm = r.Wpm
+                        Cpm = r.Cpm
+                        Accuracy = r.Accuracy
+                        ErrorCount = r.Error_count
                         PerKeyErrors = Map.empty
-                        CreatedAt = result.Created_at
+                        CreatedAt = r.Created_at
                     }
         }

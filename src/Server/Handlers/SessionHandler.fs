@@ -5,6 +5,30 @@ open Giraffe
 open KeyboardTrainer.Shared
 
 module SessionHandler =
+    /// Validate session creation DTO
+    let validateSessionCreateDto (dto: SessionCreateDto) : ValidationError list =
+        [
+            // LessonId validation
+            if dto.LessonId = Guid.Empty then
+                { Field = "lessonId"; Message = "Lesson ID is required" }
+            
+            // Accuracy validation
+            if dto.Accuracy < 0.0 || dto.Accuracy > 100.0 then
+                { Field = "accuracy"; Message = "Accuracy must be between 0 and 100" }
+            
+            // WPM validation
+            if dto.Wpm < 0 then
+                { Field = "wpm"; Message = "Words per minute cannot be negative" }
+            
+            // CPM validation
+            if dto.Cpm < 0 then
+                { Field = "cpm"; Message = "Characters per minute cannot be negative" }
+            
+            // Error count validation
+            if dto.ErrorCount < 0 then
+                { Field = "errorCount"; Message = "Error count cannot be negative" }
+        ]
+
     /// HTTP handler for POST /api/sessions (create session)
     let postSession: HttpHandler =
         fun next ctx ->
@@ -37,7 +61,7 @@ module SessionHandler =
                         | Some _ ->
                             let! session = SessionRepository.createSession dto |> Async.StartAsTask
                             ctx.SetStatusCode 201
-                            ctx.SetHttpHeader "Location" $"/api/sessions/{session.Id}"
+                            ctx.SetHttpHeader("Location", $"/api/sessions/{session.Id}")
                             return! json session next ctx
                 with
                 | :? System.Text.Json.JsonException as ex ->
@@ -103,26 +127,3 @@ module SessionHandler =
                     return! json error next ctx
             }
 
-    /// Validate session creation DTO
-    and validateSessionCreateDto (dto: SessionCreateDto) : ValidationError list =
-        [
-            // LessonId validation
-            if dto.LessonId = Guid.Empty then
-                { Field = "lessonId"; Message = "Lesson ID is required" }
-            
-            // Accuracy validation
-            if dto.Accuracy < 0.0 || dto.Accuracy > 100.0 then
-                { Field = "accuracy"; Message = "Accuracy must be between 0 and 100" }
-            
-            // WPM validation
-            if dto.Wpm < 0 then
-                { Field = "wpm"; Message = "Words per minute cannot be negative" }
-            
-            // CPM validation
-            if dto.Cpm < 0 then
-                { Field = "cpm"; Message = "Characters per minute cannot be negative" }
-            
-            // Error count validation
-            if dto.ErrorCount < 0 then
-                { Field = "errorCount"; Message = "Error count cannot be negative" }
-        ]

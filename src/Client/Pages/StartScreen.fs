@@ -142,36 +142,38 @@ module StartScreen =
                                         ]
                                 ]
 
-                    // Selected lesson details
-                    match model.SelectedLesson with
-                    | Some lesson ->
-                        div [ ClassName "lesson-details" ] [
-                            h3 [] [ str lesson.Title ]
-                            p [ ClassName "detail-row" ] [
-                                strong [] [ str "Difficulty: " ]
-                                str (sprintf "%A" lesson.Difficulty)
+                        // Selected lesson details
+                        match model.SelectedLesson with
+                        | Some lesson ->
+                            div [ ClassName "lesson-details" ] [
+                                h3 [] [ str lesson.Title ]
+                                p [ ClassName "detail-row" ] [
+                                    strong [] [ str "Difficulty: " ]
+                                    str (sprintf "%A" lesson.Difficulty)
+                                ]
+                                p [ ClassName "detail-row" ] [
+                                    strong [] [ str "Type: " ]
+                                    str (sprintf "%A" lesson.ContentType)
+                                ]
+                                p [ ClassName "detail-row" ] [
+                                    strong [] [ str "Language: " ]
+                                    str (sprintf "%A" lesson.Language)
+                                ]
+                                p [ ClassName "detail-row" ] [
+                                    strong [] [ str "Content: " ]
+                                    str lesson.Content
+                                ]
+                                p [ ClassName "detail-row" ] [
+                                    strong [] [ str "Created: " ]
+                                    str (lesson.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))
+                                ]
+                                
+                                button [
+                                    ClassName "btn btn-primary btn-large"
+                                    OnClick (fun _ -> dispatch StartLesson)
+                                ] [ str "Start Typing" ]
                             ]
-                            p [ ClassName "detail-row" ] [
-                                strong [] [ str "Type: " ]
-                                str (sprintf "%A" lesson.ContentType)
-                            ]
-                            p [ ClassName "detail-row" ] [
-                                strong [] [ str "Language: " ]
-                                str (sprintf "%A" lesson.Language)
-                            ]
-                            p [ ClassName "detail-row" ] [
-                                strong [] [ str "Content: " ]
-                                str lesson.Content
-                            ]
-                            p [ ClassName "detail-row" ] [
-                                strong [] [ str "Created: " ]
-                                str (lesson.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))
-                            ]
-                            
-                            button [
-                                ClassName "btn btn-primary btn-large"
-                                OnClick (fun _ -> dispatch StartLesson)
-                            ] [ str "Start Typing" ]
-                        ]
-                    | None -> ()
+                        | None -> ()
+                    ]
                 ]
+        ]

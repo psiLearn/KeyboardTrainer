@@ -5,6 +5,25 @@ open Giraffe
 open KeyboardTrainer.Shared
 
 module LessonHandler =
+    /// Validate lesson creation DTO
+    let validateLessonCreateDto (dto: LessonCreateDto) : ValidationError list =
+        [
+            // Title validation
+            if String.IsNullOrWhiteSpace dto.Title then
+                { Field = "title"; Message = "Title is required" }
+            elif dto.Title.Length > 100 then
+                { Field = "title"; Message = "Title cannot exceed 100 characters" }
+            
+            // Content validation
+            if String.IsNullOrWhiteSpace dto.TextContent then
+                { Field = "textContent"; Message = "Content is required" }
+            elif dto.TextContent.Length > 5000 then
+                { Field = "textContent"; Message = "Content cannot exceed 5000 characters" }
+            
+            // Language validation is implicit through the type system
+            // (Language is an enum that can only have valid values)
+        ]
+
     /// HTTP handler for GET /api/lessons (get all lessons)
     let getAllLessons: HttpHandler =
         fun next ctx ->
@@ -95,7 +114,7 @@ module LessonHandler =
                     else
                         let! lesson = LessonRepository.createLesson dto |> Async.StartAsTask
                         ctx.SetStatusCode 201
-                        ctx.SetHttpHeader "Location" $"/api/lessons/{lesson.Id}"
+                        ctx.SetHttpHeader("Location", $"/api/lessons/{lesson.Id}")
                         let responseDto: LessonDto = {
                             Id = lesson.Id
                             Title = lesson.Title
@@ -213,18 +232,3 @@ module LessonHandler =
                     return! json error next ctx
             }
 
-    /// Validate lesson creation DTO
-    and validateLessonCreateDto (dto: LessonCreateDto) : ValidationError list =
-        [
-            // Title validation
-            if String.IsNullOrWhiteSpace dto.Title then
-                { Field = "title"; Message = "Title is required" }
-            elif dto.Title.Length > 100 then
-                { Field = "title"; Message = "Title cannot exceed 100 characters" }
-            
-            // Content validation
-            if String.IsNullOrWhiteSpace dto.TextContent then
-                { Field = "textContent"; Message = "Content is required" }
-            elif dto.TextContent.Length > 5000 then
-                { Field = "textContent"; Message = "Content cannot exceed 5000 characters" }
-        ]

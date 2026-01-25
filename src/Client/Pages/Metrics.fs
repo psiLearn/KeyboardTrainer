@@ -185,4 +185,4 @@ module Metrics =
                             h3 [] [ str "No Sessions Yet" ]
                             p [] [ str "Complete a typing lesson to see your statistics." ]
                         ]
-                ]
+                ]        ]

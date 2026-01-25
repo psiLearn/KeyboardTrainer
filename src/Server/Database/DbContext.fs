@@ -26,7 +26,7 @@ module DbContext =
     let runMigrations () =
         async {
             use conn = createConnection()
-            do! conn.OpenAsync() |> Async.AwaitTask
+            conn.Open()
             
             try
                 // Read and execute migration files
@@ -36,14 +36,14 @@ module DbContext =
                     System.IO.File.ReadAllText(
                         "./src/Server/Database/Migrations/001_CreateLessonsAndSessionsTables.sql"
                     )
-                do! conn.ExecuteAsync(migration1) |> Async.AwaitTask |> Async.Ignore
+                let! _ = conn.ExecuteAsync(migration1) |> Async.AwaitTask
                 printfn "[DB] ✓ Migration 001 completed"
                 
                 let migration2 = 
                     System.IO.File.ReadAllText(
                         "./src/Server/Database/Migrations/002_SeedFrenchLessons.sql"
                     )
-                do! conn.ExecuteAsync(migration2) |> Async.AwaitTask |> Async.Ignore
+                let! _ = conn.ExecuteAsync(migration2) |> Async.AwaitTask
                 printfn "[DB] ✓ Migration 002 (seed data) completed"
                 
                 printfn "[DB] All migrations completed successfully"
@@ -57,8 +57,8 @@ module DbContext =
         async {
             try
                 use conn = createConnection()
-                do! conn.OpenAsync() |> Async.AwaitTask
-                do! conn.ExecuteAsync("SELECT 1") |> Async.AwaitTask |> Async.Ignore
+                conn.Open()
+                let! _ = conn.ExecuteAsync("SELECT 1") |> Async.AwaitTask
                 return true
             with _ ->
                 return false

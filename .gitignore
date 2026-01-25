@@ -1,0 +1,52 @@
+# Build results
+bin/
+obj/
+dist/
+*.dll
+*.exe
+*.pdb
+
+# Visual Studio Code
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/.ionide/
+
+# JetBrains Rider
+.idea/
+.rider/
+*.iml
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Misc
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Dependencies
+node_modules/
+packages/
+.paket/paket.exe
+
+# Test Results
+TestResults/
+*.trx
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS Files
+Thumbs.db

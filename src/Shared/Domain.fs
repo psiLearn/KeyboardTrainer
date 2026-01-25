@@ -44,6 +44,7 @@ type LessonCreateDto = {
     Title: string
     Difficulty: Difficulty
     ContentType: ContentType
+    Language: Language
     TextContent: string
     Tags: string option
 }
@@ -77,13 +78,11 @@ type Session = {
 /// DTO for creating sessions
 type SessionCreateDto = {
     LessonId: Guid
-    StartedAt: DateTime
-    EndedAt: DateTime
-    Wpm: float
-    Cpm: float
+    Wpm: int
+    Cpm: int
     Accuracy: float
     ErrorCount: int
-    PerKeyErrors: Map<string, int>
+    PerKeyErrors: Map<int, int>
 }
 
 /// DTO for session responses
