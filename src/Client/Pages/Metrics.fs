@@ -16,6 +16,8 @@ module Metrics =
         Error: string option
         SelectedMetric: MetricType
         PendingLocalSessions: int
+        LastSyncError: string option
+        LastSyncErrorAt: DateTime option
     }
 
     and MetricType =
@@ -32,6 +34,7 @@ module Metrics =
         | ClearError
         | ClearLocalData
         | UpdatePendingCount of int
+        | UpdateSyncStatus of string option * DateTime option
         | Refresh
 
     let init () =
@@ -43,6 +46,8 @@ module Metrics =
             Error = None
             SelectedMetric = AllTime
             PendingLocalSessions = pendingCount
+            LastSyncError = None
+            LastSyncErrorAt = None
         }, Cmd.none
 
     let private loadSessionsCmd lessonId =
@@ -75,6 +80,9 @@ module Metrics =
 
         | UpdatePendingCount count ->
             { model with PendingLocalSessions = count }, Cmd.none
+
+        | UpdateSyncStatus (error, at) ->
+            { model with LastSyncError = error; LastSyncErrorAt = at }, Cmd.none
 
         | Refresh ->
             match model.LessonId with
@@ -116,6 +124,15 @@ module Metrics =
                                 ClassName "btn btn-secondary"
                                 OnClick (fun _ -> dispatch ClearLocalData)
                             ] [ str "Clear local data" ]
+                        ]
+
+                    if Option.isSome model.LastSyncError then
+                        div [ ClassName "local-sync-error" ] [
+                            let timestamp =
+                                match model.LastSyncErrorAt with
+                                | Some value -> value.ToString("yyyy-MM-dd HH:mm:ss")
+                                | None -> "unknown time"
+                            p [] [ str (sprintf "Last sync error (%s): %s" timestamp (Option.defaultValue "" model.LastSyncError)) ]
                         ]
 
                     // Metric type selector

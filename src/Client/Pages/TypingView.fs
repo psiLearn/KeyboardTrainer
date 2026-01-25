@@ -1,6 +1,7 @@
 namespace KeyboardTrainer.Client.Pages
 
 open System
+open Browser.Dom
 open Browser.Types
 open Elmish
 open Fable.Core.JsInterop
@@ -202,21 +203,35 @@ module TypingView =
                         ev.preventDefault()
                         dispatch Backspace
                     | "Enter" ->
+                        ev.preventDefault()
                         dispatch (CharacterTyped '\n')
-                    | key when key.Length = 1 ->
-                        dispatch (CharacterTyped key.[0])
                     | _ -> ()
 
-        let focusSelf (ev: MouseEvent) =
-            ev.currentTarget?focus() |> ignore
+        let onInput (ev: Event) =
+            let value: string = ev.target?value
+            if not (String.IsNullOrEmpty value) then
+                if model.TypingState = InProgress then
+                    value |> Seq.iter (fun c -> dispatch (CharacterTyped c))
+                ev.target?value <- ""
+
+        let focusInput (_: MouseEvent) =
+            let el = document.getElementById("typing-input")
+            if not (isNull el) then
+                el?focus() |> ignore
 
         div [
             ClassName "typing-view"
-            TabIndex 0
-            OnKeyDown onKeyDown
-            OnClick focusSelf
+            OnClick focusInput
         ] [
             h2 [ ClassName "lesson-title" ] [ str model.Lesson.Title ]
+
+            textarea [
+                Id "typing-input"
+                ClassName "typing-input"
+                AutoFocus true
+                OnKeyDown onKeyDown
+                OnInput onInput
+            ] []
 
             div [ ClassName "lesson-info" ] [
                 span [ ClassName "difficulty" ] [ str (sprintf "%A" model.Lesson.Difficulty) ]

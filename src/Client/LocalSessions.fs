@@ -9,6 +9,7 @@ module LocalSessions =
     let private localStorage: obj = jsNative
 
     let private storageKey = "keyboard-trainer-sessions"
+    let private currentVersion = 1
 
     type LocalSession = {
         Id: Guid
@@ -37,6 +38,11 @@ module LocalSessions =
     and ErrorCount = {
         Key: int
         Count: int
+    }
+
+    type LocalStoragePayload = {
+        Version: int
+        Sessions: LocalSessionStored list
     }
 
     let private toStored (session: LocalSession) : LocalSessionStored =
@@ -100,20 +106,37 @@ module LocalSessions =
         localStorage?setItem(key, value) |> ignore
 
     let load () : LocalSession list =
-        match tryGetItem storageKey with
-        | Some json ->
+        let tryParsePayload (json: string) =
+            try
+                let payload = fromJsonString<LocalStoragePayload> json
+                if isNull (box payload) || payload.Version <> currentVersion then
+                    None
+                else
+                    Some payload.Sessions
+            with _ -> None
+
+        let tryParseLegacy (json: string) =
             try
                 let sessions = fromJsonString<LocalSessionStored list> json
-                if isNull (box sessions) then
-                    []
-                else
-                    sessions
-                    |> List.choose fromStored
-            with _ -> []
+                if isNull (box sessions) then None else Some sessions
+            with _ -> None
+
+        match tryGetItem storageKey with
+        | Some json ->
+            let sessions =
+                match tryParsePayload json with
+                | Some stored -> stored
+                | None ->
+                    match tryParseLegacy json with
+                    | Some stored -> stored
+                    | None -> []
+
+            sessions |> List.choose fromStored
         | None -> []
 
     let save (sessions: LocalSession list) =
-        let json = sessions |> List.map toStored |> toJsonString
+        let payload = { Version = currentVersion; Sessions = sessions |> List.map toStored }
+        let json = toJsonString payload
         setItem storageKey json
 
     let upsert (session: LocalSession) =

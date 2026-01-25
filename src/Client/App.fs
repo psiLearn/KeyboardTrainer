@@ -2,6 +2,8 @@ namespace KeyboardTrainer.Client
 
 open Elmish
 open Elmish.React
+open Browser.Dom
+open Browser.Types
 open Fable.React
 open Fable.React.Props
 open KeyboardTrainer.Client.Pages
@@ -18,6 +20,7 @@ module App =
         StartScreenModel: StartScreen.Model
         TypingViewModel: TypingView.Model option
         MetricsModel: Metrics.Model
+        SyncState: SessionSync.State
     }
 
     type Msg =
@@ -31,36 +34,22 @@ module App =
         | PendingSessionSynced of System.Guid
         | PendingSessionSyncFailed of System.Guid * string
 
-    let private syncLocalSession (local: LocalSessions.LocalSession) =
-        async {
-            let dto: SessionCreateDto = {
-                LessonId = local.LessonId
-                Wpm = local.Wpm
-                Cpm = local.Cpm
-                Accuracy = local.Accuracy
-                ErrorCount = local.ErrorCount
-                PerKeyErrors = local.PerKeyErrors
-            }
+    let private delayCmd (delayMs: int) (msg: Msg) =
+        Cmd.OfAsync.perform (fun () -> async {
+            do! Async.Sleep delayMs
+            return ()
+        }) () (fun () -> msg)
 
-            let! result = ApiClient.createSession dto
-            match result with
-            | Ok _ -> return Ok local.Id
-            | Error err -> return Error err
-        }
+    let private ofSub (sub: (Msg -> unit) -> unit) : Cmd<Msg> =
+        [ sub ]
 
-    let private syncPendingCmd () =
-        let pending = LocalSessions.pending ()
-        if List.isEmpty pending then
-            Cmd.none
-        else
-            pending
-            |> List.map (fun local ->
-                Cmd.OfAsync.either syncLocalSession local
-                    (function
-                        | Ok localId -> PendingSessionSynced localId
-                        | Error err -> PendingSessionSyncFailed (local.Id, err))
-                    (fun ex -> PendingSessionSyncFailed (local.Id, ex.Message)))
-            |> Cmd.batch
+    let private registerConnectivity (dispatch: Msg -> unit) =
+        let onOnline (_: Event) = dispatch SyncPendingSessions
+        let onVisibility (_: Event) =
+            if document.visibilityState = "visible" then
+                dispatch SyncPendingSessions
+        window.addEventListener("online", onOnline)
+        window.addEventListener("visibilitychange", onVisibility)
 
     let init () =
         let startScreenModel, startScreenCmd = StartScreen.init()
@@ -71,11 +60,13 @@ module App =
             StartScreenModel = startScreenModel
             TypingViewModel = None
             MetricsModel = metricsModel
+            SyncState = SessionSync.init
         },
         Cmd.batch [
             Cmd.map StartScreenMsg startScreenCmd
             Cmd.map MetricsMsg metricsCmd
             Cmd.ofMsg SyncPendingSessions
+            ofSub registerConnectivity
         ]
 
     let update msg model =
@@ -165,16 +156,35 @@ module App =
             Cmd.map TypingViewMsg typingCmd
 
         | SyncPendingSessions ->
-            model, syncPendingCmd ()
+            let now = System.DateTime.UtcNow
+            let pending = LocalSessions.pending ()
+            let eligible = SessionSync.pendingForSync now model.SyncState pending
+            let cmd =
+                SessionSync.syncPendingCmd eligible PendingSessionSynced PendingSessionSyncFailed
+            model, cmd
 
         | PendingSessionSynced localId ->
             LocalSessions.markSynced localId
             let pendingCount = LocalSessions.pending () |> List.length
-            model, Cmd.ofMsg (MetricsMsg (Metrics.Msg.UpdatePendingCount pendingCount))
+            let nextSyncState = SessionSync.markSynced model.SyncState localId
+            let nextModel = { model with SyncState = nextSyncState }
+            nextModel,
+            Cmd.batch [
+                Cmd.ofMsg (MetricsMsg (Metrics.Msg.UpdatePendingCount pendingCount))
+                Cmd.ofMsg (MetricsMsg (Metrics.Msg.UpdateSyncStatus (None, None)))
+            ]
 
-        | PendingSessionSyncFailed _ ->
+        | PendingSessionSyncFailed (sessionId, error) ->
             let pendingCount = LocalSessions.pending () |> List.length
-            model, Cmd.ofMsg (MetricsMsg (Metrics.Msg.UpdatePendingCount pendingCount))
+            let now = System.DateTime.UtcNow
+            let nextSyncState, delayMs = SessionSync.recordFailure now model.SyncState sessionId error
+            let nextModel = { model with SyncState = nextSyncState }
+            nextModel,
+            Cmd.batch [
+                Cmd.ofMsg (MetricsMsg (Metrics.Msg.UpdatePendingCount pendingCount))
+                Cmd.ofMsg (MetricsMsg (Metrics.Msg.UpdateSyncStatus (Some error, Some now)))
+                delayCmd delayMs SyncPendingSessions
+            ]
 
     let view model dispatch =
         div [ ClassName "app-container" ] [
