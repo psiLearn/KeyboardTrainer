@@ -77,6 +77,7 @@ type Session = {
 
 /// DTO for creating sessions
 type SessionCreateDto = {
+    ClientSessionId: Guid
     LessonId: Guid
     Wpm: int
     Cpm: int

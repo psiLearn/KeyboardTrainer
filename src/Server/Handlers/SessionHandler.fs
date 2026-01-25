@@ -11,6 +11,10 @@ module SessionHandler =
             // LessonId validation
             if dto.LessonId = Guid.Empty then
                 { Field = "lessonId"; Message = "Lesson ID is required" }
+
+            // ClientSessionId validation
+            if dto.ClientSessionId = Guid.Empty then
+                { Field = "clientSessionId"; Message = "Client session ID is required" }
             
             // Accuracy validation
             if dto.Accuracy < 0.0 || dto.Accuracy > 100.0 then
@@ -70,6 +74,14 @@ module SessionHandler =
                         Message = "Invalid request body"
                         StatusCode = 400
                         Errors = Some [{ Field = "body"; Message = ex.Message }]
+                    }
+                    return! json error next ctx
+                | :? SessionRepository.SessionConflict as ex ->
+                    ctx.SetStatusCode 409
+                    let error: ApiError = {
+                        Message = "Session ID conflict"
+                        StatusCode = 409
+                        Errors = Some [{ Field = "clientSessionId"; Message = ex.Message }]
                     }
                     return! json error next ctx
                 | ex ->

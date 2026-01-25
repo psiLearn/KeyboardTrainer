@@ -23,6 +23,7 @@ module SessionSync =
     let private syncLocalSession (local: LocalSessions.LocalSession) =
         async {
             let dto: SessionCreateDto = {
+                ClientSessionId = local.Id
                 LessonId = local.LessonId
                 Wpm = local.Wpm
                 Cpm = local.Cpm

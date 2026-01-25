@@ -6,13 +6,15 @@ open Dapper
 open KeyboardTrainer.Shared
 
 module SessionRepository =
+    exception SessionConflict of string
+
     /// Create a new session record
     let createSession (dto: SessionCreateDto) =
         async {
             use conn = DbContext.createConnection()
             conn.Open()
             
-            let id = Guid.NewGuid()
+            let id = dto.ClientSessionId
             let now = DateTime.UtcNow
             
             // Convert Map to JSON string for JSONB storage
@@ -23,10 +25,17 @@ module SessionRepository =
                 |> String.concat ","
                 |> fun s -> "{" + s + "}"
             
-            let query = """
+            let insertQuery = """
                 INSERT INTO sessions (id, lesson_id, started_at, ended_at, wpm, cpm, accuracy, error_count, per_key_errors, created_at)
                 VALUES (@id, @lesson_id, @started_at, @ended_at, @wpm, @cpm, @accuracy, @error_count, @per_key_errors::JSONB, @created_at)
+                ON CONFLICT (id) DO NOTHING
                 RETURNING id, lesson_id, started_at, ended_at, wpm, cpm, accuracy, error_count, per_key_errors, created_at
+            """
+
+            let selectByIdQuery = """
+                SELECT id, lesson_id, started_at, ended_at, wpm, cpm, accuracy, error_count, per_key_errors, created_at
+                FROM sessions
+                WHERE id = @id
             """
             
             let param = {|
@@ -42,10 +51,27 @@ module SessionRepository =
                 created_at = now
             |}
             
-            let! result = 
-                conn.QuerySingleAsync<{| Id: Guid; Lesson_id: Guid; Started_at: DateTime; Ended_at: DateTime; Wpm: float; Cpm: float; Accuracy: float; Error_count: int; Per_key_errors: string; Created_at: DateTime |}>
-                    (query, param)
+            let! inserted = 
+                conn.QueryAsync<{| Id: Guid; Lesson_id: Guid; Started_at: DateTime; Ended_at: DateTime; Wpm: float; Cpm: float; Accuracy: float; Error_count: int; Per_key_errors: string; Created_at: DateTime |}>
+                    (insertQuery, param)
                 |> Async.AwaitTask
+
+            let! result =
+                match inserted |> Seq.tryHead with
+                | Some row -> async { return row }
+                | None ->
+                    async {
+                        let! rows =
+                            conn.QueryAsync<{| Id: Guid; Lesson_id: Guid; Started_at: DateTime; Ended_at: DateTime; Wpm: float; Cpm: float; Accuracy: float; Error_count: int; Per_key_errors: string; Created_at: DateTime |}>
+                                (selectByIdQuery, param)
+                            |> Async.AwaitTask
+                        match rows |> Seq.tryHead with
+                        | Some row ->
+                            if row.Lesson_id <> dto.LessonId then
+                                return raise (SessionConflict "ClientSessionId already used for a different lesson")
+                            return row
+                        | None -> return failwith "Idempotent session insert failed: session not found"
+                    }
             
             // Parse JSONB back to map
             let perKeyErrors = 

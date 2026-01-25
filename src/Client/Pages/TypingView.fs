@@ -114,11 +114,11 @@ module TypingView =
                 let newIndex = model.CurrentCharIndex + 1
                 
                 if newIndex >= model.Lesson.Content.Length then
-                    let endTime = DateTime.Now
-                    let elapsed =
+                    let elapsed = model.ElapsedSeconds
+                    let endTime =
                         match model.StartTime with
-                        | Some startTime -> int (endTime - startTime).TotalSeconds
-                        | None -> model.ElapsedSeconds
+                        | Some startTime -> startTime.AddSeconds(float elapsed)
+                        | None -> DateTime.Now
                     { model with 
                         UserInput = newInput
                         CurrentCharIndex = newIndex
@@ -157,11 +157,7 @@ module TypingView =
         | Tick ->
             match model.TypingState with
             | InProgress ->
-                let nextElapsed =
-                    match model.StartTime with
-                    | Some startTime -> int (DateTime.Now - startTime).TotalSeconds
-                    | None -> model.ElapsedSeconds + 1
-                { model with ElapsedSeconds = nextElapsed }, tickCmd
+                { model with ElapsedSeconds = model.ElapsedSeconds + 1 }, tickCmd
             | _ ->
                 model, Cmd.none
 
@@ -170,7 +166,13 @@ module TypingView =
             | (Some startTime, Some endTime) ->
                 let wpm, cpm, accuracy, errorCount = calculateMetrics model.Lesson model.UserInput startTime endTime model.Errors
                 
+                let localSessionId =
+                    match model.PendingLocalSessionId with
+                    | Some id -> id
+                    | None -> Guid.NewGuid()
+
                 let sessionDto: SessionCreateDto = {
+                    ClientSessionId = localSessionId
                     LessonId = model.Lesson.Id
                     Wpm = wpm
                     Cpm = cpm
@@ -178,11 +180,6 @@ module TypingView =
                     ErrorCount = errorCount
                     PerKeyErrors = model.Errors
                 }
-
-                let localSessionId =
-                    match model.PendingLocalSessionId with
-                    | Some id -> id
-                    | None -> Guid.NewGuid()
 
                 let localSession: LocalSessions.LocalSession = {
                     Id = localSessionId
