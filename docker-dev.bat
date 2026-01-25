@@ -21,7 +21,7 @@ if "%COMMAND%"=="up" (
     echo 🔗 Access points:
     echo   - Web:    http://localhost:80
     echo   - API:    http://localhost:5000/api/lessons
-    echo   - DB:     localhost:5432
+    echo   - DB:     localhost:5434
     echo.
     docker-compose --project-name %PROJECT_NAME% --env-file %ENV_FILE% ps
     goto :end

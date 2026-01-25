@@ -44,7 +44,7 @@ chmod +x docker-dev.sh docker-prod.sh
 | Web App | http://localhost | 80 | - |
 | API | http://localhost:5000 | 5000 | - |
 | Health | http://localhost:5000/health | 5000 | - |
-| Database | localhost | 5432 | keyboardtrainer |
+| Database | localhost | 5434 | keyboardtrainer |
 
 ---
 
@@ -107,7 +107,7 @@ docker system prune -a           # Clean up all unused
 | Problem | Solution |
 |---------|----------|
 | Port 80 in use | Change `NGINX_PORT=8080` in .env file |
-| Port 5432 in use | Change `DB_PORT=5433` in .env file |
+| Port 5434 in use | Change `DB_PORT=5433` in .env file |
 | Database won't connect | `docker-compose logs postgres` |
 | API not responding | `curl http://localhost:5000/health` |
 | Containers won't start | `docker-compose build --no-cache && docker-compose up -d` |

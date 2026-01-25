@@ -189,7 +189,7 @@
 ### Start Database (PostgreSQL required)
 ```bash
 # Option 1: Docker
-docker run -e POSTGRES_PASSWORD=trainer123 -p 5432:5432 postgres:15
+docker run -e POSTGRES_PASSWORD=trainer123 -p 5434:5434 postgres:15
 
 # Option 2: Local PostgreSQL (if installed)
 psql -U trainer -d keyboardtrainer

@@ -525,7 +525,7 @@ type Page =
 ## Environment Requirements
 
 **Backend**:
-- PostgreSQL 13+ (localhost:5432 or via DATABASE_URL env var)
+- PostgreSQL 13+ (localhost:5434 or via DATABASE_URL env var)
 - .NET 8.0 SDK
 - F# compiler
 
@@ -546,7 +546,7 @@ type Page =
 ### Manual Backend Testing (Future):
 ```bash
 # Start PostgreSQL
-docker run -e POSTGRES_PASSWORD=trainer123 -p 5432:5432 postgres:15
+docker run -e POSTGRES_PASSWORD=trainer123 -p 5434:5434 postgres:15
 
 # Run server (in src/Server)
 dotnet run

@@ -54,7 +54,7 @@ docker exec keyboard-trainer-db pg_dump -U keyboardtrainer keyboardtrainer > bac
 ### PostgreSQL Database
 
 - **Container**: `keyboard-trainer-db`
-- **Port**: `5432`
+- **Port**: `5434`
 - **User**: `keyboardtrainer`
 - **Password**: Set via `DB_PASSWORD` env var
 - **Database**: `keyboardtrainer`
@@ -168,7 +168,7 @@ All services communicate via `keyboard-trainer-network` bridge network:
                       │                  │
             ┌─────────▼─────┐   ┌────────▼──────┐
             │  Server       │   │  PostgreSQL   │
-            │  (port 5000)  │   │  (port 5432)  │
+            │  (port 5000)  │   │  (port 5434)  │
             └───────────────┘   └───────────────┘
 ```
 
@@ -234,7 +234,7 @@ docker-compose build --no-cache
 docker-compose ps
 
 # Verify network connectivity
-docker exec keyboard-trainer-server curl -v http://postgres:5432
+docker exec keyboard-trainer-server curl -v http://postgres:5434
 
 # Check credentials in .env file
 cat .env.docker.dev
@@ -246,7 +246,7 @@ cat .env.docker.dev
 # Change in docker-compose.yml or .env file
 NGINX_PORT=8080        # Use 8080 instead of 80
 SERVER_PORT=5001       # Use 5001 instead of 5000
-DB_PORT=5433           # Use 5433 instead of 5432
+DB_PORT=5433           # Use 5433 instead of 5434
 
 docker-compose up
 ```

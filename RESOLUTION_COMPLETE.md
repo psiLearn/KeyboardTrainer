@@ -159,7 +159,7 @@ Status: ⚠️ Pre-existing architectural issues
 ### Test Commands
 ```bash
 # Start database
-docker run -e POSTGRES_PASSWORD=trainer123 -p 5432:5432 postgres:15
+docker run -e POSTGRES_PASSWORD=trainer123 -p 5434:5434 postgres:15
 
 # Build and run server
 cd src/Server

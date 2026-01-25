@@ -15,7 +15,7 @@
   - Persistent volume for data
   - Auto-migrations on startup
   - Health checks enabled
-  - Port: 5432
+  - Port: 5434
 
 - **F# Server** (ASP.NET Core 8)
   - Multi-stage build (optimized size)
@@ -226,7 +226,7 @@ docker-compose ps
 # 4. Access application
 # Web: http://localhost:80
 # API: http://localhost:5000/api/lessons
-# Database: localhost:5432
+# Database: localhost:5434
 ```
 
 ### Using Helper Scripts
@@ -302,7 +302,7 @@ docker-compose --env-file .env.docker.prod.local up -d
 ### Server Integration
 - Connects to PostgreSQL using Dapper ORM
 - Hostname: `postgres` (Docker DNS)
-- Port: `5432`
+- Port: `5434`
 - Database name: `keyboardtrainer`
 - User/password from environment
 

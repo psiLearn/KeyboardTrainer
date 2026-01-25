@@ -28,7 +28,7 @@ docker-compose --env-file .env.docker.dev up -d
 
 - **Web Application**: http://localhost:80
 - **API Documentation**: http://localhost:5000/health
-- **Database**: localhost:5432
+- **Database**: localhost:5434
 
 ### View Logs
 
@@ -58,7 +58,7 @@ Internet
 └──────────┬──────────────┘
            ↓
 ┌──────────────────────────┐
-│ PostgreSQL (Port 5432)   │
+│ PostgreSQL (Port 5434)   │
 │ - Data persistence       │
 │ - Lesson management      │
 │ - Session tracking       │
@@ -206,7 +206,7 @@ Edit `.env.docker.dev` or `.env.docker.prod.local`:
 ```env
 NGINX_PORT=8080        # Use 8080 instead of 80
 SERVER_PORT=5001       # Use 5001 instead of 5000
-DB_PORT=5433           # Use 5433 instead of 5432
+DB_PORT=5433           # Use 5433 instead of 5434
 ```
 
 Then restart:
