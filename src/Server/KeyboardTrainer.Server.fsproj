@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>KeyboardTrainer.Server</AssemblyName>
+    <RootNamespace>KeyboardTrainer.Server</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../Shared/Domain.fs" />
+    <Compile Include="Database/DbContext.fs" />
+    <Compile Include="Database/LessonRepository.fs" />
+    <Compile Include="Database/SessionRepository.fs" />
+    <Compile Include="Handlers/LessonHandler.fs" />
+    <Compile Include="Handlers/SessionHandler.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="8.0.0" />
+    <PackageReference Include="Dapper" Version="2.1.15" />
+    <PackageReference Include="Saturn" Version="0.16.1" />
+    <PackageReference Include="Giraffe" Version="6.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>

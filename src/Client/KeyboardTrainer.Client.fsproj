@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>KeyboardTrainer.Client</AssemblyName>
+    <RootNamespace>KeyboardTrainer.Client</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../Shared/Domain.fs" />
+    <Compile Include="Pages/StartScreen.fs" />
+    <Compile Include="Pages/TypingView.fs" />
+    <Compile Include="Pages/Metrics.fs" />
+    <Compile Include="App.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="4.1.0" />
+    <PackageReference Include="Fable.Elmish" Version="4.0.0" />
+    <PackageReference Include="Fable.Elmish.Browser" Version="4.0.0" />
+    <PackageReference Include="Fable.Fetch" Version="3.2.0" />
+    <PackageReference Include="Fable.FontAwesome.Free" Version="2.0.0" />
+  </ItemGroup>
+
+</Project>
