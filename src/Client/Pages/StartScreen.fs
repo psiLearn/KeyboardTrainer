@@ -4,6 +4,7 @@ open System
 open Elmish
 open Fable.React
 open Fable.React.Props
+open KeyboardTrainer.Client.Components
 open KeyboardTrainer.Shared
 open KeyboardTrainer.Client
 
@@ -22,6 +23,7 @@ module StartScreen =
         | LessonSelected of LessonDto
         | FilterByDifficulty of Difficulty option
         | ApiError of string
+        | ClearError
         | StartLesson
 
     let init () =
@@ -33,13 +35,18 @@ module StartScreen =
             FilterDifficulty = None
         }, Cmd.ofMsg LoadLessons
 
+    let private loadLessonsCmd () =
+        Cmd.OfAsync.either ApiClient.getAllLessons () (function
+            | Ok lessons -> LessonsLoaded lessons
+            | Error error -> ApiError error) (fun ex -> ApiError ex.Message)
+
     let update msg model =
         match msg with
         | LoadLessons ->
-            { model with IsLoading = true; Error = None }, Cmd.none
+            { model with IsLoading = true; Error = None }, loadLessonsCmd ()
 
         | LessonsLoaded lessons ->
-            { model with Lessons = lessons; IsLoading = false }, Cmd.none
+            { model with Lessons = lessons; IsLoading = false; Error = None }, Cmd.none
 
         | LessonSelected lesson ->
             { model with SelectedLesson = Some lesson }, Cmd.none
@@ -50,6 +57,9 @@ module StartScreen =
         | ApiError error ->
             { model with Error = Some error; IsLoading = false }, Cmd.none
 
+        | ClearError ->
+            { model with Error = None }, Cmd.none
+
         | StartLesson ->
             model, Cmd.none
 
@@ -59,16 +69,15 @@ module StartScreen =
             p [ ClassName "subtitle" ] [ str "Improve your typing speed and accuracy" ]
 
             if model.IsLoading then
-                div [ ClassName "loading" ] [
-                    str "Loading lessons..."
-                ]
+                LoadingSpinner.view (Some "Loading lessons...")
             else
                 div [ ClassName "container" ] [
                     // Error message
                     if Option.isSome model.Error then
-                        div [ ClassName "error-message" ] [
-                            str (Option.defaultValue "" model.Error)
-                        ]
+                        ErrorAlert.view
+                            (Option.defaultValue "" model.Error)
+                            (Some (fun () -> dispatch LoadLessons))
+                            (Some (fun () -> dispatch ClearError))
 
                     // Filter controls
                     div [ ClassName "filter-section" ] [

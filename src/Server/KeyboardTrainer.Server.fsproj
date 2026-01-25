@@ -19,11 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="8.0.0" />
+    <PackageReference Include="Npgsql" Version="8.0.4" />
     <PackageReference Include="Dapper" Version="2.1.15" />
     <PackageReference Include="Saturn" Version="0.16.1" />
     <PackageReference Include="Giraffe" Version="6.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>

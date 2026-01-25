@@ -1,9 +1,12 @@
 namespace KeyboardTrainer.Client.Pages
 
 open System
+open Browser.Types
 open Elmish
+open Fable.Core.JsInterop
 open Fable.React
 open Fable.React.Props
+open KeyboardTrainer.Client.Components
 open KeyboardTrainer.Shared
 open KeyboardTrainer.Client
 
@@ -23,6 +26,7 @@ module TypingView =
         Errors: Map<int, int>
         IsSubmitting: bool
         SubmitError: string option
+        PendingLocalSessionId: Guid option
     }
 
     type Msg =
@@ -32,6 +36,7 @@ module TypingView =
         | SubmitSession
         | SessionSubmitted of SessionDto
         | SubmitError of string
+        | ClearSubmitError
         | ResetView
         | CancelTyping
 
@@ -40,13 +45,14 @@ module TypingView =
         let words = (double input.Length) / 5.0
         let wpm = if duration > 0.0 then int (words / (duration / 60.0)) else 0
         let cpm = if duration > 0.0 then int ((double input.Length) / (duration / 60.0)) else 0
+        let totalErrors = Map.fold (fun acc _ count -> acc + count) 0 errors
         let accuracy = 
             if input.Length = 0 then 100.0
             else
-                let correctChars = input.Length - (Map.fold (fun acc _ count -> acc + count) 0 errors)
+                let correctChars = input.Length - totalErrors
                 ((double correctChars) / (double input.Length)) * 100.0
 
-        wpm, cpm, int accuracy, Map.count errors
+        wpm, cpm, accuracy, totalErrors
 
     let init lesson =
         {
@@ -59,7 +65,13 @@ module TypingView =
             Errors = Map.empty
             IsSubmitting = false
             SubmitError = None
+            PendingLocalSessionId = None
         }, Cmd.none
+
+    let private submitSessionCmd (dto: SessionCreateDto) =
+        Cmd.OfAsync.either ApiClient.createSession dto (function
+            | Ok session -> SessionSubmitted session
+            | Error error -> SubmitError error) (fun ex -> SubmitError ex.Message)
 
     let update msg model =
         match msg with
@@ -77,7 +89,10 @@ module TypingView =
                 let expectedChar = model.Lesson.Content.[model.CurrentCharIndex]
                 let newErrors = 
                     if expectedChar <> char then
-                        Map.change model.CurrentCharIndex (fun _ -> Some 1) model.Errors
+                        Map.change model.CurrentCharIndex (fun existing ->
+                            match existing with
+                            | Some count -> Some (count + 1)
+                            | None -> Some 1) model.Errors
                     else
                         model.Errors
                 
@@ -128,21 +143,47 @@ module TypingView =
                     LessonId = model.Lesson.Id
                     Wpm = wpm
                     Cpm = cpm
-                    Accuracy = double accuracy
+                    Accuracy = accuracy
                     ErrorCount = errorCount
                     PerKeyErrors = model.Errors
                 }
+
+                let localSessionId =
+                    match model.PendingLocalSessionId with
+                    | Some id -> id
+                    | None -> Guid.NewGuid()
+
+                let localSession: LocalSessions.LocalSession = {
+                    Id = localSessionId
+                    LessonId = model.Lesson.Id
+                    Wpm = wpm
+                    Cpm = cpm
+                    Accuracy = accuracy
+                    ErrorCount = errorCount
+                    PerKeyErrors = model.Errors
+                    CreatedAt = DateTime.UtcNow
+                    SyncedWithServer = false
+                }
+
+                LocalSessions.upsert localSession
                 
-                let cmd = Cmd.none
-                { model with IsSubmitting = true; SubmitError = None }, cmd
+                { model with IsSubmitting = true; SubmitError = None; PendingLocalSessionId = Some localSessionId }, submitSessionCmd sessionDto
 
             | _ -> model, Cmd.none
 
         | SessionSubmitted session ->
-            { model with IsSubmitting = false }, Cmd.none
+            match model.PendingLocalSessionId with
+            | Some localSessionId ->
+                LocalSessions.markSynced localSessionId
+            | None -> ()
+
+            { model with IsSubmitting = false; SubmitError = None; PendingLocalSessionId = None }, Cmd.none
 
         | SubmitError error ->
             { model with IsSubmitting = false; SubmitError = Some error }, Cmd.none
+
+        | ClearSubmitError ->
+            { model with SubmitError = None }, Cmd.none
 
         | ResetView ->
             init model.Lesson
@@ -151,7 +192,30 @@ module TypingView =
             init model.Lesson
 
     let view model dispatch =
-        div [ ClassName "typing-view" ] [
+        let onKeyDown (ev: KeyboardEvent) =
+            if model.TypingState = InProgress then
+                if ev.ctrlKey || ev.altKey || ev.metaKey then
+                    ()
+                else
+                    match ev.key with
+                    | "Backspace" ->
+                        ev.preventDefault()
+                        dispatch Backspace
+                    | "Enter" ->
+                        dispatch (CharacterTyped '\n')
+                    | key when key.Length = 1 ->
+                        dispatch (CharacterTyped key.[0])
+                    | _ -> ()
+
+        let focusSelf (ev: MouseEvent) =
+            ev.currentTarget?focus() |> ignore
+
+        div [
+            ClassName "typing-view"
+            TabIndex 0
+            OnKeyDown onKeyDown
+            OnClick focusSelf
+        ] [
             h2 [ ClassName "lesson-title" ] [ str model.Lesson.Title ]
 
             div [ ClassName "lesson-info" ] [
@@ -211,7 +275,7 @@ module TypingView =
                     div [ ClassName "typing-stats" ] [
                         span [ ClassName "stat" ] [
                             strong [] [ str "Errors: " ]
-                            str (string (Map.count model.Errors))
+                            str (string (Map.fold (fun acc _ count -> acc + count) 0 model.Errors))
                         ]
                     ]
 
@@ -226,15 +290,16 @@ module TypingView =
                     match (model.StartTime, model.EndTime) with
                     | (Some startTime, Some endTime) ->
                         calculateMetrics model.Lesson model.UserInput startTime endTime model.Errors
-                    | _ -> 0, 0, 0, 0
+                    | _ -> 0, 0, 0.0, 0
 
                 div [ ClassName "completion-section" ] [
                     h3 [] [ str "Typing Complete!" ]
 
                     if Option.isSome model.SubmitError then
-                        div [ ClassName "error-message" ] [
-                            str (Option.defaultValue "" model.SubmitError)
-                        ]
+                        ErrorAlert.view
+                            (Option.defaultValue "" model.SubmitError)
+                            (Some (fun () -> dispatch SubmitSession))
+                            (Some (fun () -> dispatch ClearSubmitError))
 
                     div [ ClassName "results-summary" ] [
                         div [ ClassName "result-stat" ] [
@@ -247,7 +312,7 @@ module TypingView =
                         ]
                         div [ ClassName "result-stat" ] [
                             span [ ClassName "label" ] [ str "Accuracy:" ]
-                            span [ ClassName "value" ] [ str (sprintf "%d%%" accuracy) ]
+                            span [ ClassName "value" ] [ str (sprintf "%.1f%%" accuracy) ]
                         ]
                         div [ ClassName "result-stat" ] [
                             span [ ClassName "label" ] [ str "Errors:" ]

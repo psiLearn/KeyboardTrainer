@@ -4,6 +4,7 @@ open System
 open Elmish
 open Fable.React
 open Fable.React.Props
+open KeyboardTrainer.Client.Components
 open KeyboardTrainer.Shared
 open KeyboardTrainer.Client
 
@@ -14,6 +15,7 @@ module Metrics =
         IsLoading: bool
         Error: string option
         SelectedMetric: MetricType
+        PendingLocalSessions: int
     }
 
     and MetricType =
@@ -27,24 +29,36 @@ module Metrics =
         | SessionsLoaded of SessionDto list
         | ChangeMetricView of MetricType
         | ApiError of string
+        | ClearError
+        | ClearLocalData
+        | UpdatePendingCount of int
         | Refresh
 
     let init () =
+        let pendingCount = LocalSessions.pending () |> List.length
         {
             LessonId = None
             Sessions = []
             IsLoading = false
             Error = None
             SelectedMetric = AllTime
+            PendingLocalSessions = pendingCount
         }, Cmd.none
+
+    let private loadSessionsCmd lessonId =
+        Cmd.OfAsync.either ApiClient.getSessionsByLesson lessonId (function
+            | Ok sessions -> SessionsLoaded sessions
+            | Error error -> ApiError error) (fun ex -> ApiError ex.Message)
 
     let update msg model =
         match msg with
         | LoadSessions lessonId ->
-            { model with IsLoading = true; Error = None; LessonId = Some lessonId }, Cmd.none
+            let pendingCount = LocalSessions.pending () |> List.length
+            { model with IsLoading = true; Error = None; LessonId = Some lessonId; PendingLocalSessions = pendingCount }, loadSessionsCmd lessonId
 
         | SessionsLoaded sessions ->
-            { model with Sessions = sessions; IsLoading = false }, Cmd.none
+            let pendingCount = LocalSessions.pending () |> List.length
+            { model with Sessions = sessions; IsLoading = false; Error = None; PendingLocalSessions = pendingCount }, Cmd.none
 
         | ChangeMetricView metric ->
             { model with SelectedMetric = metric }, Cmd.none
@@ -52,10 +66,21 @@ module Metrics =
         | ApiError error ->
             { model with Error = Some error; IsLoading = false }, Cmd.none
 
+        | ClearError ->
+            { model with Error = None }, Cmd.none
+
+        | ClearLocalData ->
+            LocalSessions.clear ()
+            { model with PendingLocalSessions = 0 }, Cmd.none
+
+        | UpdatePendingCount count ->
+            { model with PendingLocalSessions = count }, Cmd.none
+
         | Refresh ->
             match model.LessonId with
             | Some lessonId ->
-                { model with IsLoading = true }, Cmd.none
+                let pendingCount = LocalSessions.pending () |> List.length
+                { model with IsLoading = true; Error = None; PendingLocalSessions = pendingCount }, loadSessionsCmd lessonId
             | None -> model, Cmd.none
 
     let calculateStats (sessions: SessionDto list) =
@@ -74,13 +99,23 @@ module Metrics =
             h2 [ ClassName "page-title" ] [ str "Your Statistics" ]
 
             if model.IsLoading then
-                div [ ClassName "loading" ] [ str "Loading metrics..." ]
+                LoadingSpinner.view (Some "Loading metrics...")
             else
                 div [ ClassName "metrics-container" ] [
                     // Error message
                     if Option.isSome model.Error then
-                        div [ ClassName "error-message" ] [
-                            str (Option.defaultValue "" model.Error)
+                        ErrorAlert.view
+                            (Option.defaultValue "" model.Error)
+                            (Some (fun () -> dispatch Refresh))
+                            (Some (fun () -> dispatch ClearError))
+
+                    if model.PendingLocalSessions > 0 then
+                        div [ ClassName "local-sync-status" ] [
+                            p [] [ str (sprintf "Pending local sessions: %d" model.PendingLocalSessions) ]
+                            button [
+                                ClassName "btn btn-secondary"
+                                OnClick (fun _ -> dispatch ClearLocalData)
+                            ] [ str "Clear local data" ]
                         ]
 
                     // Metric type selector

@@ -9,6 +9,9 @@
 
   <ItemGroup>
     <Compile Include="../Shared/Domain.fs" />
+    <Compile Include="LocalSessions.fs" />
+    <Compile Include="Components/LoadingSpinner.fs" />
+    <Compile Include="Components/ErrorAlert.fs" />
     <Compile Include="ApiClient.fs" />
     <Compile Include="Pages/StartScreen.fs" />
     <Compile Include="Pages/TypingView.fs" />

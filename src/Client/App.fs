@@ -27,6 +27,40 @@ module App =
         | NavigateToStartScreen
         | NavigateToMetrics
         | NavigateToTypingView of LessonDto
+        | SyncPendingSessions
+        | PendingSessionSynced of System.Guid
+        | PendingSessionSyncFailed of System.Guid * string
+
+    let private syncLocalSession (local: LocalSessions.LocalSession) =
+        async {
+            let dto: SessionCreateDto = {
+                LessonId = local.LessonId
+                Wpm = local.Wpm
+                Cpm = local.Cpm
+                Accuracy = local.Accuracy
+                ErrorCount = local.ErrorCount
+                PerKeyErrors = local.PerKeyErrors
+            }
+
+            let! result = ApiClient.createSession dto
+            match result with
+            | Ok _ -> return Ok local.Id
+            | Error err -> return Error err
+        }
+
+    let private syncPendingCmd () =
+        let pending = LocalSessions.pending ()
+        if List.isEmpty pending then
+            Cmd.none
+        else
+            pending
+            |> List.map (fun local ->
+                Cmd.OfAsync.either syncLocalSession local
+                    (function
+                        | Ok localId -> PendingSessionSynced localId
+                        | Error err -> PendingSessionSyncFailed (local.Id, err))
+                    (fun ex -> PendingSessionSyncFailed (local.Id, ex.Message)))
+            |> Cmd.batch
 
     let init () =
         let startScreenModel, startScreenCmd = StartScreen.init()
@@ -41,6 +75,7 @@ module App =
         Cmd.batch [
             Cmd.map StartScreenMsg startScreenCmd
             Cmd.map MetricsMsg metricsCmd
+            Cmd.ofMsg SyncPendingSessions
         ]
 
     let update msg model =
@@ -128,6 +163,18 @@ module App =
                     TypingViewModel = Some typingModel
             },
             Cmd.map TypingViewMsg typingCmd
+
+        | SyncPendingSessions ->
+            model, syncPendingCmd ()
+
+        | PendingSessionSynced localId ->
+            LocalSessions.markSynced localId
+            let pendingCount = LocalSessions.pending () |> List.length
+            model, Cmd.ofMsg (MetricsMsg (Metrics.Msg.UpdatePendingCount pendingCount))
+
+        | PendingSessionSyncFailed _ ->
+            let pendingCount = LocalSessions.pending () |> List.length
+            model, Cmd.ofMsg (MetricsMsg (Metrics.Msg.UpdatePendingCount pendingCount))
 
     let view model dispatch =
         div [ ClassName "app-container" ] [
