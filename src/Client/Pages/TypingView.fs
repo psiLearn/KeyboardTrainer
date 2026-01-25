@@ -28,12 +28,14 @@ module TypingView =
         IsSubmitting: bool
         SubmitError: string option
         PendingLocalSessionId: Guid option
+        ElapsedSeconds: int
     }
 
     type Msg =
         | StartTyping
         | CharacterTyped of char
         | Backspace
+        | Tick
         | SubmitSession
         | SessionSubmitted of SessionDto
         | SubmitError of string
@@ -67,7 +69,14 @@ module TypingView =
             IsSubmitting = false
             SubmitError = None
             PendingLocalSessionId = None
+            ElapsedSeconds = 0
         }, Cmd.none
+
+    let private tickCmd =
+        Cmd.OfAsync.perform (fun () -> async {
+            do! Async.Sleep 1000
+            return ()
+        }) () (fun () -> Tick)
 
     let private submitSessionCmd (dto: SessionCreateDto) =
         Cmd.OfAsync.either ApiClient.createSession dto (function
@@ -77,13 +86,17 @@ module TypingView =
     let update msg model =
         match msg with
         | StartTyping ->
-            { model with 
-                TypingState = InProgress
-                StartTime = Some DateTime.Now
-                UserInput = ""
-                CurrentCharIndex = 0
-                Errors = Map.empty
-            }, Cmd.none
+            match model.TypingState with
+            | InProgress -> model, Cmd.none
+            | _ ->
+                { model with 
+                    TypingState = InProgress
+                    StartTime = Some DateTime.Now
+                    UserInput = ""
+                    CurrentCharIndex = 0
+                    Errors = Map.empty
+                    ElapsedSeconds = 0
+                }, tickCmd
 
         | CharacterTyped char ->
             if model.TypingState = InProgress && model.CurrentCharIndex < model.Lesson.Content.Length then
@@ -101,12 +114,18 @@ module TypingView =
                 let newIndex = model.CurrentCharIndex + 1
                 
                 if newIndex >= model.Lesson.Content.Length then
+                    let endTime = DateTime.Now
+                    let elapsed =
+                        match model.StartTime with
+                        | Some startTime -> int (endTime - startTime).TotalSeconds
+                        | None -> model.ElapsedSeconds
                     { model with 
                         UserInput = newInput
                         CurrentCharIndex = newIndex
                         Errors = newErrors
                         TypingState = Completed
-                        EndTime = Some DateTime.Now
+                        EndTime = Some endTime
+                        ElapsedSeconds = elapsed
                     }, Cmd.none
                 else
                     { model with 
@@ -133,6 +152,17 @@ module TypingView =
                     Errors = newErrors
                 }, Cmd.none
             else
+                model, Cmd.none
+
+        | Tick ->
+            match model.TypingState with
+            | InProgress ->
+                let nextElapsed =
+                    match model.StartTime with
+                    | Some startTime -> int (DateTime.Now - startTime).TotalSeconds
+                    | None -> model.ElapsedSeconds + 1
+                { model with ElapsedSeconds = nextElapsed }, tickCmd
+            | _ ->
                 model, Cmd.none
 
         | SubmitSession ->
@@ -265,6 +295,16 @@ module TypingView =
                 ]
 
             | InProgress ->
+                let wpm, cpm, accuracy, _ =
+                    match model.StartTime with
+                    | Some startTime ->
+                        let endTime = startTime.AddSeconds(float model.ElapsedSeconds)
+                        calculateMetrics model.Lesson model.UserInput startTime endTime model.Errors
+                    | None -> 0, 0, 100.0, 0
+
+                let minutes = model.ElapsedSeconds / 60
+                let seconds = model.ElapsedSeconds % 60
+
                 div [ ClassName "typing-section" ] [
                     div [ ClassName "progress-bar" ] [
                         div [
@@ -300,6 +340,18 @@ module TypingView =
                         span [ ClassName "stat" ] [
                             strong [] [ str "Errors: " ]
                             str (string (Map.fold (fun acc _ count -> acc + count) 0 model.Errors))
+                        ]
+                        span [ ClassName "stat" ] [
+                            strong [] [ str "Time: " ]
+                            str (sprintf "%02d:%02d" minutes seconds)
+                        ]
+                        span [ ClassName "stat" ] [
+                            strong [] [ str "WPM: " ]
+                            str (string wpm)
+                        ]
+                        span [ ClassName "stat" ] [
+                            strong [] [ str "Accuracy: " ]
+                            str (sprintf "%.1f%%" accuracy)
                         ]
                     ]
 
