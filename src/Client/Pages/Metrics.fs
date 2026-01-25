@@ -41,8 +41,7 @@ module Metrics =
     let update msg model =
         match msg with
         | LoadSessions lessonId ->
-            { model with IsLoading = true; Error = None; LessonId = Some lessonId },
-            Cmd.OfAsync.perform ApiClient.getSessionsByLesson lessonId SessionsLoaded ApiError
+            { model with IsLoading = true; Error = None; LessonId = Some lessonId }, Cmd.none
 
         | SessionsLoaded sessions ->
             { model with Sessions = sessions; IsLoading = false }, Cmd.none
@@ -56,8 +55,7 @@ module Metrics =
         | Refresh ->
             match model.LessonId with
             | Some lessonId ->
-                { model with IsLoading = true },
-                Cmd.OfAsync.perform ApiClient.getSessionsByLesson lessonId SessionsLoaded ApiError
+                { model with IsLoading = true }, Cmd.none
             | None -> model, Cmd.none
 
     let calculateStats (sessions: SessionDto list) =

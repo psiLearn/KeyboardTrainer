@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Compile Include="../Shared/Domain.fs" />
+    <Compile Include="ApiClient.fs" />
     <Compile Include="Pages/StartScreen.fs" />
     <Compile Include="Pages/TypingView.fs" />
     <Compile Include="Pages/Metrics.fs" />
@@ -18,8 +19,9 @@
   <ItemGroup>
     <PackageReference Include="Fable.Core" Version="4.1.0" />
     <PackageReference Include="Fable.Elmish" Version="4.0.0" />
+    <PackageReference Include="Fable.Elmish.React" Version="4.0.0" />
     <PackageReference Include="Fable.Elmish.Browser" Version="4.0.0" />
-    <PackageReference Include="Fable.Fetch" Version="2.7.0" />
+    <PackageReference Include="Fable.SimpleHttp" Version="3.4.0" />
     <PackageReference Include="Fable.FontAwesome.Free" Version="2.0.0" />
   </ItemGroup>
 

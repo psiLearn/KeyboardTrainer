@@ -36,8 +36,7 @@ module StartScreen =
     let update msg model =
         match msg with
         | LoadLessons ->
-            { model with IsLoading = true; Error = None },
-            Cmd.OfAsync.perform ApiClient.getAllLessons () LessonsLoaded ApiError
+            { model with IsLoading = true; Error = None }, Cmd.none
 
         | LessonsLoaded lessons ->
             { model with Lessons = lessons; IsLoading = false }, Cmd.none

@@ -133,8 +133,8 @@ module TypingView =
                     PerKeyErrors = model.Errors
                 }
                 
-                { model with IsSubmitting = true; SubmitError = None },
-                Cmd.OfAsync.perform ApiClient.createSession sessionDto SessionSubmitted SubmitError
+                let cmd = Cmd.none
+                { model with IsSubmitting = true; SubmitError = None }, cmd
 
             | _ -> model, Cmd.none
 
@@ -206,25 +206,6 @@ module TypingView =
                                 
                                 span [ ClassName className ] [ str (string char) ]
                         ]
-
-                        input [
-                            Type "text"
-                            ClassName "hidden-input"
-                            Value model.UserInput
-                            ReadOnly true
-                            AutoFocus true
-                            OnKeyDown (fun ev ->
-                                match ev.key with
-                                | "Backspace" -> 
-                                    ev.preventDefault()
-                                    dispatch Backspace
-                                | _ -> ()
-                            )
-                            OnKeyPress (fun ev ->
-                                if ev.key.Length = 1 then
-                                    dispatch (CharacterTyped ev.key.[0])
-                            )
-                        ] []
                     ]
 
                     div [ ClassName "typing-stats" ] [
