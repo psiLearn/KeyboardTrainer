@@ -229,6 +229,15 @@ module TypingView =
                 Id "typing-input"
                 ClassName "typing-input"
                 AutoFocus true
+                HTMLAttr.Custom ("aria-label", "Typing input")
+                SpellCheck false
+                Style [
+                    Position PositionOptions.Absolute
+                    Left "-9999px"
+                    Width "1px"
+                    Height "1px"
+                    Opacity 0.0
+                ]
                 OnKeyDown onKeyDown
                 OnInput onInput
             ] []
