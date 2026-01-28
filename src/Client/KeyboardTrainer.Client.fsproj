@@ -18,6 +18,7 @@
     <Compile Include="Pages/TypingView.fs" />
     <Compile Include="Pages/Metrics.fs" />
     <Compile Include="App.fs" />
+    <Compile Include="Main.fs" />
   </ItemGroup>
 
   <ItemGroup>
