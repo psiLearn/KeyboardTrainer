@@ -3,15 +3,27 @@ namespace KeyboardTrainer.Server
 open Npgsql
 open System
 open System.Data
+open System.IO
 open Dapper
 
 module DbContext =
     /// Get database connection string from environment or use default
     let getConnectionString () =
-        System.Environment.GetEnvironmentVariable "DATABASE_URL"
-        |> function
-            | null | "" -> "Server=localhost;Database=keyboardtrainer;User Id=trainer;Password=trainer123"
-            | connStr -> connStr
+        let getEnv name defaultValue =
+            System.Environment.GetEnvironmentVariable name
+            |> function
+                | null | "" -> defaultValue
+                | value -> value
+
+        match System.Environment.GetEnvironmentVariable "DATABASE_URL" with
+        | null | "" ->
+            let host = getEnv "DB_HOST" "localhost"
+            let port = getEnv "DB_PORT" "5434"
+            let database = getEnv "DB_NAME" "keyboardtrainer"
+            let user = getEnv "DB_USER" "trainer"
+            let password = getEnv "DB_PASSWORD" "trainer123"
+            $"Host={host};Port={port};Database={database};Username={user};Password={password}"
+        | connStr -> connStr
 
     /// Create a new database connection
     let createConnection () : IDbConnection =
@@ -31,25 +43,44 @@ module DbContext =
             try
                 // Read and execute migration files
                 printfn "[DB] Running migrations..."
-                
-                let migration1 = 
-                    System.IO.File.ReadAllText(
-                        "./src/Server/Database/Migrations/001_CreateLessonsAndSessionsTables.sql"
-                    )
-                let! _ = conn.ExecuteAsync(migration1) |> Async.AwaitTask
-                printfn "[DB] ✓ Migration 001 completed"
-                
-                let migration2 = 
-                    System.IO.File.ReadAllText(
-                        "./src/Server/Database/Migrations/002_SeedFrenchLessons.sql"
-                    )
-                let! _ = conn.ExecuteAsync(migration2) |> Async.AwaitTask
-                printfn "[DB] ✓ Migration 002 (seed data) completed"
-                
-                printfn "[DB] All migrations completed successfully"
+
+                let baseDir = AppContext.BaseDirectory
+                let candidates =
+                    [
+                        Path.Combine(baseDir, "Database", "Migrations")
+                        Path.Combine(baseDir, "Migrations")
+                        Path.Combine(Environment.CurrentDirectory, "src", "Server", "Database", "Migrations")
+                    ]
+
+                let migrationsDir =
+                    candidates
+                    |> List.tryFind Directory.Exists
+
+                match migrationsDir with
+                | None ->
+                    let message = "[DB] Migration failed: No migrations directory found in expected locations."
+                    printfn "%s" message
+                    return raise (InvalidOperationException message)
+                | Some dir ->
+                    let files =
+                        Directory.GetFiles(dir, "*.sql")
+                        |> Array.sort
+
+                    if files.Length = 0 then
+                        let message = $"[DB] Migration failed: No migration files found in {dir}"
+                        printfn "%s" message
+                        return raise (InvalidOperationException message)
+                    else
+                        for filePath in files do
+                            let migrationSql = File.ReadAllText(filePath)
+                            let! _ = conn.ExecuteAsync(migrationSql) |> Async.AwaitTask
+                            printfn "[DB] ✓ Migration %s completed" (Path.GetFileName(filePath))
+
+                        printfn "[DB] All migrations completed successfully"
             with
             | ex ->
-                printfn "[DB] Warning: Migration may have already been applied: %s" ex.Message
+                printfn "[DB] Migration failed: %s" ex.Message
+                return raise ex
         }
     
     /// Check if database is accessible

@@ -159,7 +159,11 @@ Status: ⚠️ Pre-existing architectural issues
 ### Test Commands
 ```bash
 # Start database
-docker run -e POSTGRES_PASSWORD=trainer123 -p 5434:5434 postgres:15
+docker run -e POSTGRES_PASSWORD=trainer123 -p 5434:5434 postgres:15 -c port=5434
+
+# Build client assets (required for UI)
+npm install
+npm run build:client
 
 # Build and run server
 cd src/Server
@@ -215,3 +219,4 @@ dotnet run
 **Resolved by**: Full-stack Developer  
 **Date**: January 25, 2026  
 **Quality Gate**: PASSED
+

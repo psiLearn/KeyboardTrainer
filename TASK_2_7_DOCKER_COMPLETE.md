@@ -217,13 +217,17 @@ KeyboardTrainer/
 git clone <repo>
 cd KeyboardTrainer
 
-# 2. Start all services
+# 2. Build client assets (required for UI)
+npm install
+npm run build:client
+
+# 3. Start all services
 docker-compose --env-file .env.docker.dev up -d
 
-# 3. Wait for services to be healthy
+# 4. Wait for services to be healthy
 docker-compose ps
 
-# 4. Access application
+# 5. Access application
 # Web: http://localhost:80
 # API: http://localhost:5000/api/lessons
 # Database: localhost:5434
@@ -399,7 +403,7 @@ docker-compose --env-file .env.docker.prod.local up -d
 curl http://localhost:5000/health
 
 # Database health
-docker-compose exec postgres pg_isready -U keyboardtrainer
+docker-compose exec postgres pg_isready -U keyboardtrainer -p 5434
 
 # All services
 docker-compose ps
@@ -538,3 +542,4 @@ commit e3db933 - Task 2.7: Docker Compose full stack setup with Nginx, PostgreSQ
 **Document Created**: 2026-01-25  
 **Task Completed**: Phase 2 Task 2.7  
 **Next Review**: After Task 2.3 completion
+

@@ -25,4 +25,11 @@
     <PackageReference Include="Giraffe" Version="6.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Database/Migrations/*.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

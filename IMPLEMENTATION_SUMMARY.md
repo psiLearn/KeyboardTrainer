@@ -546,7 +546,11 @@ type Page =
 ### Manual Backend Testing (Future):
 ```bash
 # Start PostgreSQL
-docker run -e POSTGRES_PASSWORD=trainer123 -p 5434:5434 postgres:15
+docker run -e POSTGRES_PASSWORD=trainer123 -p 5434:5434 postgres:15 -c port=5434
+
+# Build client assets (required for UI)
+npm install
+npm run build:client
 
 # Run server (in src/Server)
 dotnet run
@@ -585,3 +589,4 @@ This implementation delivers a **production-ready MVP foundation** with:
 
 **All acceptance criteria for Sprint 1 Task 1.2 are met.**
 Remaining work: local testing, Fable build setup, Docker configuration, and frontend styling.
+

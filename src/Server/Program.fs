@@ -51,7 +51,7 @@ module Program =
         async {
             try
                 printfn "Running database migrations..."
-                let! result = DbContext.runMigrations()
+                let! _ = DbContext.runMigrations()
                 
                 // Health check
                 let! healthOk = DbContext.healthCheck()
@@ -62,7 +62,7 @@ module Program =
             with
             | ex ->
                 printfn "ERROR: Failed to initialize database: %s" ex.Message
-                // Don't exit - let the server start anyway
+                return raise ex
         }
         |> Async.RunSynchronously
         

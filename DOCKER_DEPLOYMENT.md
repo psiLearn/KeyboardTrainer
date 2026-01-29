@@ -8,6 +8,17 @@
 
 ### Start the Application
 
+**Build client assets (required for the web UI):**
+```bash
+npm install
+npm run build:client
+```
+
+**Or run the full restart script (build + rebuild containers):**
+```powershell
+.\scripts\restart-compose.ps1
+```
+
 **Linux/Mac**:
 ```bash
 chmod +x docker-dev.sh
@@ -193,7 +204,7 @@ docker-compose ps postgres
 docker-compose logs postgres
 
 # Try connecting directly
-docker-compose exec postgres psql -U keyboardtrainer -d keyboardtrainer
+docker-compose exec postgres psql -U keyboardtrainer -p 5434 -d keyboardtrainer
 
 # Reset database
 docker-compose down -v
@@ -206,7 +217,7 @@ Edit `.env.docker.dev` or `.env.docker.prod.local`:
 ```env
 NGINX_PORT=8080        # Use 8080 instead of 80
 SERVER_PORT=5001       # Use 5001 instead of 5000
-DB_PORT=5433           # Use 5433 instead of 5434
+DB_PORT=5435           # Use 5435 instead of 5434
 ```
 
 Then restart:
@@ -240,7 +251,7 @@ For production, optimize PostgreSQL:
 
 ```bash
 # Connect to database
-docker-compose exec postgres psql -U keyboardtrainer -d keyboardtrainer
+docker-compose exec postgres psql -U keyboardtrainer -p 5434 -d keyboardtrainer
 
 # View connection count
 SELECT datname, count(*) FROM pg_stat_activity GROUP BY datname;
@@ -343,7 +354,7 @@ mkdir -p $BACKUP_DIR
 
 # Backup database
 docker exec keyboard-trainer-db pg_dump \
-  -U keyboardtrainer keyboardtrainer | \
+  -U keyboardtrainer -p 5434 keyboardtrainer | \
   gzip > $BACKUP_DIR/db_$DATE.sql.gz
 
 # Keep 30 days
@@ -365,7 +376,7 @@ crontab -e
 # Restore database
 gunzip < backups/db_20260125_020000.sql.gz | \
   docker exec -i keyboard-trainer-db psql \
-  -U keyboardtrainer keyboardtrainer
+  -U keyboardtrainer -p 5434 keyboardtrainer
 
 # Restart
 ./docker-prod.sh up
@@ -405,7 +416,7 @@ docker stats keyboard-trainer-server
 curl http://localhost:5000/health
 
 # Database health
-docker-compose exec postgres pg_isready -U keyboardtrainer
+docker-compose exec postgres pg_isready -U keyboardtrainer -p 5434
 
 # Service status
 docker-compose ps
@@ -482,3 +493,4 @@ jobs:
 **Last Updated**: 2026-01-25  
 **Docker Compose Version**: 3.8  
 **Tested With**: Docker 20.10+, Docker Compose 2.0+
+

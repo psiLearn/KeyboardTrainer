@@ -3,6 +3,10 @@
 ## 🚀 Quick Start (30 seconds)
 
 ```bash
+# Build client assets (required for UI)
+npm install
+npm run build:client
+
 # Development
 docker-compose --env-file .env.docker.dev up -d
 
@@ -62,19 +66,19 @@ docker stats                         # Resource usage
 ### Database Operations
 ```bash
 # Connect to database
-docker-compose exec postgres psql -U keyboardtrainer -d keyboardtrainer
+docker-compose exec postgres psql -U keyboardtrainer -p 5434 -d keyboardtrainer
 
 # Backup
-docker-compose exec postgres pg_dump -U keyboardtrainer keyboardtrainer > backup.sql
+docker-compose exec postgres pg_dump -U keyboardtrainer -p 5434 keyboardtrainer > backup.sql
 
 # Restore
-cat backup.sql | docker-compose exec -T postgres psql -U keyboardtrainer keyboardtrainer
+cat backup.sql | docker-compose exec -T postgres psql -U keyboardtrainer -p 5434 keyboardtrainer
 ```
 
 ### Container Access
 ```bash
 docker-compose exec server /bin/sh              # Shell access
-docker-compose exec postgres psql -U keyboardtrainer   # DB shell
+docker-compose exec postgres psql -U keyboardtrainer -p 5434   # DB shell
 docker logs keyboard-trainer-server             # View logs
 docker inspect keyboard-trainer-server          # Show config
 ```
@@ -107,7 +111,7 @@ docker system prune -a           # Clean up all unused
 | Problem | Solution |
 |---------|----------|
 | Port 80 in use | Change `NGINX_PORT=8080` in .env file |
-| Port 5434 in use | Change `DB_PORT=5433` in .env file |
+| Port 5434 in use | Change `DB_PORT=5435` in .env file |
 | Database won't connect | `docker-compose logs postgres` |
 | API not responding | `curl http://localhost:5000/health` |
 | Containers won't start | `docker-compose build --no-cache && docker-compose up -d` |
@@ -158,7 +162,7 @@ docker-compose up -d --scale server=3
 docker stats --no-stream=false
 
 # Check database connections
-docker exec keyboard-trainer-db psql -U keyboardtrainer -c \
+docker exec keyboard-trainer-db psql -U keyboardtrainer -p 5434 -c \
   "SELECT datname, count(*) FROM pg_stat_activity GROUP BY datname"
 ```
 
@@ -233,3 +237,4 @@ find /backups -name "*.sql.gz" -mtime +30 -delete
 **Quick Reference Version**: 1.0  
 **Updated**: 2026-01-25  
 **Format**: Copy & paste ready commands
+

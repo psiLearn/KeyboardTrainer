@@ -1,10 +1,9 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database Service
   postgres:
     image: postgres:16-alpine
     container_name: keyboard-trainer-db
+    command: ["postgres", "-p", "5434"]
     environment:
       POSTGRES_USER: ${DB_USER:-keyboardtrainer}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-keyboardtrainer_dev}
@@ -18,7 +17,7 @@ services:
     networks:
       - keyboard-trainer-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-keyboardtrainer}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-keyboardtrainer} -p 5434"]
       interval: 10s
       timeout: 5s
       retries: 5

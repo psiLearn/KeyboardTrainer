@@ -5,6 +5,8 @@ dist/
 *.dll
 *.exe
 *.pdb
+src/Client/public/app.js
+src/Client/public/app.js.map
 
 # Visual Studio Code
 .vscode/settings.json

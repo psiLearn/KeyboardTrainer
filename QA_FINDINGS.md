@@ -189,10 +189,16 @@
 ### Start Database (PostgreSQL required)
 ```bash
 # Option 1: Docker
-docker run -e POSTGRES_PASSWORD=trainer123 -p 5434:5434 postgres:15
+docker run -e POSTGRES_PASSWORD=trainer123 -p 5434:5434 postgres:15 -c port=5434
 
 # Option 2: Local PostgreSQL (if installed)
-psql -U trainer -d keyboardtrainer
+psql -h localhost -p 5434 -U trainer -d keyboardtrainer
+```
+
+### Build Client Assets (required for UI)
+```bash
+npm install
+npm run build:client
 ```
 
 ### Start Server
@@ -278,3 +284,4 @@ For detailed issue descriptions, code examples, and fix instructions, see: [TEST
 **Reviewed by**: QA Tester  
 **Date**: January 25, 2026  
 **Status**: ⛔ BLOCKED - Fix critical issues first
+

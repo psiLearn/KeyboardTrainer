@@ -18,6 +18,10 @@ This Docker Compose configuration orchestrates the complete Keyboard Trainer app
 ### 1. Development Environment
 
 ```bash
+# Build client assets (required for UI)
+npm install
+npm run build:client
+
 # Start all services
 docker-compose --env-file .env.docker.dev up -d
 
@@ -34,6 +38,10 @@ docker-compose down -v
 ### 2. Production Environment
 
 ```bash
+# Build client assets (required for UI)
+npm install
+npm run build:client
+
 # Configure secrets first
 cp .env.docker.prod .env.docker.prod.local
 # Edit .env.docker.prod.local with production values
@@ -46,7 +54,7 @@ docker-compose --env-file .env.docker.prod.local up -d
 docker-compose logs -f server
 
 # Backup database
-docker exec keyboard-trainer-db pg_dump -U keyboardtrainer keyboardtrainer > backup.sql
+docker exec keyboard-trainer-db pg_dump -U keyboardtrainer -p 5434 keyboardtrainer > backup.sql
 ```
 
 ## Service Details
@@ -63,12 +71,12 @@ docker exec keyboard-trainer-db pg_dump -U keyboardtrainer keyboardtrainer > bac
 
 **Health Check**:
 ```bash
-docker exec keyboard-trainer-db pg_isready -U keyboardtrainer
+docker exec keyboard-trainer-db pg_isready -U keyboardtrainer -p 5434
 ```
 
 **Connect Directly**:
 ```bash
-psql -h localhost -U keyboardtrainer -d keyboardtrainer
+psql -h localhost -p 5434 -U keyboardtrainer -d keyboardtrainer
 ```
 
 ### F# Server
@@ -209,7 +217,7 @@ Migrations run automatically on container startup:
 
 **Manual Migration**:
 ```bash
-docker exec keyboard-trainer-db psql -U keyboardtrainer -d keyboardtrainer -f /docker-entrypoint-initdb.d/001_CreateLessonsAndSessionsTables.sql
+docker exec keyboard-trainer-db psql -U keyboardtrainer -p 5434 -d keyboardtrainer -f /docker-entrypoint-initdb.d/001_CreateLessonsAndSessionsTables.sql
 ```
 
 ## Troubleshooting
@@ -246,7 +254,7 @@ cat .env.docker.dev
 # Change in docker-compose.yml or .env file
 NGINX_PORT=8080        # Use 8080 instead of 80
 SERVER_PORT=5001       # Use 5001 instead of 5000
-DB_PORT=5433           # Use 5433 instead of 5434
+DB_PORT=5435           # Use 5435 instead of 5434
 
 docker-compose up
 ```
@@ -325,7 +333,7 @@ mkdir -p $BACKUP_DIR
 
 # Backup database
 docker exec keyboard-trainer-db pg_dump \
-  -U keyboardtrainer keyboardtrainer \
+  -U keyboardtrainer -p 5434 keyboardtrainer \
   > $BACKUP_DIR/db_backup_$DATE.sql
 
 # Compress
@@ -367,9 +375,9 @@ curl http://localhost:5000/health
 
 ```bash
 # Create restricted user for backups
-docker exec keyboard-trainer-db createuser -l backup_user
-docker exec keyboard-trainer-db psql -c "ALTER ROLE backup_user ENCRYPTED PASSWORD 'backup_pass';"
-docker exec keyboard-trainer-db psql -c "GRANT CONNECT ON DATABASE keyboardtrainer TO backup_user;"
+docker exec keyboard-trainer-db createuser -U keyboardtrainer -p 5434 -l backup_user
+docker exec keyboard-trainer-db psql -U keyboardtrainer -p 5434 -c "ALTER ROLE backup_user ENCRYPTED PASSWORD 'backup_pass';"
+docker exec keyboard-trainer-db psql -U keyboardtrainer -p 5434 -c "GRANT CONNECT ON DATABASE keyboardtrainer TO backup_user;"
 ```
 
 ## Monitoring & Logging
@@ -404,7 +412,7 @@ docker stats keyboard-trainer-db
 ```bash
 # Shell into container
 docker exec -it keyboard-trainer-server /bin/sh
-docker exec -it keyboard-trainer-db psql -U keyboardtrainer
+docker exec -it keyboard-trainer-db psql -U keyboardtrainer -p 5434
 
 # View server logs
 docker exec keyboard-trainer-server tail -f /app/logs/*.log
@@ -423,7 +431,7 @@ docker exec keyboard-trainer-server tail -f /app/logs/*.log
 
 1. Create migration SQL in `src/Server/Database/Migrations/`
 2. Docker will auto-run on restart
-3. Or manually: `docker exec keyboard-trainer-db psql -U keyboardtrainer -d keyboardtrainer < migration.sql`
+3. Or manually: `docker exec keyboard-trainer-db psql -U keyboardtrainer -p 5434 -d keyboardtrainer < migration.sql`
 
 ### Scale Services
 
@@ -470,3 +478,4 @@ docker system prune -a
 **Last Updated**: 2026-01-25
 **Docker Compose Version**: 3.8
 **Architecture**: Multi-container orchestration with Nginx, ASP.NET Core, PostgreSQL
+

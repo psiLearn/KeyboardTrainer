@@ -53,7 +53,7 @@ case "${1:-up}" in
 
     psql)
         echo "🐘 Connecting to PostgreSQL..."
-        docker exec -it "${PROJECT_NAME}_postgres_1" psql -U keyboardtrainer -d keyboardtrainer
+        docker exec -it keyboard-trainer-db psql -U keyboardtrainer -d keyboardtrainer -p 5434
         ;;
 
     health)
@@ -78,3 +78,4 @@ case "${1:-up}" in
         exit 1
         ;;
 esac
+

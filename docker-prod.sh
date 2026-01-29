@@ -50,7 +50,7 @@ case "${1:-help}" in
         
         echo "💾 Backing up database..."
         docker-compose --project-name "$PROJECT_NAME" --env-file "$ENV_FILE" exec -T postgres \
-            pg_dump -U keyboardtrainer keyboardtrainer | gzip > "$BACKUP_FILE"
+            pg_dump -U keyboardtrainer -p 5434 keyboardtrainer | gzip > "$BACKUP_FILE"
         
         echo "✅ Backup created: $BACKUP_FILE"
         ls -lh "$BACKUP_FILE"
@@ -72,7 +72,7 @@ case "${1:-help}" in
         if [ "$confirm" = "yes" ]; then
             echo "📥 Restoring database..."
             gunzip < "$2" | docker-compose --project-name "$PROJECT_NAME" --env-file "$ENV_FILE" exec -T postgres \
-                psql -U keyboardtrainer keyboardtrainer
+                psql -U keyboardtrainer -p 5434 keyboardtrainer
             echo "✅ Restore complete"
         else
             echo "❌ Cancelled"
@@ -119,3 +119,4 @@ case "${1:-help}" in
         exit 1
         ;;
 esac
+
