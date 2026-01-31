@@ -124,7 +124,10 @@ module App =
                             CurrentPage = StartScreen
                             TypingViewModel = None
                     },
-                    Cmd.ofMsg (MetricsMsg (Metrics.Msg.LoadSessions typingModel.Lesson.Id))
+                    Cmd.batch [
+                        Cmd.ofMsg (MetricsMsg (Metrics.Msg.LoadSessions typingModel.Lesson.Id))
+                        Cmd.ofMsg SyncPendingSessions
+                    ]
 
                 | _ ->
                     {
