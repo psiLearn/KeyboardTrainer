@@ -1,6 +1,7 @@
 namespace KeyboardTrainer.Client
 
 open System
+open Browser.Dom
 open Fable.Core
 open Fable.Core.JsInterop
 
@@ -10,6 +11,7 @@ module LocalSessions =
 
     let private storageKey = "keyboard-trainer-sessions"
     let private currentVersion = 1
+    let private maxStoredSessions = 1000
 
     type LocalSession = {
         Id: Guid
@@ -134,8 +136,26 @@ module LocalSessions =
             sessions |> List.choose fromStored
         | None -> []
 
+    let private normalize (sessions: LocalSession list) =
+        let sorted = sessions |> List.sortByDescending (fun session -> session.CreatedAt)
+        let unsynced, synced = sorted |> List.partition (fun session -> not session.SyncedWithServer)
+        let retainedUnsynced =
+            if unsynced.Length > maxStoredSessions then
+                console.warn($"LocalSessions: {unsynced.Length} unsynced sessions exceed retention cap of {maxStoredSessions}. Keeping all unsynced.")
+                unsynced
+            else
+                unsynced
+        let remaining = maxStoredSessions - retainedUnsynced.Length
+        let retainedSynced =
+            if remaining > 0 then
+                synced |> List.truncate remaining
+            else
+                []
+        retainedUnsynced @ retainedSynced
+
     let save (sessions: LocalSession list) =
-        let payload = { Version = currentVersion; Sessions = sessions |> List.map toStored }
+        let normalized = normalize sessions
+        let payload = { Version = currentVersion; Sessions = normalized |> List.map toStored }
         let json = toJsonString payload
         setItem storageKey json
 
