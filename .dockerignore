@@ -1,0 +1,21 @@
+# Docker-related files and directories
+__pycache__
+*.pyc
+.git
+.gitignore
+.env
+.env.local
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode
+.idea
+*.log
+node_modules
+dist
+build
+obj
+bin
+coverage
+.nyc_output

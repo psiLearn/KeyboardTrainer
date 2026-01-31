@@ -3,6 +3,8 @@
         "git checkout": true,
         "git add": true,
         "git commit": true,
+        "dotnet build": true,
+        "dir": true,
         "measure": true
     }
 }

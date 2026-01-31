@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>KeyboardTrainer.Client</AssemblyName>
+    <RootNamespace>KeyboardTrainer.Client</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(FABLE_COMPILER)' == 'true'">
+    <Compile Include="$(NuGetPackageRoot)fable.react.types\18.3.0\fable\Fable.React.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.react.types\18.3.0\fable\Fable.React.Hooks.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.react.types\18.3.0\fable\Fable.React.Extensions.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.reactdom.types\18.2.0\fable\Fable.ReactDom.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.react\9.4.0\fable\Fable.React.Props.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.react\9.4.0\fable\Fable.React.Helpers.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.react\9.4.0\fable\Fable.React.Standard.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.react\9.4.0\fable\Fable.React.FunctionComponent.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.react\9.4.0\fable\Fable.React.ReactiveComponents.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.react\9.4.0\fable\Fable.React.Isomorphic.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.react\9.4.0\fable\Fable.ReactServer.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.elmish\5.0.2\fable\prelude.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.elmish\5.0.2\fable\cmd.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.elmish\5.0.2\fable\cmd.obsolete.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.elmish\5.0.2\fable\sub.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.elmish\5.0.2\fable\ring.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.elmish\5.0.2\fable\program.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.elmish.react\5.0.1\fable\common.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.elmish.react\5.0.1\fable\react.fs" />
+    <Compile Include="$(NuGetPackageRoot)fable.elmish.react\5.0.1\fable\react-native.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../Shared/Domain.fs" />
+    <Compile Include="Errors.fs" />
+    <Compile Include="LocalSessions.fs" />
+    <Compile Include="Components/LoadingSpinner.fs" />
+    <Compile Include="Components/ErrorAlert.fs" />
+    <Compile Include="Components/ErrorBoundary.fs" />
+    <Compile Include="ApiClient.fs" />
+    <Compile Include="SessionSync.fs" />
+    <Compile Include="Pages/StartScreen.fs" />
+    <Compile Include="Pages/TypingView.fs" />
+    <Compile Include="Pages/Metrics.fs" />
+    <Compile Include="App.fs" />
+    <Compile Include="Main.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="4.5.0" />
+    <PackageReference Include="Fable.Elmish" Version="5.0.2" />
+    <PackageReference Include="Fable.Elmish.React" Version="5.0.1" />
+    <PackageReference Include="Fable.React" Version="9.4.0" />
+  </ItemGroup>
+
+</Project>

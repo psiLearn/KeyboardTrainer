@@ -1,0 +1,41 @@
+# Multi-stage build for F# Server (ASP.NET Core 8)
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS builder
+
+WORKDIR /build
+
+# Copy project files
+COPY src/Shared/Domain.fs ./src/Shared/
+COPY src/Server/KeyboardTrainer.Server.fsproj ./src/Server/
+COPY src/Server/Program.fs ./src/Server/
+COPY src/Server/Database ./src/Server/Database
+COPY src/Server/Handlers ./src/Server/Handlers
+
+# Restore and build
+RUN cd src/Server && \
+    dotnet restore KeyboardTrainer.Server.fsproj && \
+    dotnet publish -c Release -o /app/publish
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
+
+WORKDIR /app
+
+# Install additional tools for health checks and migrations
+RUN apk add --no-cache curl postgresql-client
+
+# Copy built application from builder
+COPY --from=builder /app/publish .
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+# Expose port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
+
+# Run application
+ENTRYPOINT ["dotnet", "KeyboardTrainer.Server.dll"]

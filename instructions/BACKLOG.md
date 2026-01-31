@@ -630,7 +630,7 @@ This backlog is organized into **5 epics**, each representing a major capability
   - Source code mounted as volume for hot reload (if applicable)
 - [ ] Environment variables:
   - `POSTGRES_DB=keyboardtrainer`, `POSTGRES_USER=trainer`, `POSTGRES_PASSWORD=<env>`
-  - Server: `DATABASE_URL=postgresql://trainer:pwd@db:5432/keyboardtrainer`
+  - Server: `DATABASE_URL=postgresql://trainer:pwd@db:5434/keyboardtrainer`
 - [ ] Healthchecks:
   - Database has healthcheck (psql query)
   - Server waits for db (depends_on with condition)
