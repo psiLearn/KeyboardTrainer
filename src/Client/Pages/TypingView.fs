@@ -162,42 +162,45 @@ module TypingView =
                 model, Cmd.none
 
         | SubmitSession ->
-            match (model.StartTime, model.EndTime) with
-            | (Some startTime, Some endTime) ->
-                let wpm, cpm, accuracy, errorCount = calculateMetrics model.Lesson model.UserInput startTime endTime model.Errors
+            if model.IsSubmitting then
+                model, Cmd.none
+            else
+                match (model.StartTime, model.EndTime) with
+                | (Some startTime, Some endTime) ->
+                    let wpm, cpm, accuracy, errorCount = calculateMetrics model.Lesson model.UserInput startTime endTime model.Errors
                 
-                let localSessionId =
-                    match model.PendingLocalSessionId with
-                    | Some id -> id
-                    | None -> Guid.NewGuid()
+                    let localSessionId =
+                        match model.PendingLocalSessionId with
+                        | Some id -> id
+                        | None -> Guid.NewGuid()
 
-                let sessionDto: SessionCreateDto = {
-                    ClientSessionId = localSessionId
-                    LessonId = model.Lesson.Id
-                    Wpm = wpm
-                    Cpm = cpm
-                    Accuracy = accuracy
-                    ErrorCount = errorCount
-                    PerKeyErrors = model.Errors
-                }
+                    let sessionDto: SessionCreateDto = {
+                        ClientSessionId = localSessionId
+                        LessonId = model.Lesson.Id
+                        Wpm = wpm
+                        Cpm = cpm
+                        Accuracy = accuracy
+                        ErrorCount = errorCount
+                        PerKeyErrors = model.Errors
+                    }
 
-                let localSession: LocalSessions.LocalSession = {
-                    Id = localSessionId
-                    LessonId = model.Lesson.Id
-                    Wpm = wpm
-                    Cpm = cpm
-                    Accuracy = accuracy
-                    ErrorCount = errorCount
-                    PerKeyErrors = model.Errors
-                    CreatedAt = DateTime.UtcNow
-                    SyncedWithServer = false
-                }
+                    let localSession: LocalSessions.LocalSession = {
+                        Id = localSessionId
+                        LessonId = model.Lesson.Id
+                        Wpm = wpm
+                        Cpm = cpm
+                        Accuracy = accuracy
+                        ErrorCount = errorCount
+                        PerKeyErrors = model.Errors
+                        CreatedAt = DateTime.UtcNow
+                        SyncedWithServer = false
+                    }
 
-                LocalSessions.upsert localSession
-                
-                { model with IsSubmitting = true; SubmitError = None; PendingLocalSessionId = Some localSessionId }, submitSessionCmd sessionDto
+                    LocalSessions.upsert localSession
+                    
+                    { model with IsSubmitting = true; SubmitError = None; PendingLocalSessionId = Some localSessionId }, submitSessionCmd sessionDto
 
-            | _ -> model, Cmd.none
+                | _ -> model, Cmd.none
 
         | SessionSubmitted session ->
             match model.PendingLocalSessionId with
@@ -220,19 +223,38 @@ module TypingView =
             init model.Lesson
 
     let view model dispatch =
+        let tryShortcut key =
+            match model.TypingState, key with
+            | NotStarted, "Enter"
+            | NotStarted, " "
+            | NotStarted, "Spacebar" -> Some StartTyping
+            | InProgress, "Escape" -> Some CancelTyping
+            | Completed, "Enter" -> Some SubmitSession
+            | Completed, "r"
+            | Completed, "R"
+            | Completed, "Escape" -> Some ResetView
+            | _ -> None
+
         let onKeyDown (ev: KeyboardEvent) =
-            if model.TypingState = InProgress then
-                if ev.ctrlKey || ev.altKey || ev.metaKey then
-                    ()
-                else
-                    match ev.key with
-                    | "Backspace" ->
-                        ev.preventDefault()
-                        dispatch Backspace
-                    | "Enter" ->
-                        ev.preventDefault()
-                        dispatch (CharacterTyped '\n')
-                    | _ -> ()
+            if ev.ctrlKey || ev.altKey || ev.metaKey then
+                ()
+            else
+                match tryShortcut ev.key with
+                | Some msg ->
+                    ev.preventDefault()
+                    dispatch msg
+                | None ->
+                    if model.TypingState = InProgress then
+                        match ev.key with
+                        | "Backspace" ->
+                            ev.preventDefault()
+                            dispatch Backspace
+                        | "Enter" ->
+                            ev.preventDefault()
+                            dispatch (CharacterTyped '\n')
+                        | _ -> ()
+                    else
+                        ()
 
         let onInput (ev: Event) =
             let value: string = ev.target?value
@@ -249,6 +271,7 @@ module TypingView =
         div [
             ClassName "typing-view"
             OnClick focusInput
+            OnKeyDown onKeyDown
         ] [
             h2 [ ClassName "lesson-title" ] [ str model.Lesson.Title ]
 
@@ -265,7 +288,6 @@ module TypingView =
                     Height "1px"
                     Opacity 0.0
                 ]
-                OnKeyDown onKeyDown
                 OnInput onInput
             ] []
 
@@ -366,6 +388,10 @@ module TypingView =
                     | _ -> 0, 0, 0.0, 0
 
                 div [ ClassName "completion-section" ] [
+                    div [ ClassName "confetti" ] [
+                        for index in 1 .. 12 do
+                            span [ Key (sprintf "confetti-%d" index) ] []
+                    ]
                     h3 [] [ str "Typing Complete!" ]
 
                     match model.SubmitError with

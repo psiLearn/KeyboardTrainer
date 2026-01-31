@@ -429,9 +429,52 @@ body::before {
   gap: 8px;
 }
 
+.completion-section {
+  position: relative;
+  overflow: hidden;
+}
+
 .completion-section h3 {
   margin-top: 0;
 }
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.confetti span {
+  position: absolute;
+  top: -12px;
+  width: 8px;
+  height: 14px;
+  border-radius: 3px;
+  opacity: 0;
+  background: var(--accent-warm);
+  animation: confetti-fall 1.7s ease-out forwards;
+}
+
+.confetti span:nth-child(2n) {
+  background: var(--accent-strong);
+}
+
+.confetti span:nth-child(3n) {
+  background: #60a5fa;
+}
+
+.confetti span:nth-child(1) { left: 12%; animation-delay: 0.05s; }
+.confetti span:nth-child(2) { left: 22%; animation-delay: 0.12s; }
+.confetti span:nth-child(3) { left: 32%; animation-delay: 0.18s; }
+.confetti span:nth-child(4) { left: 44%; animation-delay: 0.08s; }
+.confetti span:nth-child(5) { left: 56%; animation-delay: 0.22s; }
+.confetti span:nth-child(6) { left: 66%; animation-delay: 0.15s; }
+.confetti span:nth-child(7) { left: 78%; animation-delay: 0.26s; }
+.confetti span:nth-child(8) { left: 88%; animation-delay: 0.1s; }
+.confetti span:nth-child(9) { left: 18%; animation-delay: 0.2s; }
+.confetti span:nth-child(10) { left: 36%; animation-delay: 0.27s; }
+.confetti span:nth-child(11) { left: 58%; animation-delay: 0.3s; }
+.confetti span:nth-child(12) { left: 72%; animation-delay: 0.24s; }
 
 .results-summary {
   display: grid;
@@ -640,6 +683,20 @@ body::before {
   }
   100% {
     background: var(--danger-soft);
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-12px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(220px) rotate(260deg);
+    opacity: 0;
   }
 }
 
