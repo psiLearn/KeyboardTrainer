@@ -394,11 +394,10 @@ type Page =
 **File**: [src/Client/KeyboardTrainer.Client.fsproj](src/Client/KeyboardTrainer.Client.fsproj)
 
 **Dependencies**:
-- Fable.Core 4.1.0 (Transpiler)
-- Fable.Elmish 4.0.0 (State management)
-- Fable.Elmish.Browser 4.0.0 (Browser integration)
-- Fable.Fetch 3.2.0 (HTTP client)
-- Fable.FontAwesome.Free 2.0.0 (Icons)
+- Fable.Core 4.5.0 (Transpiler)
+- Fable.Elmish 5.0.2 (State management)
+- Fable.Elmish.React 5.0.1 (React bindings for Elmish)
+- Fable.React 9.4.0 (React helpers)
 
 **Compile Order**:
 1. Shared/Domain.fs (Types)
@@ -526,12 +525,13 @@ type Page =
 
 **Backend**:
 - PostgreSQL 13+ (localhost:5434 or via DATABASE_URL env var)
-- .NET 8.0 SDK
+- .NET SDK 8.0.123 (pinned via `global.json`)
 - F# compiler
 
 **Frontend**:
 - Node.js 18+ (for Fable transpilation)
 - NPM or Yarn (for package management)
+- Fable toolchain 4.28.0 (via `dotnet tool restore`)
 - Modern browser with ES6 support
 
 **Database**:

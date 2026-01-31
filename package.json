@@ -6,7 +6,7 @@
     "build:client:dev": "dotnet tool restore && dotnet fable src/Client/KeyboardTrainer.Client.fsproj --outDir src/Client/obj/fable --define DEBUG && esbuild src/Client/obj/fable/Main.js --bundle --sourcemap --outfile=src/Client/public/app.js --format=iife"
   },
   "devDependencies": {
-    "esbuild": "^0.20.0"
+    "esbuild": "^0.27.2"
   },
   "dependencies": {
     "react": "^18.2.0",

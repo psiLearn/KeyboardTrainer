@@ -5,6 +5,8 @@
 ### Prerequisites
 - Docker 20.10+
 - Docker Compose 2.0+
+- .NET SDK 8.0.123 (pinned via `global.json`)
+- Node.js 18+ (for client build)
 
 ### Start the Application
 
@@ -13,6 +15,7 @@
 npm install
 npm run build:client
 ```
+_Note: `npm run build:client` runs `dotnet tool restore` and uses the pinned Fable toolchain (4.28.0)._
 
 **Or run the full restart script (build + rebuild containers):**
 ```powershell

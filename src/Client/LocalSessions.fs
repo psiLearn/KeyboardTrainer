@@ -91,10 +91,10 @@ module LocalSessions =
         | _ -> None
 
     let private toJsonString value =
-        System.Text.Json.JsonSerializer.Serialize(value)
+        JS.JSON.stringify value
 
     let private fromJsonString<'T> (json: string) : 'T =
-        System.Text.Json.JsonSerializer.Deserialize<'T>(json)
+        JS.JSON.parse json |> unbox<'T>
 
     let private tryGetItem (key: string) =
         try

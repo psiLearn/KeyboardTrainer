@@ -1,19 +1,18 @@
 namespace KeyboardTrainer.Client
 
 open System
-open Fable.SimpleHttp
+open Fable.Core
+open Fable.Core.JsInterop
 open KeyboardTrainer.Shared
 
 [<AutoOpen>]
 module private JsonHelpers =
-    open Fable.Core.JsInterop
-    
     /// Serialize to JSON string
-    let inline toJsonString obj = (obj |> System.Text.Json.JsonSerializer.Serialize)
-    
+    let inline toJsonString obj = JS.JSON.stringify obj
+
     /// Parse JSON string to type
     let inline fromJsonString<'T> (json: string) : 'T =
-        System.Text.Json.JsonSerializer.Deserialize<'T> json
+        JS.JSON.parse json |> unbox<'T>
 
 module ApiClient =
     let baseUrl = 
@@ -22,6 +21,32 @@ module ApiClient =
         #else
         ""
         #endif
+
+    [<Emit("fetch($0, $1)")>]
+    let private fetch (url: string, props: obj) : JS.Promise<obj> = jsNative
+
+    let private request (method: string) (url: string) (body: string option) =
+        async {
+            let headers = createObj [ "Content-Type" ==> "application/json" ]
+            let props =
+                match body with
+                | Some payload ->
+                    createObj [
+                        "method" ==> method
+                        "headers" ==> headers
+                        "body" ==> payload
+                    ]
+                | None ->
+                    createObj [
+                        "method" ==> method
+                        "headers" ==> headers
+                    ]
+
+            let! response = fetch (url, props) |> Async.AwaitPromise
+            let! text = response?text() |> Async.AwaitPromise
+            let status: int = response?status
+            return status, text
+        }
 
     /// Helper to parse error response
     let parseErrorResponse (status: int) (body: string) : string =
@@ -45,7 +70,7 @@ module ApiClient =
         async {
             try
                 let url = $"{baseUrl}/api/lessons"
-                let! (status, body) = Http.get url
+                let! (status, body) = request "GET" url None
                 
                 if status = 200 then
                     let lessons = fromJsonString<LessonDto list> body
@@ -62,7 +87,7 @@ module ApiClient =
         async {
             try
                 let url = $"{baseUrl}/api/lessons/{id}"
-                let! (status, body) = Http.get url
+                let! (status, body) = request "GET" url None
                 
                 if status = 200 then
                     let lesson = fromJsonString<LessonDto> body
@@ -80,7 +105,7 @@ module ApiClient =
             try
                 let url = $"{baseUrl}/api/lessons"
                 let body = toJsonString dto
-                let! (status, responseBody) = Http.post url body
+                let! (status, responseBody) = request "POST" url (Some body)
                 
                 if status = 201 then
                     let lesson = fromJsonString<LessonDto> responseBody
@@ -98,7 +123,7 @@ module ApiClient =
             try
                 let url = $"{baseUrl}/api/lessons/{id}"
                 let body = toJsonString dto
-                let! (status, responseBody) = Http.put url body
+                let! (status, responseBody) = request "PUT" url (Some body)
                 
                 if status = 200 then
                     let lesson = fromJsonString<LessonDto> responseBody
@@ -115,7 +140,7 @@ module ApiClient =
         async {
             try
                 let url = $"{baseUrl}/api/lessons/{id}"
-                let! (status, body) = Http.delete url
+                let! (status, body) = request "DELETE" url None
                 
                 if status = 204 then
                     return Ok ()
@@ -132,7 +157,7 @@ module ApiClient =
             try
                 let url = $"{baseUrl}/api/sessions"
                 let body = toJsonString dto
-                let! (status, responseBody) = Http.post url body
+                let! (status, responseBody) = request "POST" url (Some body)
                 
                 if status = 201 then
                     let session = fromJsonString<SessionDto> responseBody
@@ -149,7 +174,7 @@ module ApiClient =
         async {
             try
                 let url = $"{baseUrl}/api/lessons/{lessonId}/sessions"
-                let! (status, body) = Http.get url
+                let! (status, body) = request "GET" url None
                 
                 if status = 200 then
                     let sessions = fromJsonString<SessionDto list> body
@@ -166,7 +191,7 @@ module ApiClient =
         async {
             try
                 let url = $"{baseUrl}/api/sessions/last"
-                let! (status, body) = Http.get url
+                let! (status, body) = request "GET" url None
                 
                 if status = 200 then
                     let session = fromJsonString<SessionDto> body
@@ -175,4 +200,5 @@ module ApiClient =
                     return Error (parseErrorResponse status body)
             with
             | ex ->
-                return Error $"Network error: {ex.Message}"        }
+                return Error $"Network error: {ex.Message}"
+        }
