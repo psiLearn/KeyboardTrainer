@@ -26,7 +26,7 @@ module TypingView =
         CurrentCharIndex: int
         Errors: Map<int, int>
         IsSubmitting: bool
-        SubmitError: string option
+        SubmitError: AppError option
         PendingLocalSessionId: Guid option
         ElapsedSeconds: int
     }
@@ -38,7 +38,7 @@ module TypingView =
         | Tick
         | SubmitSession
         | SessionSubmitted of SessionDto
-        | SubmitError of string
+        | SubmitError of AppError
         | ClearSubmitError
         | ResetView
         | CancelTyping
@@ -81,7 +81,7 @@ module TypingView =
     let private submitSessionCmd (dto: SessionCreateDto) =
         Cmd.OfAsync.either ApiClient.createSession dto (function
             | Ok session -> SessionSubmitted session
-            | Error error -> SubmitError error) (fun ex -> SubmitError ex.Message)
+            | Error error -> SubmitError error) (fun ex -> SubmitError (AppError.fromException ex))
 
     let update msg model =
         match msg with
@@ -368,11 +368,13 @@ module TypingView =
                 div [ ClassName "completion-section" ] [
                     h3 [] [ str "Typing Complete!" ]
 
-                    if Option.isSome model.SubmitError then
+                    match model.SubmitError with
+                    | Some error ->
                         ErrorAlert.view
-                            (Option.defaultValue "" model.SubmitError)
+                            error
                             (Some (fun () -> dispatch SubmitSession))
                             (Some (fun () -> dispatch ClearSubmitError))
+                    | None -> ()
 
                     div [ ClassName "results-summary" ] [
                         div [ ClassName "result-stat" ] [

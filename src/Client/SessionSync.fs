@@ -35,7 +35,7 @@ module SessionSync =
             let! result = ApiClient.createSession dto
             match result with
             | Ok _ -> return Ok local.Id
-            | Error err -> return Error err
+            | Error err -> return Error (AppError.toMessage err)
         }
 
     let pendingForSync (now: DateTime) (state: State) (pending: LocalSessions.LocalSession list) =

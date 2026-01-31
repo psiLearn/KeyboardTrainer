@@ -13,7 +13,7 @@ module StartScreen =
         Lessons: LessonDto list
         SelectedLesson: LessonDto option
         IsLoading: bool
-        Error: string option
+        Error: AppError option
         FilterDifficulty: Difficulty option
     }
 
@@ -22,7 +22,7 @@ module StartScreen =
         | LessonsLoaded of LessonDto list
         | LessonSelected of LessonDto
         | FilterByDifficulty of Difficulty option
-        | ApiError of string
+        | ApiError of AppError
         | ClearError
         | StartLesson
 
@@ -38,7 +38,7 @@ module StartScreen =
     let private loadLessonsCmd () =
         Cmd.OfAsync.either ApiClient.getAllLessons () (function
             | Ok lessons -> LessonsLoaded lessons
-            | Error error -> ApiError error) (fun ex -> ApiError ex.Message)
+            | Error error -> ApiError error) (fun ex -> ApiError (AppError.fromException ex))
 
     let update msg model =
         match msg with
@@ -73,11 +73,13 @@ module StartScreen =
             else
                 div [ ClassName "container" ] [
                     // Error message
-                    if Option.isSome model.Error then
+                    match model.Error with
+                    | Some error ->
                         ErrorAlert.view
-                            (Option.defaultValue "" model.Error)
+                            error
                             (Some (fun () -> dispatch LoadLessons))
                             (Some (fun () -> dispatch ClearError))
+                    | None -> ()
 
                     // Filter controls
                     div [ ClassName "filter-section" ] [

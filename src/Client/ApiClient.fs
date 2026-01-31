@@ -49,24 +49,11 @@ module ApiClient =
         }
 
     /// Helper to parse error response
-    let parseErrorResponse (status: int) (body: string) : string =
-        if String.IsNullOrWhiteSpace body then
-            match status with
-            | 404 -> "Resource not found"
-            | 400 -> "Bad request"
-            | 500 -> "Server error"
-            | _ -> $"HTTP {status}"
-        else
-            try
-                let error = fromJsonString<ApiError> body
-                match error.Errors with
-                | Some errors -> 
-                    String.concat "; " [for e in errors -> $"{e.Field}: {e.Message}"]
-                | None -> error.Message
-            with _ -> body
+    let parseErrorResponse (status: int) (body: string) : AppError =
+        AppError.fromApiResponse status body
 
     /// Fetch all lessons
-    let getAllLessons () : Async<Result<LessonDto list, string>> =
+    let getAllLessons () : Async<Result<LessonDto list, AppError>> =
         async {
             try
                 let url = $"{baseUrl}/api/lessons"
@@ -79,11 +66,11 @@ module ApiClient =
                     return Error (parseErrorResponse status body)
             with
             | ex ->
-                return Error $"Network error: {ex.Message}"
+                return Error (AppError.fromException ex)
         }
 
     /// Fetch a single lesson by ID
-    let getLessonById (id: Guid) : Async<Result<LessonDto, string>> =
+    let getLessonById (id: Guid) : Async<Result<LessonDto, AppError>> =
         async {
             try
                 let url = $"{baseUrl}/api/lessons/{id}"
@@ -96,11 +83,11 @@ module ApiClient =
                     return Error (parseErrorResponse status body)
             with
             | ex ->
-                return Error $"Network error: {ex.Message}"
+                return Error (AppError.fromException ex)
         }
 
     /// Create a new lesson
-    let createLesson (dto: LessonCreateDto) : Async<Result<LessonDto, string>> =
+    let createLesson (dto: LessonCreateDto) : Async<Result<LessonDto, AppError>> =
         async {
             try
                 let url = $"{baseUrl}/api/lessons"
@@ -114,11 +101,11 @@ module ApiClient =
                     return Error (parseErrorResponse status responseBody)
             with
             | ex ->
-                return Error $"Network error: {ex.Message}"
+                return Error (AppError.fromException ex)
         }
 
     /// Update a lesson
-    let updateLesson (id: Guid) (dto: LessonCreateDto) : Async<Result<LessonDto, string>> =
+    let updateLesson (id: Guid) (dto: LessonCreateDto) : Async<Result<LessonDto, AppError>> =
         async {
             try
                 let url = $"{baseUrl}/api/lessons/{id}"
@@ -132,11 +119,11 @@ module ApiClient =
                     return Error (parseErrorResponse status responseBody)
             with
             | ex ->
-                return Error $"Network error: {ex.Message}"
+                return Error (AppError.fromException ex)
         }
 
     /// Delete a lesson
-    let deleteLesson (id: Guid) : Async<Result<unit, string>> =
+    let deleteLesson (id: Guid) : Async<Result<unit, AppError>> =
         async {
             try
                 let url = $"{baseUrl}/api/lessons/{id}"
@@ -148,11 +135,11 @@ module ApiClient =
                     return Error (parseErrorResponse status body)
             with
             | ex ->
-                return Error $"Network error: {ex.Message}"
+                return Error (AppError.fromException ex)
         }
 
     /// Create a new typing session
-    let createSession (dto: SessionCreateDto) : Async<Result<SessionDto, string>> =
+    let createSession (dto: SessionCreateDto) : Async<Result<SessionDto, AppError>> =
         async {
             try
                 let url = $"{baseUrl}/api/sessions"
@@ -166,11 +153,11 @@ module ApiClient =
                     return Error (parseErrorResponse status responseBody)
             with
             | ex ->
-                return Error $"Network error: {ex.Message}"
+                return Error (AppError.fromException ex)
         }
 
     /// Get sessions for a lesson
-    let getSessionsByLesson (lessonId: Guid) : Async<Result<SessionDto list, string>> =
+    let getSessionsByLesson (lessonId: Guid) : Async<Result<SessionDto list, AppError>> =
         async {
             try
                 let url = $"{baseUrl}/api/lessons/{lessonId}/sessions"
@@ -183,11 +170,11 @@ module ApiClient =
                     return Error (parseErrorResponse status body)
             with
             | ex ->
-                return Error $"Network error: {ex.Message}"
+                return Error (AppError.fromException ex)
         }
 
     /// Get the most recent session
-    let getLastSession () : Async<Result<SessionDto, string>> =
+    let getLastSession () : Async<Result<SessionDto, AppError>> =
         async {
             try
                 let url = $"{baseUrl}/api/sessions/last"
@@ -200,5 +187,5 @@ module ApiClient =
                     return Error (parseErrorResponse status body)
             with
             | ex ->
-                return Error $"Network error: {ex.Message}"
+                return Error (AppError.fromException ex)
         }

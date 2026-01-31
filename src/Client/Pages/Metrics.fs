@@ -13,7 +13,7 @@ module Metrics =
         LessonId: Guid option
         Sessions: SessionDto list
         IsLoading: bool
-        Error: string option
+        Error: AppError option
         SelectedMetric: MetricType
         PendingLocalSessions: int
         LastSyncError: string option
@@ -30,7 +30,7 @@ module Metrics =
         | LoadSessions of Guid
         | SessionsLoaded of SessionDto list
         | ChangeMetricView of MetricType
-        | ApiError of string
+        | ApiError of AppError
         | ClearError
         | ClearLocalData
         | UpdatePendingCount of int
@@ -53,7 +53,7 @@ module Metrics =
     let private loadSessionsCmd lessonId =
         Cmd.OfAsync.either ApiClient.getSessionsByLesson lessonId (function
             | Ok sessions -> SessionsLoaded sessions
-            | Error error -> ApiError error) (fun ex -> ApiError ex.Message)
+            | Error error -> ApiError error) (fun ex -> ApiError (AppError.fromException ex))
 
     let update msg model =
         match msg with
@@ -111,11 +111,13 @@ module Metrics =
             else
                 div [ ClassName "metrics-container" ] [
                     // Error message
-                    if Option.isSome model.Error then
+                    match model.Error with
+                    | Some error ->
                         ErrorAlert.view
-                            (Option.defaultValue "" model.Error)
+                            error
                             (Some (fun () -> dispatch Refresh))
                             (Some (fun () -> dispatch ClearError))
+                    | None -> ()
 
                     if model.PendingLocalSessions > 0 then
                         div [ ClassName "local-sync-status" ] [

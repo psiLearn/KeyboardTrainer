@@ -6,6 +6,7 @@ open Browser.Dom
 open Browser.Types
 open Fable.React
 open Fable.React.Props
+open KeyboardTrainer.Client.Components
 open KeyboardTrainer.Client.Pages
 open KeyboardTrainer.Shared
 
@@ -187,45 +188,47 @@ module App =
             ]
 
     let view model dispatch =
-        div [ ClassName "app-container" ] [
-            // Navigation bar
-            nav [ ClassName "navbar" ] [
-                div [ ClassName "nav-brand" ] [
-                    h1 [ OnClick (fun _ -> dispatch NavigateToStartScreen) ] [ str "Keyboard Trainer" ]
-                ]
-                ul [ ClassName "nav-links" ] [
-                    li [] [
-                        button [
-                            ClassName (if model.CurrentPage = StartScreen then "nav-link active" else "nav-link")
-                            OnClick (fun _ -> dispatch NavigateToStartScreen)
-                        ] [ str "Start" ]
+        ErrorBoundary.view [
+            div [ ClassName "app-container" ] [
+                // Navigation bar
+                nav [ ClassName "navbar" ] [
+                    div [ ClassName "nav-brand" ] [
+                        h1 [ OnClick (fun _ -> dispatch NavigateToStartScreen) ] [ str "Keyboard Trainer" ]
                     ]
-                    li [] [
-                        button [
-                            ClassName (if model.CurrentPage = Metrics then "nav-link active" else "nav-link")
-                            OnClick (fun _ -> dispatch NavigateToMetrics)
-                        ] [ str "Statistics" ]
+                    ul [ ClassName "nav-links" ] [
+                        li [] [
+                            button [
+                                ClassName (if model.CurrentPage = StartScreen then "nav-link active" else "nav-link")
+                                OnClick (fun _ -> dispatch NavigateToStartScreen)
+                            ] [ str "Start" ]
+                        ]
+                        li [] [
+                            button [
+                                ClassName (if model.CurrentPage = Metrics then "nav-link active" else "nav-link")
+                                OnClick (fun _ -> dispatch NavigateToMetrics)
+                            ] [ str "Statistics" ]
+                        ]
                     ]
                 ]
-            ]
 
-            // Main content area
-            main [ ClassName "main-content" ] [
-                match model.CurrentPage with
-                | StartScreen ->
-                    StartScreen.view model.StartScreenModel (StartScreenMsg >> dispatch)
+                // Main content area
+                main [ ClassName "main-content" ] [
+                    match model.CurrentPage with
+                    | StartScreen ->
+                        StartScreen.view model.StartScreenModel (StartScreenMsg >> dispatch)
 
-                | TypingView lesson ->
-                    match model.TypingViewModel with
-                    | Some typingModel ->
-                        TypingView.view typingModel (TypingViewMsg >> dispatch)
-                    | None -> div [] [ str "Loading..." ]
+                    | TypingView lesson ->
+                        match model.TypingViewModel with
+                        | Some typingModel ->
+                            TypingView.view typingModel (TypingViewMsg >> dispatch)
+                        | None -> div [] [ str "Loading..." ]
 
-                | Metrics ->
-                    Metrics.view model.MetricsModel (MetricsMsg >> dispatch)
-            ]
-            // Footer
-            footer [ ClassName "footer" ] [
-                p [] [ str "© 2024 Keyboard Trainer. Master your typing skills!" ]
+                    | Metrics ->
+                        Metrics.view model.MetricsModel (MetricsMsg >> dispatch)
+                ]
+                // Footer
+                footer [ ClassName "footer" ] [
+                    p [] [ str "© 2024 Keyboard Trainer. Master your typing skills!" ]
+                ]
             ]
         ]
