@@ -218,7 +218,13 @@ module App =
                 main [ ClassName "main-content" ] [
                     match model.CurrentPage with
                     | StartScreen ->
-                        StartScreen.view model.StartScreenModel (StartScreenMsg >> dispatch)
+                        let pendingCount = LocalSessions.pending () |> List.length
+                        StartScreen.view
+                            model.StartScreenModel
+                            pendingCount
+                            model.SyncState.LastError
+                            model.SyncState.LastErrorAt
+                            (StartScreenMsg >> dispatch)
 
                     | TypingView lesson ->
                         match model.TypingViewModel with

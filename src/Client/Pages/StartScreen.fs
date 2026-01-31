@@ -63,7 +63,7 @@ module StartScreen =
         | StartLesson ->
             model, Cmd.none
 
-    let view model dispatch =
+    let view model pendingCount lastSyncError lastSyncErrorAt dispatch =
         div [ ClassName "start-screen" ] [
             h1 [ ClassName "title" ] [ str "Keyboard Trainer" ]
             p [ ClassName "subtitle" ] [ str "Improve your typing speed and accuracy" ]
@@ -72,6 +72,22 @@ module StartScreen =
                 LoadingSpinner.view (Some "Loading lessons...")
             else
                 div [ ClassName "container" ] [
+                    if pendingCount > 0 then
+                        div [ ClassName "local-sync-status" ] [
+                            p [] [ str (sprintf "Pending local sessions: %d" pendingCount) ]
+                        ]
+
+                    match lastSyncError with
+                    | Some error ->
+                        let timestamp =
+                            match lastSyncErrorAt with
+                            | Some value -> value.ToString("yyyy-MM-dd HH:mm:ss")
+                            | None -> "unknown time"
+                        div [ ClassName "local-sync-error" ] [
+                            p [] [ str (sprintf "Last sync error (%s): %s" timestamp error) ]
+                        ]
+                    | None -> ()
+
                     // Error message
                     match model.Error with
                     | Some error ->
