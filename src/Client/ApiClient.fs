@@ -25,6 +25,215 @@ module ApiClient =
     [<Emit("fetch($0, $1)")>]
     let private fetch (url: string, props: obj) : JS.Promise<obj> = jsNative
 
+    let private isNullOrUndefined (value: obj) =
+        isNull value || obj.ReferenceEquals(value, JS.undefined)
+
+    let private tryGetProp (names: string list) (value: obj) =
+        if isNullOrUndefined value then None
+        else
+            names
+            |> List.tryPick (fun name ->
+                let prop: obj = value?(name)
+                if isNullOrUndefined prop then None else Some prop)
+
+    let private tryGetString (names: string list) (value: obj) =
+        tryGetProp names value
+        |> Option.map string
+        |> Option.filter (fun text -> not (String.IsNullOrWhiteSpace text))
+
+    let private tryGetGuid (names: string list) (value: obj) =
+        match tryGetString names value with
+        | Some text ->
+            match Guid.TryParse text with
+            | true, parsed -> Some parsed
+            | _ -> None
+        | None -> None
+
+    let private tryGetDate (names: string list) (value: obj) =
+        match tryGetString names value with
+        | Some text ->
+            match DateTime.TryParse text with
+            | true, parsed -> Some parsed
+            | _ -> None
+        | None -> None
+
+    let private tryGetInt (names: string list) (value: obj) =
+        match tryGetProp names value with
+        | Some (:? int as number) -> Some number
+        | Some (:? float as number) -> Some (int number)
+        | Some (:? string as text) ->
+            match Int32.TryParse text with
+            | true, parsed -> Some parsed
+            | _ -> None
+        | _ -> None
+
+    let private tryGetFloat (names: string list) (value: obj) =
+        match tryGetProp names value with
+        | Some (:? float as number) -> Some number
+        | Some (:? int as number) -> Some (float number)
+        | Some (:? string as text) ->
+            match Double.TryParse text with
+            | true, parsed -> Some parsed
+            | _ -> None
+        | _ -> None
+
+    let private tryGetUnionCase (value: obj) =
+        match value with
+        | :? string as text -> Some text
+        | _ -> tryGetString [ "case"; "Case" ] value
+
+    let private parseDifficulty (value: obj) =
+        match tryGetUnionCase value |> Option.map (fun text -> text.ToLowerInvariant()) with
+        | Some "a1" -> Some Difficulty.A1
+        | Some "a2" -> Some Difficulty.A2
+        | Some "b1" -> Some Difficulty.B1
+        | Some "b2" -> Some Difficulty.B2
+        | Some "c1" -> Some Difficulty.C1
+        | _ -> None
+
+    let private parseContentType (value: obj) =
+        match tryGetUnionCase value |> Option.map (fun text -> text.ToLowerInvariant()) with
+        | Some "words" -> Some ContentType.Words
+        | Some "sentences" -> Some ContentType.Sentences
+        | _ -> None
+
+    let private parseLanguage (value: obj) =
+        match tryGetUnionCase value |> Option.map (fun text -> text.ToLowerInvariant()) with
+        | Some "french" -> Some Language.French
+        | _ -> None
+
+    let private parsePerKeyErrors (value: obj) =
+        if isNullOrUndefined value then
+            Map.empty
+        else
+            try
+                let parsedFromArray =
+                    try
+                        let items: obj array = unbox value
+                        items
+                        |> Array.choose (fun item ->
+                            match tryGetString [ "Key"; "key" ] item, tryGetInt [ "Value"; "value" ] item with
+                            | Some key, Some count -> Some (key, count)
+                            | _ ->
+                                try
+                                    let tuple: obj array = unbox item
+                                    if tuple.Length >= 2 then
+                                        let key =
+                                            match tuple[0] with
+                                            | :? string as text -> Some text
+                                            | other -> Some (string other)
+                                        let count =
+                                            match tuple[1] with
+                                            | :? int as number -> Some number
+                                            | :? float as number -> Some (int number)
+                                            | :? string as text ->
+                                                match Int32.TryParse text with
+                                                | true, parsed -> Some parsed
+                                                | _ -> None
+                                            | _ -> None
+                                        match key, count with
+                                        | Some keyText, Some value -> Some (keyText, value)
+                                        | _ -> None
+                                    else
+                                        None
+                                with _ ->
+                                    None)
+                        |> Map.ofArray
+                        |> Some
+                    with _ ->
+                        None
+
+                match parsedFromArray with
+                | Some parsed -> parsed
+                | None ->
+                    let keys: string[] = JS.Object.keys(value) |> unbox
+                    keys
+                    |> Array.choose (fun key ->
+                        let raw: obj = value?(key)
+                        match raw with
+                        | :? int as number -> Some (key, number)
+                        | :? float as number -> Some (key, int number)
+                        | :? string as text ->
+                            match Int32.TryParse text with
+                            | true, parsed -> Some (key, parsed)
+                            | _ -> None
+                        | _ -> None)
+                    |> Map.ofArray
+            with _ ->
+                Map.empty
+
+    let private tryParseLessonDto (value: obj) =
+        match tryGetGuid [ "id"; "Id" ] value,
+              tryGetString [ "title"; "Title" ] value,
+              tryGetProp [ "difficulty"; "Difficulty" ] value |> Option.bind parseDifficulty,
+              tryGetProp [ "contentType"; "ContentType" ] value |> Option.bind parseContentType,
+              tryGetProp [ "language"; "Language" ] value |> Option.bind parseLanguage,
+              tryGetString [ "content"; "Content" ] value,
+              tryGetDate [ "createdAt"; "CreatedAt" ] value,
+              tryGetDate [ "updatedAt"; "UpdatedAt" ] value with
+        | Some id, Some title, Some difficulty, Some contentType, Some language, Some content, Some createdAt, Some updatedAt ->
+            Some {
+                Id = id
+                Title = title
+                Difficulty = difficulty
+                ContentType = contentType
+                Language = language
+                Content = content
+                CreatedAt = createdAt
+                UpdatedAt = updatedAt
+            }
+        | _ -> None
+
+    let private tryParseSessionDto (value: obj) =
+        let perKeyErrors =
+            match tryGetProp [ "perKeyErrors"; "PerKeyErrors" ] value with
+            | Some prop -> parsePerKeyErrors prop
+            | None -> Map.empty
+
+        match tryGetGuid [ "id"; "Id" ] value,
+              tryGetGuid [ "lessonId"; "LessonId" ] value,
+              tryGetDate [ "startedAt"; "StartedAt" ] value,
+              tryGetDate [ "endedAt"; "EndedAt" ] value,
+              tryGetFloat [ "wpm"; "Wpm" ] value,
+              tryGetFloat [ "cpm"; "Cpm" ] value,
+              tryGetFloat [ "accuracy"; "Accuracy" ] value,
+              tryGetInt [ "errorCount"; "ErrorCount" ] value,
+              tryGetDate [ "createdAt"; "CreatedAt" ] value with
+        | Some id, Some lessonId, Some startedAt, Some endedAt, Some wpm, Some cpm, Some accuracy, Some errorCount, Some createdAt ->
+            Some {
+                Id = id
+                LessonId = lessonId
+                StartedAt = startedAt
+                EndedAt = endedAt
+                Wpm = wpm
+                Cpm = cpm
+                Accuracy = accuracy
+                ErrorCount = errorCount
+                PerKeyErrors = perKeyErrors
+                CreatedAt = createdAt
+            }
+        | _ -> None
+
+    let private parseArray (body: string) (parser: obj -> 'T option) (label: string) =
+        try
+            let raw = fromJsonString<obj array> body
+            let parsed = raw |> Array.choose parser |> Array.toList
+            if raw.Length = parsed.Length then
+                Ok parsed
+            else
+                Error (AppError.Server $"Failed to parse {label} response.")
+        with ex ->
+            Error (AppError.fromException ex)
+
+    let private parseSingle (body: string) (parser: obj -> 'T option) (label: string) =
+        try
+            let raw = fromJsonString<obj> body
+            match parser raw with
+            | Some parsed -> Ok parsed
+            | None -> Error (AppError.Server $"Failed to parse {label} response.")
+        with ex ->
+            Error (AppError.fromException ex)
+
     let private request (method: string) (url: string) (body: string option) =
         async {
             let headers = createObj [ "Content-Type" ==> "application/json" ]
@@ -60,8 +269,7 @@ module ApiClient =
                 let! (status, body) = request "GET" url None
                 
                 if status = 200 then
-                    let lessons = fromJsonString<LessonDto list> body
-                    return Ok lessons
+                    return parseArray body tryParseLessonDto "lessons"
                 else
                     return Error (parseErrorResponse status body)
             with
@@ -77,8 +285,7 @@ module ApiClient =
                 let! (status, body) = request "GET" url None
                 
                 if status = 200 then
-                    let lesson = fromJsonString<LessonDto> body
-                    return Ok lesson
+                    return parseSingle body tryParseLessonDto "lesson"
                 else
                     return Error (parseErrorResponse status body)
             with
@@ -95,8 +302,7 @@ module ApiClient =
                 let! (status, responseBody) = request "POST" url (Some body)
                 
                 if status = 201 then
-                    let lesson = fromJsonString<LessonDto> responseBody
-                    return Ok lesson
+                    return parseSingle responseBody tryParseLessonDto "lesson"
                 else
                     return Error (parseErrorResponse status responseBody)
             with
@@ -113,8 +319,7 @@ module ApiClient =
                 let! (status, responseBody) = request "PUT" url (Some body)
                 
                 if status = 200 then
-                    let lesson = fromJsonString<LessonDto> responseBody
-                    return Ok lesson
+                    return parseSingle responseBody tryParseLessonDto "lesson"
                 else
                     return Error (parseErrorResponse status responseBody)
             with
@@ -143,12 +348,26 @@ module ApiClient =
         async {
             try
                 let url = $"{baseUrl}/api/sessions"
-                let body = toJsonString dto
+                let perKeyErrors =
+                    dto.PerKeyErrors
+                    |> Map.toSeq
+                    |> Seq.map (fun (key, value) -> string key ==> value)
+                    |> createObj
+                let payload =
+                    createObj [
+                        "clientSessionId" ==> dto.ClientSessionId.ToString()
+                        "lessonId" ==> dto.LessonId.ToString()
+                        "wpm" ==> dto.Wpm
+                        "cpm" ==> dto.Cpm
+                        "accuracy" ==> dto.Accuracy
+                        "errorCount" ==> dto.ErrorCount
+                        "perKeyErrors" ==> perKeyErrors
+                    ]
+                let body = toJsonString payload
                 let! (status, responseBody) = request "POST" url (Some body)
                 
                 if status = 201 then
-                    let session = fromJsonString<SessionDto> responseBody
-                    return Ok session
+                    return parseSingle responseBody tryParseSessionDto "session"
                 else
                     return Error (parseErrorResponse status responseBody)
             with
@@ -164,8 +383,7 @@ module ApiClient =
                 let! (status, body) = request "GET" url None
                 
                 if status = 200 then
-                    let sessions = fromJsonString<SessionDto list> body
-                    return Ok sessions
+                    return parseArray body tryParseSessionDto "sessions"
                 else
                     return Error (parseErrorResponse status body)
             with
@@ -181,8 +399,7 @@ module ApiClient =
                 let! (status, body) = request "GET" url None
                 
                 if status = 200 then
-                    let session = fromJsonString<SessionDto> body
-                    return Ok session
+                    return parseSingle body tryParseSessionDto "session"
                 else
                     return Error (parseErrorResponse status body)
             with

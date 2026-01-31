@@ -39,6 +39,8 @@ packages/
 # Test Results
 TestResults/
 *.trx
+playwright-report/
+test-results/
 
 # Database files
 *.db

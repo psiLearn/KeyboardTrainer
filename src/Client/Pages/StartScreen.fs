@@ -64,6 +64,9 @@ module StartScreen =
             model, Cmd.none
 
     let view model pendingCount lastSyncError lastSyncErrorAt dispatch =
+        let formatTimestamp (value: DateTime) =
+            sprintf "%04d-%02d-%02d %02d:%02d:%02d" value.Year value.Month value.Day value.Hour value.Minute value.Second
+
         div [ ClassName "start-screen" ] [
             h1 [ ClassName "title" ] [ str "Keyboard Trainer" ]
             p [ ClassName "subtitle" ] [ str "Improve your typing speed and accuracy" ]
@@ -81,7 +84,7 @@ module StartScreen =
                     | Some error ->
                         let timestamp =
                             match lastSyncErrorAt with
-                            | Some value -> value.ToString("yyyy-MM-dd HH:mm:ss")
+                            | Some value -> formatTimestamp value
                             | None -> "unknown time"
                         div [ ClassName "local-sync-error" ] [
                             p [] [ str (sprintf "Last sync error (%s): %s" timestamp error) ]

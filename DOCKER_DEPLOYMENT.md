@@ -44,6 +44,29 @@ docker-compose --env-file .env.docker.dev up -d
 - **API Documentation**: http://localhost:5000/health
 - **Database**: localhost:5434
 
+## E2E Testing (Playwright)
+
+Prerequisites:
+- Docker Compose stack running
+- Client assets built (`npm run build:client`)
+
+```bash
+npm install
+npx playwright install
+npm run test:e2e
+```
+
+Optional base URL override (default: http://localhost):
+```bash
+E2E_BASE_URL=http://localhost npm run test:e2e
+```
+
+PowerShell:
+```powershell
+$env:E2E_BASE_URL="http://localhost"
+npm run test:e2e
+```
+
 ### View Logs
 
 ```bash

@@ -44,7 +44,7 @@ module LocalSessions =
 
     type LocalStoragePayload = {
         Version: int
-        Sessions: LocalSessionStored list
+        Sessions: LocalSessionStored array
     }
 
     let private toStored (session: LocalSession) : LocalSessionStored =
@@ -98,6 +98,41 @@ module LocalSessions =
     let private fromJsonString<'T> (json: string) : 'T =
         JS.JSON.parse json |> unbox<'T>
 
+    let private tryGetProp (names: string list) (value: obj) =
+        if isNull value then None
+        else
+            names
+            |> List.tryPick (fun name ->
+                let prop: obj = value?(name)
+                if isNull prop then None else Some prop)
+
+    let private tryGetIntProp (names: string list) (value: obj) =
+        match tryGetProp names value with
+        | Some (:? int as number) -> Some number
+        | Some (:? float as number) -> Some (int number)
+        | Some (:? string as text) ->
+            match Int32.TryParse text with
+            | true, parsed -> Some parsed
+            | _ -> None
+        | _ -> None
+
+    let private tryParseStoredArray (value: obj) =
+        try
+            Some (unbox<LocalSessionStored array> value)
+        with _ ->
+            try
+                let list = unbox<LocalSessionStored list> value
+                Some (List.toArray list)
+            with _ ->
+                try
+                    let raw: obj array = unbox value
+                    raw
+                    |> Array.choose (fun item ->
+                        try Some (unbox<LocalSessionStored> item) with _ -> None)
+                    |> Some
+                with _ ->
+                    None
+
     let private tryGetItem (key: string) =
         try
             let value: string = localStorage?getItem(key)
@@ -110,17 +145,19 @@ module LocalSessions =
     let load () : LocalSession list =
         let tryParsePayload (json: string) =
             try
-                let payload = fromJsonString<LocalStoragePayload> json
-                if isNull (box payload) || payload.Version <> currentVersion then
-                    None
-                else
-                    Some payload.Sessions
+                let payloadObj = fromJsonString<obj> json
+                match tryGetIntProp [ "Version"; "version" ] payloadObj with
+                | Some version when version = currentVersion ->
+                    match tryGetProp [ "Sessions"; "sessions" ] payloadObj with
+                    | Some sessionsValue -> tryParseStoredArray sessionsValue
+                    | None -> None
+                | _ -> None
             with _ -> None
 
         let tryParseLegacy (json: string) =
             try
-                let sessions = fromJsonString<LocalSessionStored list> json
-                if isNull (box sessions) then None else Some sessions
+                let sessionsObj = fromJsonString<obj> json
+                tryParseStoredArray sessionsObj
             with _ -> None
 
         match tryGetItem storageKey with
@@ -131,9 +168,9 @@ module LocalSessions =
                 | None ->
                     match tryParseLegacy json with
                     | Some stored -> stored
-                    | None -> []
+                    | None -> [||]
 
-            sessions |> List.choose fromStored
+            sessions |> Array.toList |> List.choose fromStored
         | None -> []
 
     let private normalize (sessions: LocalSession list) =
@@ -155,7 +192,7 @@ module LocalSessions =
 
     let save (sessions: LocalSession list) =
         let normalized = normalize sessions
-        let payload = { Version = currentVersion; Sessions = normalized |> List.map toStored }
+        let payload = { Version = currentVersion; Sessions = normalized |> List.map toStored |> List.toArray }
         let json = toJsonString payload
         setItem storageKey json
 
