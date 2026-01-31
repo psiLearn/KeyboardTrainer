@@ -127,7 +127,7 @@ module LessonRepository =
             
             let query = """
                 INSERT INTO lessons (id, title, difficulty, content_type, language, content, created_at, updated_at)
-                VALUES (@id, @title, @difficulty, @content_type, @language, @content, @created_at, @updated_at)
+                VALUES (@id, @title, @difficulty::difficulty, @content_type::content_type, @language::language, @content, @created_at, @updated_at)
                 RETURNING
                     id AS Id,
                     title AS Title,
@@ -165,8 +165,8 @@ module LessonRepository =
             
             let query = """
                 UPDATE lessons 
-                SET title = @title, difficulty = @difficulty, content_type = @content_type, 
-                    language = @language, content = @content, updated_at = @updated_at
+                SET title = @title, difficulty = @difficulty::difficulty, content_type = @content_type::content_type, 
+                    language = @language::language, content = @content, updated_at = @updated_at
                 WHERE id = @id
                 RETURNING
                     id AS Id,
