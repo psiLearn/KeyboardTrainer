@@ -106,3 +106,35 @@ test('next-key highlight includes Enter on newline', async ({ page }) => {
   await page.keyboard.type('a');
   await expect(nextKey).toHaveText('Enter');
 });
+
+test('keyboard shows correct and error key states', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (!window.sessionStorage.getItem('e2e-storage-cleared')) {
+      window.localStorage.clear();
+      window.sessionStorage.setItem('e2e-storage-cleared', '1');
+    }
+  });
+
+  const title = `E2E Keyboard States ${Date.now()}`;
+  await createLesson(page, {
+    title,
+    difficulty: { case: 'A1' },
+    contentType: { case: 'Words' },
+    language: { case: 'French' },
+    textContent: 'abc'
+  });
+
+  await page.goto('/');
+  await page.locator('.start-screen').waitFor();
+  await page.locator('.lesson-card', { hasText: title }).click();
+  await page.locator('.typing-view').waitFor();
+
+  await page.getByRole('button', { name: /^Start Typing$/ }).click();
+  await page.locator('.typing-view').click();
+
+  await page.keyboard.type('x');
+  await expect(page.locator('.keyboard .key-error')).toHaveText('X');
+
+  await page.keyboard.type('b');
+  await expect(page.locator('.keyboard .key-correct')).toHaveText('B');
+});

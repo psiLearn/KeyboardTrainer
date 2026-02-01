@@ -29,6 +29,8 @@ module TypingView =
         SubmitError: AppError option
         PendingLocalSessionId: Guid option
         ElapsedSeconds: int
+        LastKey: string option
+        LastKeyIsError: bool option
     }
 
     type Msg =
@@ -70,6 +72,8 @@ module TypingView =
             SubmitError = None
             PendingLocalSessionId = None
             ElapsedSeconds = 0
+            LastKey = None
+            LastKeyIsError = None
         }, Cmd.none
 
     let private tickCmd =
@@ -96,6 +100,8 @@ module TypingView =
                     CurrentCharIndex = 0
                     Errors = Map.empty
                     ElapsedSeconds = 0
+                    LastKey = None
+                    LastKeyIsError = None
                 }, tickCmd
 
         | CharacterTyped char ->
@@ -112,6 +118,14 @@ module TypingView =
                 
                 let newInput = model.UserInput + string char
                 let newIndex = model.CurrentCharIndex + 1
+                let lastKey =
+                    match KeyboardView.charToKey char with
+                    | Some key -> Some key
+                    | None -> None
+                let lastKeyIsError =
+                    match lastKey with
+                    | Some _ -> Some (expectedChar <> char)
+                    | None -> None
                 
                 if newIndex >= model.Lesson.Content.Length then
                     let elapsed = model.ElapsedSeconds
@@ -126,12 +140,16 @@ module TypingView =
                         TypingState = Completed
                         EndTime = Some endTime
                         ElapsedSeconds = elapsed
+                        LastKey = lastKey
+                        LastKeyIsError = lastKeyIsError
                     }, Cmd.none
                 else
                     { model with 
                         UserInput = newInput
                         CurrentCharIndex = newIndex
                         Errors = newErrors
+                        LastKey = lastKey
+                        LastKeyIsError = lastKeyIsError
                     }, Cmd.none
             else
                 model, Cmd.none
@@ -150,6 +168,8 @@ module TypingView =
                     UserInput = newInput
                     CurrentCharIndex = newIndex
                     Errors = newErrors
+                    LastKey = None
+                    LastKeyIsError = None
                 }, Cmd.none
             else
                 model, Cmd.none
@@ -359,20 +379,29 @@ module TypingView =
                         ]
                     ]
 
-                    let nextKey =
-                        if settings.HighlightNextKey && model.TypingState = InProgress then
-                            if model.CurrentCharIndex < model.Lesson.Content.Length then
-                                let nextChar = model.Lesson.Content.[model.CurrentCharIndex]
-                                KeyboardView.charToKey nextChar
-                            else
-                                None
+                    let keyboardHighlights =
+                        if settings.ShowKeyboard then
+                            let nextKey =
+                                if settings.HighlightNextKey && model.TypingState = InProgress then
+                                    if model.CurrentCharIndex < model.Lesson.Content.Length then
+                                        let nextChar = model.Lesson.Content.[model.CurrentCharIndex]
+                                        KeyboardView.charToKey nextChar
+                                    else
+                                        None
+                                else
+                                    None
+                            let highlights: KeyboardView.KeyHighlights = {
+                                NextKey = nextKey
+                                LastKey = model.LastKey
+                                LastKeyIsError = model.LastKeyIsError
+                            }
+                            Some highlights
                         else
                             None
 
-                    if settings.ShowKeyboard then
-                        KeyboardView.view nextKey
-                    else
-                        ()
+                    match keyboardHighlights with
+                    | Some highlights -> KeyboardView.view highlights
+                    | None -> ()
 
                     div [ ClassName "typing-stats" ] [
                         span [ ClassName "stat" ] [

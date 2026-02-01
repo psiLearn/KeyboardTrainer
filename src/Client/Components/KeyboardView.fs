@@ -5,6 +5,12 @@ open Fable.React
 open Fable.React.Props
 
 module KeyboardView =
+    type KeyHighlights = {
+        NextKey: string option
+        LastKey: string option
+        LastKeyIsError: bool option
+    }
+
     let private rows =
         [
             [ "`"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "0"; "-"; "=" ]
@@ -19,6 +25,12 @@ module KeyboardView =
         | ' ' -> Some "Space"
         | '\n' -> Some "Enter"
         | '\t' -> None
+        | 'à' | 'â' | 'ä' | 'À' | 'Â' | 'Ä' -> Some "A"
+        | 'ç' | 'Ç' -> Some "C"
+        | 'é' | 'è' | 'ê' | 'ë' | 'É' | 'È' | 'Ê' | 'Ë' -> Some "E"
+        | 'î' | 'ï' | 'Î' | 'Ï' -> Some "I"
+        | 'ô' | 'ö' | 'Ô' | 'Ö' -> Some "O"
+        | 'ù' | 'û' | 'ü' | 'Ù' | 'Û' | 'Ü' -> Some "U"
         | other when Char.IsLetter other -> Some (string (Char.ToUpperInvariant other))
         | other when Char.IsDigit other -> Some (string other)
         | '`' | '~' -> Some "`"
@@ -44,10 +56,17 @@ module KeyboardView =
         | ')' -> Some "0"
         | _ -> None
 
-    let view (nextKey: string option) =
+    let view (highlights: KeyHighlights) =
         let isNext label =
-            nextKey
+            highlights.NextKey
             |> Option.map (fun key -> String.Equals(key, label, StringComparison.OrdinalIgnoreCase))
+            |> Option.defaultValue false
+        let isLast label =
+            highlights.LastKey
+            |> Option.map (fun key -> String.Equals(key, label, StringComparison.OrdinalIgnoreCase))
+            |> Option.defaultValue false
+        let lastIsError =
+            highlights.LastKeyIsError
             |> Option.defaultValue false
 
         div [ ClassName "keyboard" ] [
@@ -57,14 +76,17 @@ module KeyboardView =
                         let isSpace = key = "Space"
                         let isEnter = key = "Enter"
                         let next = isNext key
-                        let className =
-                            match isSpace, isEnter, next with
-                            | true, _, true -> "key key-space key-next"
-                            | true, _, false -> "key key-space"
-                            | _, true, true -> "key key-enter key-next"
-                            | _, true, false -> "key key-enter"
-                            | _, _, true -> "key key-next"
-                            | _ -> "key"
+                        let last = isLast key
+                        let classes = ResizeArray<string>()
+                        classes.Add("key")
+                        if isSpace then classes.Add("key-space")
+                        if isEnter then classes.Add("key-enter")
+                        if next then classes.Add("key-next")
+                        if last && lastIsError then
+                            classes.Add("key-error")
+                        elif last then
+                            classes.Add("key-correct")
+                        let className = String.concat " " classes
                         div [ ClassName className ] [ str key ]
                 ]
         ]

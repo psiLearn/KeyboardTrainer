@@ -1,7 +1,7 @@
 # Keyboard Trainer
 
 Keyboard Trainer is a small full-stack typing practice app built with F#, Saturn/Giraffe, and a Fable/Elmish client.
-It includes training aids (letter colors + on-screen keyboard with next-key highlight), Docker Compose for local dev, and a Playwright E2E suite.
+It includes training aids (letter colors + on-screen keyboard with next-key and last-key highlights), Docker Compose for local dev, and a Playwright E2E suite.
 
 ## Quick Start (Docker)
 

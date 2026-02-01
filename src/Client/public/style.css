@@ -518,6 +518,25 @@ body::before {
   box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
 }
 
+.key-next.key-correct,
+.key-next.key-error {
+  background: rgba(20, 184, 166, 0.25);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.35);
+}
+
+.key-correct {
+  background: rgba(20, 184, 166, 0.28);
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.25);
+}
+
+.key-error {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+}
+
 .confetti {
   position: absolute;
   inset: 0;

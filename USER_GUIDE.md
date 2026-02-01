@@ -34,7 +34,7 @@ These settings are saved in your browser and persist across reloads.
 - Characters are highlighted as you type.
 - Errors are shown in red.
 - Metrics are calculated in real-time.
-- If enabled, the on-screen keyboard highlights the next key.
+- If enabled, the on-screen keyboard highlights the next key and the last key you pressed (correct/error).
 
 When you finish the text, click **Submit Results** to save your session.
 
