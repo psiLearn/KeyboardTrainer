@@ -1,0 +1,107 @@
+[
+  {
+    "title": "L01: Home Row - f j",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "f j f j ff jj fj jf jj ff f j fj jf"
+  },
+  {
+    "title": "L02: Home Row - d k",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "d k d k dd kk dk kd kk dd d k dk kd"
+  },
+  {
+    "title": "L03: Home Row - a s l",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "a s l a s l aa ss ll as sa al la sl ls"
+  },
+  {
+    "title": "L04: Common Letters 1 (e t a o i n)",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "e t a o i n ee tt aa oo ii nn et ta an on in"
+  },
+  {
+    "title": "L05: Common Letters 2 (s h r d l u)",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "s h r d l u ss hh rr dd ll uu sh hr rd dl lu"
+  },
+  {
+    "title": "L06: Home Row Mix",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "a s d f j k l asdf jkl asdj flk sdl ajk"
+  },
+  {
+    "title": "L07: Add c m",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "c m c m cc mm cm mc ac am sc sm dc dm"
+  },
+  {
+    "title": "L08: Add g p",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "g p g p gg pp gp pg ag ap sg sp dg dp"
+  },
+  {
+    "title": "L09: Add y b",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "y b y b yy bb yb by ay ab sy sb dy db"
+  },
+  {
+    "title": "L10: Add v w",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "v w v w vv ww vw wv av aw sv sw dv dw"
+  },
+  {
+    "title": "L11: Rare Letters (x q z)",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "x q z xx qq zz xq qx zx xz aq az"
+  },
+  {
+    "title": "L12: Common Order Drill (etaoin shrdlu)",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "etaoin shrdlu etaoin shrdlu etaoin shrdlu"
+  },
+  {
+    "title": "L13: Common Bigrams 1 (FR)",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "es de le re en on an ai es de le re en on an ai"
+  },
+  {
+    "title": "L14: Common Bigrams 2 (FR)",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "ou se te me ne ce la re qu ui ou se te me ne ce la re qu ui"
+  },
+  {
+    "title": "L15: All Letters Mix (slow)",
+    "difficulty": { "case": "A1" },
+    "contentType": { "case": "Words" },
+    "language": { "case": "French" },
+    "textContent": "a s d f g h j k l q w e r t y u i o p z x c v b n m"
+  }
+]
