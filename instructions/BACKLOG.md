@@ -746,11 +746,33 @@ This backlog is organized into **5 epics**, each representing a major capability
 - Epic 5: 5.8 (deployment guide)
 - CI/CD automation
 - Monitoring and logging setup
+- UX Training Aids (Settings + Keyboard Guidance)
 
 **Deliverables:**
 - Deployment guide
 - GitHub Actions workflow
 - Production checklist
+- Training aids settings + keyboard guidance (Level 1)
+- Training aids enhancements (Levels 2–3)
+
+**UX Training Aids (Phase 3 backlog additions)**
+
+**Level 1 (MVP / Core Support)**
+- Settings: toggles for letter coloring, on-screen keyboard, next-key highlight
+- Letter coloring: current / correct / incorrect states
+- Keyboard overlay: static QWERTY layout
+- Next-key highlight: space + punctuation support
+- Persistence: save settings to local storage
+
+**Level 2 (Enhanced Support)**
+- Keyboard key coloring by state (next/correct/error)
+- Color-blind friendly palette option
+- Hands overlay (static zones)
+
+**Level 3 (Advanced / Coaching)**
+- Dynamic hands overlay (left/right hand guidance)
+- Adaptive highlighting for repeated errors
+- Settings profiles (Beginner / Practice / Speed)
 
 ---
 
