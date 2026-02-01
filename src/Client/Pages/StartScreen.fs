@@ -11,7 +11,6 @@ open KeyboardTrainer.Client
 module StartScreen =
     type Model = {
         Lessons: LessonDto list
-        SelectedLesson: LessonDto option
         IsLoading: bool
         Error: AppError option
         FilterDifficulty: Difficulty option
@@ -28,7 +27,6 @@ module StartScreen =
     let init () =
         {
             Lessons = []
-            SelectedLesson = None
             IsLoading = true
             Error = None
             FilterDifficulty = None
@@ -57,9 +55,9 @@ module StartScreen =
             { model with Error = None }, Cmd.none
 
         | StartLesson lesson ->
-            { model with SelectedLesson = Some lesson }, Cmd.none
+            model, Cmd.none
 
-    let view model pendingCount lastSyncError lastSyncErrorAt dispatch =
+    let view model pendingCount lastSyncError lastSyncErrorAt settings onSettingsChange dispatch =
         let formatTimestamp (value: DateTime) =
             sprintf "%04d-%02d-%02d %02d:%02d:%02d" value.Year value.Month value.Day value.Hour value.Minute value.Second
         let difficultyOrder difficulty =
@@ -115,6 +113,42 @@ module StartScreen =
                             (Some (fun () -> dispatch LoadLessons))
                             (Some (fun () -> dispatch ClearError))
                     | None -> ()
+
+                    // Settings (training aids)
+                    div [ ClassName "settings-panel" ] [
+                        h3 [] [ str "Training Aids" ]
+                        label [ ClassName "settings-toggle" ] [
+                            input [
+                                Type "checkbox"
+                                Checked settings.EnableLetterColors
+                                OnChange (fun _ ->
+                                    onSettingsChange { settings with EnableLetterColors = not settings.EnableLetterColors })
+                            ]
+                            span [] [ str "Color letters" ]
+                        ]
+                        label [ ClassName "settings-toggle" ] [
+                            input [
+                                Type "checkbox"
+                                Checked settings.ShowKeyboard
+                                OnChange (fun _ ->
+                                    let nextShowKeyboard = not settings.ShowKeyboard
+                                    let nextHighlight =
+                                        if nextShowKeyboard then settings.HighlightNextKey else false
+                                    onSettingsChange { settings with ShowKeyboard = nextShowKeyboard; HighlightNextKey = nextHighlight })
+                            ]
+                            span [] [ str "Show keyboard" ]
+                        ]
+                        label [ ClassName "settings-toggle" ] [
+                            input [
+                                Type "checkbox"
+                                Checked settings.HighlightNextKey
+                                Disabled (not settings.ShowKeyboard)
+                                OnChange (fun _ ->
+                                    onSettingsChange { settings with HighlightNextKey = not settings.HighlightNextKey })
+                            ]
+                            span [] [ str "Highlight next key" ]
+                        ]
+                    ]
 
                     // Filter controls
                     div [ ClassName "filter-section" ] [
@@ -175,9 +209,8 @@ module StartScreen =
                             else
                                 div [ ClassName "lessons-grid" ] [
                                     for lesson in filteredLessons do
-                                        let isSelected = model.SelectedLesson |> Option.map (fun l -> l.Id = lesson.Id) |> Option.defaultValue false
                                         div [
-                                            ClassName (if isSelected then "lesson-card lesson-card-selected" else "lesson-card")
+                                            ClassName "lesson-card"
                                             OnClick (fun _ -> dispatch (StartLesson lesson))
                                         ] [
                                             h4 [ ClassName "lesson-title" ] [ str lesson.Title ]
@@ -189,39 +222,6 @@ module StartScreen =
                                             ]
                                         ]
                                 ]
-
-                        // Selected lesson details
-                        match model.SelectedLesson with
-                        | Some lesson ->
-                            div [ ClassName "lesson-details" ] [
-                                h3 [] [ str lesson.Title ]
-                                p [ ClassName "detail-row" ] [
-                                    strong [] [ str "Difficulty: " ]
-                                    str (sprintf "%A" lesson.Difficulty)
-                                ]
-                                p [ ClassName "detail-row" ] [
-                                    strong [] [ str "Type: " ]
-                                    str (sprintf "%A" lesson.ContentType)
-                                ]
-                                p [ ClassName "detail-row" ] [
-                                    strong [] [ str "Language: " ]
-                                    str (sprintf "%A" lesson.Language)
-                                ]
-                                p [ ClassName "detail-row" ] [
-                                    strong [] [ str "Content: " ]
-                                    str lesson.Content
-                                ]
-                                p [ ClassName "detail-row" ] [
-                                    strong [] [ str "Created: " ]
-                                    str (lesson.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))
-                                ]
-                                
-                                button [
-                                    ClassName "btn btn-primary btn-large"
-                                    OnClick (fun _ -> dispatch (StartLesson lesson))
-                                ] [ str "Start Typing" ]
-                            ]
-                        | None -> ()
                     ]
                 ]
         ]

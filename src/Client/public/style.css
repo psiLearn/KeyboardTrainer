@@ -262,11 +262,6 @@ body::before {
   box-shadow: 0 20px 30px rgba(15, 23, 42, 0.12);
 }
 
-.lesson-card-selected {
-  border-color: var(--accent-strong);
-  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
-}
-
 .lesson-title {
   margin: 0 0 8px;
 }
@@ -373,6 +368,19 @@ body::before {
   overflow-y: auto;
 }
 
+.no-letter-colors .char-next,
+.no-letter-colors .char-correct,
+.no-letter-colors .char-error,
+.no-letter-colors .char-current {
+  color: inherit;
+  background: transparent;
+  animation: none;
+}
+
+.no-letter-colors .char-current::after {
+  display: none;
+}
+
 .char {
   display: inline-block;
   position: relative;
@@ -436,6 +444,78 @@ body::before {
 
 .completion-section h3 {
   margin-top: 0;
+}
+
+.settings-panel {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 10px;
+}
+
+.settings-panel h3 {
+  margin: 0;
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.settings-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.keyboard {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.key {
+  min-width: 34px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  font-family: "IBM Plex Mono", "Courier New", monospace;
+  font-size: 0.85rem;
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.05);
+}
+
+.key-space {
+  min-width: 200px;
+}
+
+.key-enter {
+  min-width: 110px;
+}
+
+.key-next {
+  background: rgba(20, 184, 166, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
 }
 
 .confetti {
@@ -732,6 +812,20 @@ body::before {
 
   .sessions-table table {
     font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .keyboard-row {
+    flex-wrap: wrap;
+  }
+
+  .key-space {
+    min-width: 160px;
+  }
+
+  .key-enter {
+    min-width: 90px;
   }
 }
 

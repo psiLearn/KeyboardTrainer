@@ -22,6 +22,7 @@ module App =
         TypingViewModel: TypingView.Model option
         MetricsModel: Metrics.Model
         SyncState: SessionSync.State
+        Settings: UserSettings
     }
 
     type Msg =
@@ -34,6 +35,7 @@ module App =
         | SyncPendingSessions
         | PendingSessionSynced of System.Guid
         | PendingSessionSyncFailed of System.Guid * string
+        | UpdateSettings of UserSettings
 
     let private delayCmd (delayMs: int) (msg: Msg) =
         Cmd.OfAsync.perform (fun () -> async {
@@ -55,6 +57,7 @@ module App =
     let init () =
         let startScreenModel, startScreenCmd = StartScreen.init()
         let metricsModel, metricsCmd = Metrics.init()
+        let settings = UserSettings.load()
         
         {
             CurrentPage = StartScreen
@@ -62,6 +65,7 @@ module App =
             TypingViewModel = None
             MetricsModel = metricsModel
             SyncState = SessionSync.init
+            Settings = settings
         },
         Cmd.batch [
             Cmd.map StartScreenMsg startScreenCmd
@@ -193,6 +197,10 @@ module App =
                 delayCmd delayMs SyncPendingSessions
             ]
 
+        | UpdateSettings settings ->
+            UserSettings.save settings
+            { model with Settings = settings }, Cmd.none
+
     let view model dispatch =
         ErrorBoundary.view [
             div [ ClassName "app-container" ] [
@@ -227,12 +235,14 @@ module App =
                             pendingCount
                             model.SyncState.LastError
                             model.SyncState.LastErrorAt
+                            model.Settings
+                            (UpdateSettings >> dispatch)
                             (StartScreenMsg >> dispatch)
 
                     | TypingView lesson ->
                         match model.TypingViewModel with
                         | Some typingModel ->
-                            TypingView.view typingModel (TypingViewMsg >> dispatch)
+                            TypingView.view model.Settings typingModel (TypingViewMsg >> dispatch)
                         | None -> div [] [ str "Loading..." ]
 
                     | Metrics ->

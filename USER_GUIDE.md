@@ -9,7 +9,18 @@ You can track your progress and view metrics over time.
 
 1. Open the app in your browser.
 2. Pick a lesson from the list on the Start page.
-3. Click **Start Typing** to enter the typing view.
+3. Selecting a lesson opens the typing view automatically.
+4. Click **Start Typing** (or press `Enter`/`Space`) to begin.
+
+## Training Aids
+
+On the Start page you can enable optional training aids:
+
+- **Color letters**: keeps correct/incorrect highlights.
+- **Show keyboard**: displays an on-screen keyboard while typing.
+- **Highlight next key**: highlights the next required key.
+
+These settings are saved in your browser and persist across reloads.
 
 ### Keyboard Shortcuts
 
@@ -23,6 +34,7 @@ You can track your progress and view metrics over time.
 - Characters are highlighted as you type.
 - Errors are shown in red.
 - Metrics are calculated in real-time.
+- If enabled, the on-screen keyboard highlights the next key.
 
 When you finish the text, click **Submit Results** to save your session.
 
@@ -49,4 +61,3 @@ You can clear local data from the Statistics page if needed.
 - If lessons do not load, use the **Retry** button.
 - If you see an error banner, verify the server is running and reachable.
 - If the UI looks empty after a deploy, do a hard refresh in the browser.
-

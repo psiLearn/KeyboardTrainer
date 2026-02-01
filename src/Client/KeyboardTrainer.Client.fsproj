@@ -33,10 +33,12 @@
   <ItemGroup>
     <Compile Include="../Shared/Domain.fs" />
     <Compile Include="Errors.fs" />
+    <Compile Include="UserSettings.fs" />
     <Compile Include="LocalSessions.fs" />
     <Compile Include="Components/LoadingSpinner.fs" />
     <Compile Include="Components/ErrorAlert.fs" />
     <Compile Include="Components/ErrorBoundary.fs" />
+    <Compile Include="Components/KeyboardView.fs" />
     <Compile Include="ApiClient.fs" />
     <Compile Include="SessionSync.fs" />
     <Compile Include="Pages/StartScreen.fs" />

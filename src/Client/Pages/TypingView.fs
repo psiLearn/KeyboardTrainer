@@ -222,7 +222,7 @@ module TypingView =
         | CancelTyping ->
             init model.Lesson
 
-    let view model dispatch =
+    let view (settings: UserSettings) model dispatch =
         let tryShortcut key =
             match model.TypingState, key with
             | NotStarted, "Enter"
@@ -336,7 +336,11 @@ module TypingView =
                     ]
 
                     div [ ClassName "typing-area" ] [
-                        div [ ClassName "lesson-text-display" ] [
+                        let lessonTextClass =
+                            if settings.EnableLetterColors then "lesson-text-display"
+                            else "lesson-text-display no-letter-colors"
+
+                        div [ ClassName lessonTextClass ] [
                             // Display lesson text with character-by-character highlighting
                             for i in 0 .. model.Lesson.Content.Length - 1 do
                                 let char = model.Lesson.Content.[i]
@@ -354,6 +358,21 @@ module TypingView =
                                 span [ ClassName className ] [ str (string char) ]
                         ]
                     ]
+
+                    let nextKey =
+                        if settings.HighlightNextKey && model.TypingState = InProgress then
+                            if model.CurrentCharIndex < model.Lesson.Content.Length then
+                                let nextChar = model.Lesson.Content.[model.CurrentCharIndex]
+                                KeyboardView.charToKey nextChar
+                            else
+                                None
+                        else
+                            None
+
+                    if settings.ShowKeyboard then
+                        KeyboardView.view nextKey
+                    else
+                        ()
 
                     div [ ClassName "typing-stats" ] [
                         span [ ClassName "stat" ] [
