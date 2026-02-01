@@ -147,7 +147,13 @@ module App =
             Cmd.ofMsg (StartScreenMsg StartScreen.Msg.LoadLessons)
 
         | NavigateToMetrics ->
-            { model with CurrentPage = Metrics },
+            let pendingCount = LocalSessions.pending () |> List.length
+            let metricsModel =
+                { model.MetricsModel with
+                    PendingLocalSessions = pendingCount
+                    LastSyncError = model.SyncState.LastError
+                    LastSyncErrorAt = model.SyncState.LastErrorAt }
+            { model with CurrentPage = Metrics; MetricsModel = metricsModel },
             Cmd.none
 
         | NavigateToTypingView lesson ->

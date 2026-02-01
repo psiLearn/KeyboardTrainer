@@ -1,0 +1,436 @@
+openapi: 3.0.3
+info:
+  title: Keyboard Trainer API
+  version: 1.0.0
+  description: API for lessons and typing sessions.
+servers:
+  - url: http://localhost:5000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+  /api/lessons:
+    get:
+      summary: List lessons
+      responses:
+        "200":
+          description: List of lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LessonDto"
+    post:
+      summary: Create lesson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonCreateDto"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonDto"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/lessons/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get lesson by ID
+      responses:
+        "200":
+          description: Lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonDto"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    put:
+      summary: Update lesson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonCreateDto"
+      responses:
+        "200":
+          description: Updated lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonDto"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      summary: Delete lesson
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/sessions:
+    post:
+      summary: Create session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionCreateDto"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionDto"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/lessons/{lessonId}/sessions:
+    parameters:
+      - name: lessonId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: List sessions by lesson
+      responses:
+        "200":
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionDto"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/sessions/last:
+    get:
+      summary: Get most recent session
+      responses:
+        "200":
+          description: Most recent session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionDto"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  schemas:
+    Difficulty:
+      oneOf:
+        - type: string
+          enum: [A1, A2, B1, B2, C1]
+        - type: object
+          required: [case]
+          properties:
+            case:
+              type: string
+              enum: [A1, A2, B1, B2, C1]
+    ContentType:
+      oneOf:
+        - type: string
+          enum: [Words, Sentences]
+        - type: object
+          required: [case]
+          properties:
+            case:
+              type: string
+              enum: [Words, Sentences]
+    Language:
+      oneOf:
+        - type: string
+          enum: [French]
+        - type: object
+          required: [case]
+          properties:
+            case:
+              type: string
+              enum: [French]
+    FSharpOptionString:
+      description: F# option encoding (Some/None) for strings.
+      oneOf:
+        - type: object
+          required: [case]
+          properties:
+            case:
+              type: string
+              enum: [None]
+        - type: object
+          required: [case, fields]
+          properties:
+            case:
+              type: string
+              enum: [Some]
+            fields:
+              type: array
+              minItems: 1
+              maxItems: 1
+              items:
+                type: string
+    FSharpOptionValidationErrorList:
+      description: F# option encoding (Some/None) for ValidationError list.
+      oneOf:
+        - type: object
+          required: [case]
+          properties:
+            case:
+              type: string
+              enum: [None]
+        - type: object
+          required: [case, fields]
+          properties:
+            case:
+              type: string
+              enum: [Some]
+            fields:
+              type: array
+              minItems: 1
+              maxItems: 1
+              items:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ValidationError"
+    PerKeyErrors:
+      description: Map encoded as object or array of key/value pairs.
+      oneOf:
+        - type: object
+          additionalProperties:
+            type: integer
+        - type: array
+          items:
+            oneOf:
+              - type: object
+                required: [key, value]
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: integer
+              - type: object
+                required: [Key, Value]
+                properties:
+                  Key:
+                    type: string
+                  Value:
+                    type: integer
+              - type: array
+                minItems: 2
+                maxItems: 2
+                items:
+                  oneOf:
+                    - type: string
+                    - type: integer
+    LessonCreateDto:
+      type: object
+      required: [title, difficulty, contentType, language, textContent]
+      properties:
+        title:
+          type: string
+        difficulty:
+          $ref: "#/components/schemas/Difficulty"
+        contentType:
+          $ref: "#/components/schemas/ContentType"
+        language:
+          $ref: "#/components/schemas/Language"
+        textContent:
+          type: string
+        tags:
+          $ref: "#/components/schemas/FSharpOptionString"
+    LessonDto:
+      type: object
+      required: [id, title, difficulty, contentType, language, content, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        difficulty:
+          $ref: "#/components/schemas/Difficulty"
+        contentType:
+          $ref: "#/components/schemas/ContentType"
+        language:
+          $ref: "#/components/schemas/Language"
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SessionCreateDto:
+      type: object
+      required: [clientSessionId, lessonId, wpm, cpm, accuracy, errorCount, perKeyErrors]
+      properties:
+        clientSessionId:
+          type: string
+          format: uuid
+        lessonId:
+          type: string
+          format: uuid
+        wpm:
+          type: integer
+        cpm:
+          type: integer
+        accuracy:
+          type: number
+          format: double
+        errorCount:
+          type: integer
+        perKeyErrors:
+          $ref: "#/components/schemas/PerKeyErrors"
+    SessionDto:
+      type: object
+      required:
+        - id
+        - lessonId
+        - startedAt
+        - endedAt
+        - wpm
+        - cpm
+        - accuracy
+        - errorCount
+        - perKeyErrors
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        lessonId:
+          type: string
+          format: uuid
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
+        wpm:
+          type: number
+          format: double
+        cpm:
+          type: number
+          format: double
+        accuracy:
+          type: number
+          format: double
+        errorCount:
+          type: integer
+        perKeyErrors:
+          $ref: "#/components/schemas/PerKeyErrors"
+        createdAt:
+          type: string
+          format: date-time
+    ValidationError:
+      type: object
+      required: [field, message]
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+    ApiError:
+      type: object
+      required: [message, statusCode]
+      properties:
+        message:
+          type: string
+        statusCode:
+          type: integer
+        errors:
+          oneOf:
+            - $ref: "#/components/schemas/FSharpOptionValidationErrorList"
+            - type: array
+              items:
+                $ref: "#/components/schemas/ValidationError"
