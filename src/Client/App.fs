@@ -76,21 +76,18 @@ module App =
             let startScreenModel, cmd = StartScreen.update startScreenMsg model.StartScreenModel
             
             match startScreenMsg with
-            | StartScreen.Msg.StartLesson ->
-                match model.StartScreenModel.SelectedLesson with
-                | Some lesson ->
-                    let typingModel, typingCmd = TypingView.init lesson
-                    {
-                        model with
-                            CurrentPage = TypingView lesson
-                            StartScreenModel = startScreenModel
-                            TypingViewModel = Some typingModel
-                    },
-                    Cmd.batch [
-                        Cmd.map StartScreenMsg cmd
-                        Cmd.map TypingViewMsg typingCmd
-                    ]
-                | None -> { model with StartScreenModel = startScreenModel }, Cmd.map StartScreenMsg cmd
+            | StartScreen.Msg.StartLesson lesson ->
+                let typingModel, typingCmd = TypingView.init lesson
+                {
+                    model with
+                        CurrentPage = TypingView lesson
+                        StartScreenModel = startScreenModel
+                        TypingViewModel = Some typingModel
+                },
+                Cmd.batch [
+                    Cmd.map StartScreenMsg cmd
+                    Cmd.map TypingViewMsg typingCmd
+                ]
             | _ ->
                 { model with StartScreenModel = startScreenModel },
                 Cmd.map StartScreenMsg cmd

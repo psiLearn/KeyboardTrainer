@@ -20,11 +20,10 @@ module StartScreen =
     type Msg =
         | LoadLessons
         | LessonsLoaded of LessonDto list
-        | LessonSelected of LessonDto
         | FilterByDifficulty of Difficulty option
         | ApiError of AppError
         | ClearError
-        | StartLesson
+        | StartLesson of LessonDto
 
     let init () =
         {
@@ -48,9 +47,6 @@ module StartScreen =
         | LessonsLoaded lessons ->
             { model with Lessons = lessons; IsLoading = false; Error = None }, Cmd.none
 
-        | LessonSelected lesson ->
-            { model with SelectedLesson = Some lesson }, Cmd.none
-
         | FilterByDifficulty difficulty ->
             { model with FilterDifficulty = difficulty }, Cmd.none
 
@@ -60,8 +56,8 @@ module StartScreen =
         | ClearError ->
             { model with Error = None }, Cmd.none
 
-        | StartLesson ->
-            model, Cmd.none
+        | StartLesson lesson ->
+            { model with SelectedLesson = Some lesson }, Cmd.none
 
     let view model pendingCount lastSyncError lastSyncErrorAt dispatch =
         let formatTimestamp (value: DateTime) =
@@ -182,7 +178,7 @@ module StartScreen =
                                         let isSelected = model.SelectedLesson |> Option.map (fun l -> l.Id = lesson.Id) |> Option.defaultValue false
                                         div [
                                             ClassName (if isSelected then "lesson-card lesson-card-selected" else "lesson-card")
-                                            OnClick (fun _ -> dispatch (LessonSelected lesson))
+                                            OnClick (fun _ -> dispatch (StartLesson lesson))
                                         ] [
                                             h4 [ ClassName "lesson-title" ] [ str lesson.Title ]
                                             p [ ClassName "lesson-difficulty" ] [ str (sprintf "%A" lesson.Difficulty) ]
@@ -222,7 +218,7 @@ module StartScreen =
                                 
                                 button [
                                     ClassName "btn btn-primary btn-large"
-                                    OnClick (fun _ -> dispatch StartLesson)
+                                    OnClick (fun _ -> dispatch (StartLesson lesson))
                                 ] [ str "Start Typing" ]
                             ]
                         | None -> ()

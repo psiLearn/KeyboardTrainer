@@ -45,7 +45,6 @@ async function openFirstLesson(page) {
   await lessonsResponse;
   await page.locator('.lesson-card').first().waitFor();
   await page.locator('.lesson-card').first().click();
-  await page.getByRole('button', { name: /^Start Typing$/ }).first().click();
   await page.locator('.typing-view').waitFor();
 }
 
