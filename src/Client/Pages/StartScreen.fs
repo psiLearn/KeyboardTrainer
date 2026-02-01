@@ -66,6 +66,26 @@ module StartScreen =
     let view model pendingCount lastSyncError lastSyncErrorAt dispatch =
         let formatTimestamp (value: DateTime) =
             sprintf "%04d-%02d-%02d %02d:%02d:%02d" value.Year value.Month value.Day value.Hour value.Minute value.Second
+        let difficultyOrder difficulty =
+            match difficulty with
+            | Difficulty.A1 -> 1
+            | Difficulty.A2 -> 2
+            | Difficulty.B1 -> 3
+            | Difficulty.B2 -> 4
+            | Difficulty.C1 -> 5
+        let lessonOrder (title: string) =
+            let trimmed = title.Trim()
+            if trimmed.Length > 1 && (trimmed.[0] = 'L' || trimmed.[0] = 'l') then
+                let digits =
+                    trimmed.Substring(1)
+                    |> Seq.takeWhile System.Char.IsDigit
+                    |> Seq.toArray
+                    |> System.String
+                match System.Int32.TryParse digits with
+                | true, value -> Some value
+                | _ -> None
+            else
+                None
 
         div [ ClassName "start-screen" ] [
             h1 [ ClassName "title" ] [ str "Keyboard Trainer" ]
@@ -150,6 +170,9 @@ module StartScreen =
                                     | None -> true
                                     | Some difficulty -> lesson.Difficulty = difficulty
                                 )
+                                |> List.sortBy (fun lesson ->
+                                    let order = lessonOrder lesson.Title |> Option.defaultValue System.Int32.MaxValue
+                                    difficultyOrder lesson.Difficulty, order, lesson.Title)
 
                             if List.isEmpty filteredLessons then
                                 p [ ClassName "no-lessons" ] [ str "No lessons match the selected difficulty" ]
