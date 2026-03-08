@@ -91,6 +91,36 @@ module TypingViewView =
                 LastKeyIsError = model.LastKeyIsError
             } : KeyboardView.KeyHighlights)
 
+
+    let private charClassName settings model index currentChar =
+        let classes = ResizeArray<string>()
+        classes.Add("char")
+        if index < model.CurrentCharIndex then
+            classes.Add(if Map.containsKey index model.Errors then "char-error" else "char-correct")
+        elif index = model.CurrentCharIndex then
+            classes.Add("char-current")
+            if settings.EnableLetterColors then
+                currentChar
+                |> KeyboardView.charToKey
+                |> Option.bind KeyboardView.keyToFingerClass
+                |> Option.iter classes.Add
+        else
+            classes.Add("char-next")
+        String.concat " " classes
+
+    let private splitByWhitespaceSegments (text: string) =
+        let segments = ResizeArray<bool * int * int>()
+        let mutable index = 0
+
+        while index < text.Length do
+            let isWhitespace = Char.IsWhiteSpace text[index]
+            let start = index
+            while index < text.Length && Char.IsWhiteSpace text[index] = isWhitespace do
+                index <- index + 1
+            segments.Add(isWhitespace, start, index - start)
+
+        segments |> Seq.toList
+
     let private inProgressView settings model dispatch =
         let wpm, _, accuracy, _ =
             match model.StartTime with
@@ -109,24 +139,19 @@ module TypingViewView =
             p [ ClassName "progress-text" ] [ str (sprintf "%d / %d characters" model.CurrentCharIndex model.TargetContent.Length) ]
             div [ ClassName "typing-area" ] [
                 div [ ClassName lessonTextClass ] [
-                    for i in 0 .. model.TargetContent.Length - 1 do
-                        let currentChar = model.TargetContent.[i]
-                        let className =
-                            let classes = ResizeArray<string>()
-                            classes.Add("char")
-                            if i < model.CurrentCharIndex then
-                                classes.Add(if Map.containsKey i model.Errors then "char-error" else "char-correct")
-                            elif i = model.CurrentCharIndex then
-                                classes.Add("char-current")
-                                if settings.EnableLetterColors then
-                                    currentChar
-                                    |> KeyboardView.charToKey
-                                    |> Option.bind KeyboardView.keyToFingerClass
-                                    |> Option.iter classes.Add
-                            else
-                                classes.Add("char-next")
-                            String.concat " " classes
-                        span [ ClassName className ] [ str (string currentChar) ]
+                    for isWhitespace, start, length in splitByWhitespaceSegments model.TargetContent do
+                        if isWhitespace then
+                            for offset in 0 .. length - 1 do
+                                let index = start + offset
+                                let currentChar = model.TargetContent.[index]
+                                span [ ClassName (charClassName settings model index currentChar) ] [ str (string currentChar) ]
+                        else
+                            span [ ClassName "word-chunk" ] [
+                                for offset in 0 .. length - 1 do
+                                    let index = start + offset
+                                    let currentChar = model.TargetContent.[index]
+                                    span [ ClassName (charClassName settings model index currentChar) ] [ str (string currentChar) ]
+                            ]
                 ]
             ]
             match keyboardHighlights settings model with

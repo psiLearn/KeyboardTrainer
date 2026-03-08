@@ -429,6 +429,7 @@ body::before {
   user-select: none;
   max-height: 340px;
   overflow-y: auto;
+  overflow-x: auto;
 }
 
 .no-letter-colors .char-next,
@@ -450,6 +451,11 @@ body::before {
   padding: 0 1px;
   border-radius: 4px;
   transition: background 0.15s ease, color 0.15s ease;
+}
+
+.word-chunk {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .char-next {
