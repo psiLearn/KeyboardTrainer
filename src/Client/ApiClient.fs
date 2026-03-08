@@ -95,6 +95,7 @@ module ApiClient =
         match tryGetUnionCase value |> Option.map (fun text -> text.ToLowerInvariant()) with
         | Some "words" -> Some ContentType.Words
         | Some "sentences" -> Some ContentType.Sentences
+        | Some "probability" -> Some ContentType.Probability
         | _ -> None
 
     let private parseLanguage (value: obj) =
@@ -163,15 +164,29 @@ module ApiClient =
                 Map.empty
 
     let private tryParseLessonDto (value: obj) =
+        let difficulty =
+            tryGetProp [ "difficulty"; "Difficulty" ] value
+            |> Option.bind parseDifficulty
+            |> Option.defaultValue Difficulty.A1
+        let contentType =
+            tryGetProp [ "contentType"; "ContentType" ] value
+            |> Option.bind parseContentType
+            |> Option.defaultValue ContentType.Words
+        let language =
+            tryGetProp [ "language"; "Language" ] value
+            |> Option.bind parseLanguage
+            |> Option.defaultValue Language.French
+        let createdAt =
+            tryGetDate [ "createdAt"; "CreatedAt" ] value
+            |> Option.defaultValue DateTime.UtcNow
+        let updatedAt =
+            tryGetDate [ "updatedAt"; "UpdatedAt" ] value
+            |> Option.defaultValue createdAt
+
         match tryGetGuid [ "id"; "Id" ] value,
               tryGetString [ "title"; "Title" ] value,
-              tryGetProp [ "difficulty"; "Difficulty" ] value |> Option.bind parseDifficulty,
-              tryGetProp [ "contentType"; "ContentType" ] value |> Option.bind parseContentType,
-              tryGetProp [ "language"; "Language" ] value |> Option.bind parseLanguage,
-              tryGetString [ "content"; "Content" ] value,
-              tryGetDate [ "createdAt"; "CreatedAt" ] value,
-              tryGetDate [ "updatedAt"; "UpdatedAt" ] value with
-        | Some id, Some title, Some difficulty, Some contentType, Some language, Some content, Some createdAt, Some updatedAt ->
+              tryGetString [ "content"; "Content" ] value with
+        | Some id, Some title, Some content ->
             Some {
                 Id = id
                 Title = title
@@ -214,11 +229,16 @@ module ApiClient =
             }
         | _ -> None
 
+    let private tryParseExerciseDto (value: obj) =
+        match tryGetString [ "content"; "Content" ] value with
+        | Some content -> Some { Content = content }
+        | None -> None
+
     let private parseArray (body: string) (parser: obj -> 'T option) (label: string) =
         try
             let raw = fromJsonString<obj array> body
             let parsed = raw |> Array.choose parser |> Array.toList
-            if raw.Length = parsed.Length then
+            if raw.Length = 0 || parsed.Length > 0 then
                 Ok parsed
             else
                 Error (AppError.Server $"Failed to parse {label} response.")
@@ -286,6 +306,22 @@ module ApiClient =
                 
                 if status = 200 then
                     return parseSingle body tryParseLessonDto "lesson"
+                else
+                    return Error (parseErrorResponse status body)
+            with
+            | ex ->
+                return Error (AppError.fromException ex)
+        }
+
+    /// Resolve lesson content into an exercise text
+    let getLessonExercise (id: Guid) : Async<Result<ExerciseDto, AppError>> =
+        async {
+            try
+                let url = $"{baseUrl}/api/lessons/{id}/exercise"
+                let! (status, body) = request "GET" url None
+
+                if status = 200 then
+                    return parseSingle body tryParseExerciseDto "exercise"
                 else
                     return Error (parseErrorResponse status body)
             with

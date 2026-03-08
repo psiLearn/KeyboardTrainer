@@ -31,6 +31,7 @@ module LessonRepository =
         match value.ToLowerInvariant() with
         | "words" -> Words
         | "sentences" -> Sentences
+        | "probability" -> Probability
         | _ -> Words
 
     let private parseLanguage (value: string) =
@@ -54,6 +55,7 @@ module LessonRepository =
         match value with
         | Words -> "words"
         | Sentences -> "sentences"
+        | Probability -> "probability"
 
     /// Get all lessons from database
     let getAllLessons () : Async<Lesson list> =

@@ -10,6 +10,7 @@ COPY src/Server/KeyboardTrainer.Server.fsproj ./src/Server/
 COPY src/Server/Program.fs ./src/Server/
 COPY src/Server/Database ./src/Server/Database
 COPY src/Server/Handlers ./src/Server/Handlers
+COPY src/Server/Services ./src/Server/Services
 
 # Restore and build
 RUN cd src/Server && \

@@ -238,7 +238,11 @@ module StartScreen =
                                             p [ ClassName "lesson-type" ] [ str (sprintf "%A" lesson.ContentType) ]
                                             p [ ClassName "lesson-language" ] [ str (sprintf "%A" lesson.Language) ]
                                             p [ ClassName "lesson-content-preview" ] [ 
-                                                str (if lesson.Content.Length > 50 then lesson.Content.[0..47] + "..." else lesson.Content)
+                                                match lesson.ContentType with
+                                                | ContentType.Probability ->
+                                                    str "Probability exercise (generated at start)"
+                                                | _ ->
+                                                    str (if lesson.Content.Length > 50 then lesson.Content.[0..47] + "..." else lesson.Content)
                                             ]
                                         ]
                                 ]

@@ -5,6 +5,18 @@ open Giraffe
 open KeyboardTrainer.Shared
 
 module LessonHandler =
+    let private toLessonDto (lesson: Lesson) : LessonDto =
+        {
+            Id = lesson.Id
+            Title = lesson.Title
+            Difficulty = lesson.Difficulty
+            ContentType = lesson.ContentType
+            Language = lesson.Language
+            Content = lesson.Content
+            CreatedAt = lesson.CreatedAt
+            UpdatedAt = lesson.UpdatedAt
+        }
+
     /// Validate lesson creation DTO
     let validateLessonCreateDto (dto: LessonCreateDto) : ValidationError list =
         [
@@ -32,18 +44,7 @@ module LessonHandler =
                     let! lessons = LessonRepository.getAllLessons() |> Async.StartAsTask
                     let dtos = 
                         lessons 
-                        |> List.map (fun lesson ->
-                            {
-                                Id = lesson.Id
-                                Title = lesson.Title
-                                Difficulty = lesson.Difficulty
-                                ContentType = lesson.ContentType
-                                Language = lesson.Language
-                                Content = lesson.Content
-                                CreatedAt = lesson.CreatedAt
-                                UpdatedAt = lesson.UpdatedAt
-                            } : LessonDto
-                        )
+                        |> List.map toLessonDto
                     return! json dtos next ctx
                 with
                 | ex ->
@@ -64,16 +65,7 @@ module LessonHandler =
                     let! lesson = LessonRepository.getLessonById id |> Async.StartAsTask
                     match lesson with
                     | Some l ->
-                        let dto: LessonDto = {
-                            Id = l.Id
-                            Title = l.Title
-                            Difficulty = l.Difficulty
-                            ContentType = l.ContentType
-                            Language = l.Language
-                            Content = l.Content
-                            CreatedAt = l.CreatedAt
-                            UpdatedAt = l.UpdatedAt
-                        }
+                        let dto = toLessonDto l
                         return! json dto next ctx
                     | None ->
                         ctx.SetStatusCode 404
@@ -115,16 +107,7 @@ module LessonHandler =
                         let! lesson = LessonRepository.createLesson dto |> Async.StartAsTask
                         ctx.SetStatusCode 201
                         ctx.SetHttpHeader("Location", $"/api/lessons/{lesson.Id}")
-                        let responseDto: LessonDto = {
-                            Id = lesson.Id
-                            Title = lesson.Title
-                            Difficulty = lesson.Difficulty
-                            ContentType = lesson.ContentType
-                            Language = lesson.Language
-                            Content = lesson.Content
-                            CreatedAt = lesson.CreatedAt
-                            UpdatedAt = lesson.UpdatedAt
-                        }
+                        let responseDto = toLessonDto lesson
                         return! json responseDto next ctx
                 with
                 | :? System.Text.Json.JsonException as ex ->
@@ -166,16 +149,7 @@ module LessonHandler =
                         let! lesson = LessonRepository.updateLesson id dto |> Async.StartAsTask
                         match lesson with
                         | Some l ->
-                            let responseDto: LessonDto = {
-                                Id = l.Id
-                                Title = l.Title
-                                Difficulty = l.Difficulty
-                                ContentType = l.ContentType
-                                Language = l.Language
-                                Content = l.Content
-                                CreatedAt = l.CreatedAt
-                                UpdatedAt = l.UpdatedAt
-                            }
+                            let responseDto = toLessonDto l
                             return! json responseDto next ctx
                         | None ->
                             ctx.SetStatusCode 404
@@ -198,6 +172,97 @@ module LessonHandler =
                     ctx.SetStatusCode 500
                     let error: ApiError = {
                         Message = "Failed to update lesson"
+                        StatusCode = 500
+                        Errors = Some [{ Field = "server"; Message = ex.Message }]
+                    }
+                    return! json error next ctx
+            }
+
+    /// HTTP handler for GET /api/lessons/{id}/exercise (resolve lesson content into exercise text)
+    let getLessonExercise (id: Guid): HttpHandler =
+        fun next ctx ->
+            task {
+                try
+                    let! lesson = LessonRepository.getLessonById id |> Async.StartAsTask
+                    match lesson with
+                    | None ->
+                        ctx.SetStatusCode 404
+                        let error: ApiError = {
+                            Message = $"Lesson with id {id} not found"
+                            StatusCode = 404
+                            Errors = None
+                        }
+                        return! json error next ctx
+                    | Some value ->
+                        let resolvedResult =
+                            match value.ContentType with
+                            | ContentType.Probability ->
+                                ProbabilityExerciseGenerator.generateFromProbabilityJson value.Content None None
+                            | _ ->
+                                Ok value.Content
+
+                        match resolvedResult with
+                        | Ok content ->
+                            let response: ExerciseDto = { Content = content }
+                            return! json response next ctx
+                        | Error message ->
+                            ctx.SetStatusCode 400
+                            let error: ApiError = {
+                                Message = "Failed to generate exercise"
+                                StatusCode = 400
+                                Errors = Some [{ Field = "content"; Message = message }]
+                            }
+                            return! json error next ctx
+                with ex ->
+                    ctx.SetStatusCode 500
+                    let error: ApiError = {
+                        Message = "Failed to resolve lesson exercise"
+                        StatusCode = 500
+                        Errors = Some [{ Field = "server"; Message = ex.Message }]
+                    }
+                    return! json error next ctx
+            }
+
+    /// HTTP handler for POST /api/exercises/probability (generate exercise text from probability JSON)
+    let postProbabilityExercise: HttpHandler =
+        fun next ctx ->
+            task {
+                try
+                    let! dto = ctx.BindJsonAsync<ProbabilityExerciseRequestDto>()
+                    if String.IsNullOrWhiteSpace dto.Content then
+                        ctx.SetStatusCode 400
+                        let error: ApiError = {
+                            Message = "Validation failed"
+                            StatusCode = 400
+                            Errors = Some [{ Field = "content"; Message = "Content is required" }]
+                        }
+                        return! json error next ctx
+                    else
+                        match ProbabilityExerciseGenerator.generateFromProbabilityJson dto.Content dto.GeneratedLength dto.WordLength with
+                        | Ok content ->
+                            let response: ExerciseDto = { Content = content }
+                            return! json response next ctx
+                        | Error message ->
+                            ctx.SetStatusCode 400
+                            let error: ApiError = {
+                                Message = "Failed to generate exercise"
+                                StatusCode = 400
+                                Errors = Some [{ Field = "content"; Message = message }]
+                            }
+                            return! json error next ctx
+                with
+                | :? System.Text.Json.JsonException as ex ->
+                    ctx.SetStatusCode 400
+                    let error: ApiError = {
+                        Message = "Invalid request body"
+                        StatusCode = 400
+                        Errors = Some [{ Field = "body"; Message = ex.Message }]
+                    }
+                    return! json error next ctx
+                | ex ->
+                    ctx.SetStatusCode 500
+                    let error: ApiError = {
+                        Message = "Failed to generate probability exercise"
                         StatusCode = 500
                         Errors = Some [{ Field = "server"; Message = ex.Message }]
                     }

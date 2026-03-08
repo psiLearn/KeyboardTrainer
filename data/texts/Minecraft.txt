@@ -1,0 +1,12 @@
+Dans Minecraft, les « cheats » peuvent rendre le jeu plus facile et plus amusant, surtout en mode créatif ou pour tester des idées. 
+L’une des commandes les plus populaires est /gamemode creative, qui permet d’obtenir tous les blocs sans limite et de voler librement. 
+C’est idéal pour construire rapidement des maisons ou des villes entières.
+
+Une autre commande utile est /give, qui permet de recevoir n’importe quel objet, par exemple des diamants ou des outils enchantés. 
+La commande /tp (téléportation) est très pratique pour se déplacer instantanément vers un autre joueur ou vers des coordonnées précises. 
+Cela fait gagner beaucoup de temps lors de longues explorations.
+
+La commande /weather clear change la météo, tandis que /time set day permet de faire lever le soleil immédiatement. 
+Enfin, /effect give peut donner des pouvoirs spéciaux, comme la vitesse ou la force.
+
+Même si les cheats enlèvent parfois le défi du mode survie, ils offrent de grandes possibilités pour expérimenter et laisser libre cours à la créativité.

@@ -10,6 +10,8 @@
   <ItemGroup>
     <Compile Include="LessonValidationTests.fs" />
     <Compile Include="SessionValidationTests.fs" />
+    <Compile Include="ProbabilityExerciseGeneratorTests.fs" />
+    <Compile Include="ProbabilityExerciseApiTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

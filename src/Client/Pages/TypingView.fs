@@ -19,6 +19,9 @@ module TypingView =
 
     type Model = {
         Lesson: LessonDto
+        TargetContent: string
+        IsLoadingTargetContent: bool
+        TargetContentError: AppError option
         TypingState: TypingState
         StartTime: DateTime option
         EndTime: DateTime option
@@ -34,6 +37,9 @@ module TypingView =
     }
 
     type Msg =
+        | LoadTargetContent
+        | TargetContentLoaded of string
+        | TargetContentLoadFailed of AppError
         | StartTyping
         | CharacterTyped of char
         | Backspace
@@ -59,9 +65,18 @@ module TypingView =
 
         wpm, cpm, accuracy, totalErrors
 
+    let private loadTargetContentCmd (lesson: LessonDto) =
+        Cmd.OfAsync.either ApiClient.getLessonExercise lesson.Id (function
+            | Ok exercise -> TargetContentLoaded exercise.Content
+            | Error error -> TargetContentLoadFailed error) (fun ex -> TargetContentLoadFailed (AppError.fromException ex))
+
     let init lesson =
+        let isProbability = lesson.ContentType = ContentType.Probability
         {
             Lesson = lesson
+            TargetContent = if isProbability then "" else lesson.Content
+            IsLoadingTargetContent = isProbability
+            TargetContentError = None
             TypingState = NotStarted
             StartTime = None
             EndTime = None
@@ -74,7 +89,7 @@ module TypingView =
             ElapsedSeconds = 0
             LastKey = None
             LastKeyIsError = None
-        }, Cmd.none
+        }, (if isProbability then loadTargetContentCmd lesson else Cmd.none)
 
     let private tickCmd =
         Cmd.OfAsync.perform (fun () -> async {
@@ -89,24 +104,46 @@ module TypingView =
 
     let update msg model =
         match msg with
+        | LoadTargetContent ->
+            if model.Lesson.ContentType = ContentType.Probability then
+                { model with IsLoadingTargetContent = true; TargetContentError = None }, loadTargetContentCmd model.Lesson
+            else
+                { model with IsLoadingTargetContent = false; TargetContentError = None; TargetContent = model.Lesson.Content }, Cmd.none
+
+        | TargetContentLoaded content ->
+            { model with
+                TargetContent = content
+                IsLoadingTargetContent = false
+                TargetContentError = None
+            }, Cmd.none
+
+        | TargetContentLoadFailed error ->
+            { model with
+                IsLoadingTargetContent = false
+                TargetContentError = Some error
+            }, Cmd.none
+
         | StartTyping ->
-            match model.TypingState with
-            | InProgress -> model, Cmd.none
-            | _ ->
-                { model with 
-                    TypingState = InProgress
-                    StartTime = Some DateTime.Now
-                    UserInput = ""
-                    CurrentCharIndex = 0
-                    Errors = Map.empty
-                    ElapsedSeconds = 0
-                    LastKey = None
-                    LastKeyIsError = None
-                }, tickCmd
+            if model.IsLoadingTargetContent || String.IsNullOrWhiteSpace model.TargetContent then
+                model, Cmd.none
+            else
+                match model.TypingState with
+                | InProgress -> model, Cmd.none
+                | _ ->
+                    { model with 
+                        TypingState = InProgress
+                        StartTime = Some DateTime.Now
+                        UserInput = ""
+                        CurrentCharIndex = 0
+                        Errors = Map.empty
+                        ElapsedSeconds = 0
+                        LastKey = None
+                        LastKeyIsError = None
+                    }, tickCmd
 
         | CharacterTyped char ->
-            if model.TypingState = InProgress && model.CurrentCharIndex < model.Lesson.Content.Length then
-                let expectedChar = model.Lesson.Content.[model.CurrentCharIndex]
+            if model.TypingState = InProgress && model.CurrentCharIndex < model.TargetContent.Length then
+                let expectedChar = model.TargetContent.[model.CurrentCharIndex]
                 let newErrors = 
                     if expectedChar <> char then
                         Map.change model.CurrentCharIndex (fun existing ->
@@ -127,7 +164,7 @@ module TypingView =
                     | Some _ -> Some (expectedChar <> char)
                     | None -> None
                 
-                if newIndex >= model.Lesson.Content.Length then
+                if newIndex >= model.TargetContent.Length then
                     let elapsed = model.ElapsedSeconds
                     let endTime =
                         match model.StartTime with
@@ -319,19 +356,33 @@ module TypingView =
 
             match model.TypingState with
             | NotStarted ->
-                div [ ClassName "start-section" ] [
-                    div [ ClassName "content-preview" ] [
-                        h3 [] [ str "Text to Type:" ]
-                        p [ ClassName "lesson-text" ] [ str model.Lesson.Content ]
+                if model.IsLoadingTargetContent then
+                    div [ ClassName "start-section" ] [
+                        LoadingSpinner.view (Some "Preparing exercise...")
                     ]
-                    
-                    div [ ClassName "button-group" ] [
-                        button [
-                            ClassName "btn btn-primary btn-large"
-                            OnClick (fun _ -> dispatch StartTyping)
-                        ] [ str "Start Typing" ]
-                    ]
-                ]
+                else
+                    match model.TargetContentError with
+                    | Some error ->
+                        div [ ClassName "start-section" ] [
+                            ErrorAlert.view
+                                error
+                                (Some (fun () -> dispatch LoadTargetContent))
+                                None
+                        ]
+                    | None ->
+                        div [ ClassName "start-section" ] [
+                            div [ ClassName "content-preview" ] [
+                                h3 [] [ str "Text to Type:" ]
+                                p [ ClassName "lesson-text" ] [ str model.TargetContent ]
+                            ]
+                            
+                            div [ ClassName "button-group" ] [
+                                button [
+                                    ClassName "btn btn-primary btn-large"
+                                    OnClick (fun _ -> dispatch StartTyping)
+                                ] [ str "Start Typing" ]
+                            ]
+                        ]
 
             | InProgress ->
                 let wpm, cpm, accuracy, _ =
@@ -343,16 +394,17 @@ module TypingView =
 
                 let minutes = model.ElapsedSeconds / 60
                 let seconds = model.ElapsedSeconds % 60
+                let totalChars = if model.TargetContent.Length > 0 then model.TargetContent.Length else 1
 
                 div [ ClassName "typing-section" ] [
                     div [ ClassName "progress-bar" ] [
                         div [
                             ClassName "progress-fill"
-                            Style [ Width (sprintf "%.1f%%" ((double model.CurrentCharIndex / double model.Lesson.Content.Length) * 100.0)) ]
+                            Style [ Width (sprintf "%.1f%%" ((double model.CurrentCharIndex / double totalChars) * 100.0)) ]
                         ] []
                     ]
                     p [ ClassName "progress-text" ] [ 
-                        str (sprintf "%d / %d characters" model.CurrentCharIndex model.Lesson.Content.Length)
+                        str (sprintf "%d / %d characters" model.CurrentCharIndex model.TargetContent.Length)
                     ]
 
                     div [ ClassName "typing-area" ] [
@@ -362,8 +414,8 @@ module TypingView =
 
                         div [ ClassName lessonTextClass ] [
                             // Display lesson text with character-by-character highlighting
-                            for i in 0 .. model.Lesson.Content.Length - 1 do
-                                let char = model.Lesson.Content.[i]
+                            for i in 0 .. model.TargetContent.Length - 1 do
+                                let char = model.TargetContent.[i]
                                 let className =
                                     let classes = ResizeArray<string>()
                                     classes.Add("char")
@@ -390,8 +442,8 @@ module TypingView =
                         if settings.ShowKeyboard then
                             let nextKey =
                                 if settings.HighlightNextKey && model.TypingState = InProgress then
-                                    if model.CurrentCharIndex < model.Lesson.Content.Length then
-                                        let nextChar = model.Lesson.Content.[model.CurrentCharIndex]
+                                    if model.CurrentCharIndex < model.TargetContent.Length then
+                                        let nextChar = model.TargetContent.[model.CurrentCharIndex]
                                         KeyboardView.charToKey nextChar
                                     else
                                         None

@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{57072F5D-3757-4240-8549-1F44C22E4541}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "KeyboardTrainer.Client", "src\Client\KeyboardTrainer.Client.fsproj", "{FB841664-35C1-4CD2-B19D-DCA80A656171}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "KeyboardTrainer.Server", "src\Server\KeyboardTrainer.Server.fsproj", "{7E06C375-7BCC-442A-9125-454CF9699D13}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{43AF66A9-11E0-4423-AB21-E01D9B824868}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "KeyboardTrainer.LectureCreator", "src\Tools\KeyboardTrainer.LectureCreator\KeyboardTrainer.LectureCreator.fsproj", "{653E9E2A-7C89-4424-8658-A1EB12371F67}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{23F28A24-91AE-48C5-85A4-89BE87E2C7F4}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "KeyboardTrainer.Server.Tests", "tests\KeyboardTrainer.Server.Tests\KeyboardTrainer.Server.Tests.fsproj", "{22F44370-3A8F-482A-B9DD-4DD000A50133}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FB841664-35C1-4CD2-B19D-DCA80A656171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB841664-35C1-4CD2-B19D-DCA80A656171}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB841664-35C1-4CD2-B19D-DCA80A656171}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB841664-35C1-4CD2-B19D-DCA80A656171}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E06C375-7BCC-442A-9125-454CF9699D13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E06C375-7BCC-442A-9125-454CF9699D13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E06C375-7BCC-442A-9125-454CF9699D13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E06C375-7BCC-442A-9125-454CF9699D13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{653E9E2A-7C89-4424-8658-A1EB12371F67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{653E9E2A-7C89-4424-8658-A1EB12371F67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{653E9E2A-7C89-4424-8658-A1EB12371F67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{653E9E2A-7C89-4424-8658-A1EB12371F67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22F44370-3A8F-482A-B9DD-4DD000A50133}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22F44370-3A8F-482A-B9DD-4DD000A50133}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22F44370-3A8F-482A-B9DD-4DD000A50133}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22F44370-3A8F-482A-B9DD-4DD000A50133}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FB841664-35C1-4CD2-B19D-DCA80A656171} = {57072F5D-3757-4240-8549-1F44C22E4541}
+		{7E06C375-7BCC-442A-9125-454CF9699D13} = {57072F5D-3757-4240-8549-1F44C22E4541}
+		{43AF66A9-11E0-4423-AB21-E01D9B824868} = {57072F5D-3757-4240-8549-1F44C22E4541}
+		{653E9E2A-7C89-4424-8658-A1EB12371F67} = {43AF66A9-11E0-4423-AB21-E01D9B824868}
+		{22F44370-3A8F-482A-B9DD-4DD000A50133} = {23F28A24-91AE-48C5-85A4-89BE87E2C7F4}
+	EndGlobalSection
+EndGlobal

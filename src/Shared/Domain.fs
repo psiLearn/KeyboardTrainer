@@ -17,10 +17,12 @@ type Difficulty =
 type ContentType =
     | Words
     | Sentences
+    | Probability
     override this.ToString() =
         match this with
         | Words -> "words"
         | Sentences -> "sentences"
+        | Probability -> "probability"
 
 /// Language (French for MVP)
 type Language =
@@ -59,6 +61,18 @@ type LessonDto = {
     Content: string
     CreatedAt: DateTime
     UpdatedAt: DateTime
+}
+
+/// Request DTO for generating a probability-based exercise
+type ProbabilityExerciseRequestDto = {
+    Content: string
+    GeneratedLength: int option
+    WordLength: int option
+}
+
+/// Response DTO for generated exercise text
+type ExerciseDto = {
+    Content: string
 }
 
 /// Session record - tracks typing practice results

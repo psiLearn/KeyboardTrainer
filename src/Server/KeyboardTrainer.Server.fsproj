@@ -13,6 +13,7 @@
     <Compile Include="Database/DbContext.fs" />
     <Compile Include="Database/LessonRepository.fs" />
     <Compile Include="Database/SessionRepository.fs" />
+    <Compile Include="Services/ProbabilityExerciseGenerator.fs" />
     <Compile Include="Handlers/LessonHandler.fs" />
     <Compile Include="Handlers/SessionHandler.fs" />
     <Compile Include="Program.fs" />
