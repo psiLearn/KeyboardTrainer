@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Keyboard language trainer logo">
+  <defs>
+    <style>
+      .stroke { fill: none; stroke: #111; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+      .flagStroke { fill: none; stroke: #111; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+      .w { fill: none; stroke: #111; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+
+    <clipPath id="clip-flag">
+      <rect x="0" y="0" width="64" height="44" rx="10" ry="10"/>
+    </clipPath>
+  </defs>
+
+  <!-- Keycap -->
+  <rect x="44" y="54" width="168" height="148" rx="28" ry="28" class="stroke"/>
+  <rect x="64" y="74" width="128" height="108" rx="18" ry="18" class="stroke" opacity="0.55"/>
+
+  <!-- W moved slightly UP to be vertically centered -->
+  <path class="w" d="M90 106 L106 162 L128 126 L150 162 L166 106"/>
+
+  <!-- FLAGS ON TOP (overlapping the key edges) -->
+
+  <!-- Top-left: France -->
+  <g transform="translate(18 38)">
+    <rect x="0" y="0" width="64" height="44" rx="10" ry="10" class="flagStroke"/>
+    <g clip-path="url(#clip-flag)">
+      <rect x="0" y="0" width="22" height="44" fill="#1f4aa8"/>
+      <rect x="22" y="0" width="20" height="44" fill="#ffffff"/>
+      <rect x="42" y="0" width="22" height="44" fill="#e43d30"/>
+    </g>
+  </g>
+
+  <!-- Top-right: UK / English (simplified) -->
+  <g transform="translate(174 38)">
+    <rect x="0" y="0" width="64" height="44" rx="10" ry="10" class="flagStroke"/>
+    <g clip-path="url(#clip-flag)">
+      <rect x="0" y="0" width="64" height="44" fill="#1f4aa8"/>
+      <path d="M0 0 L10 0 L64 34 L64 44 L54 44 L0 10 Z" fill="#ffffff" opacity="0.95"/>
+      <path d="M64 0 L54 0 L0 34 L0 44 L10 44 L64 10 Z" fill="#ffffff" opacity="0.95"/>
+      <path d="M0 0 L7 0 L64 36 L64 44 L57 44 L0 8 Z" fill="#e43d30" opacity="0.9"/>
+      <path d="M64 0 L57 0 L0 36 L0 44 L7 44 L64 8 Z" fill="#e43d30" opacity="0.9"/>
+      <rect x="0" y="18" width="64" height="8" fill="#ffffff"/>
+      <rect x="28" y="0" width="8" height="44" fill="#ffffff"/>
+      <rect x="0" y="20" width="64" height="4" fill="#e43d30"/>
+      <rect x="30" y="0" width="4" height="44" fill="#e43d30"/>
+    </g>
+  </g>
+
+  <!-- Bottom-left: Netherlands-style horizontal tricolor (red/white/blue) -->
+  <g transform="translate(18 174)">
+    <rect x="0" y="0" width="64" height="44" rx="10" ry="10" class="flagStroke"/>
+    <g clip-path="url(#clip-flag)">
+      <rect x="0" y="0" width="64" height="15" fill="#e43d30"/>
+      <rect x="0" y="15" width="64" height="14" fill="#ffffff"/>
+      <rect x="0" y="29" width="64" height="15" fill="#1f4aa8"/>
+    </g>
+  </g>
+
+  <!-- Bottom-right: USA (simplified) -->
+  <g transform="translate(174 174)">
+    <rect x="0" y="0" width="64" height="44" rx="10" ry="10" class="flagStroke"/>
+    <g clip-path="url(#clip-flag)">
+      <rect x="0" y="0" width="64" height="44" fill="#ffffff"/>
+      <rect x="0" y="0"  width="64" height="6" fill="#e43d30"/>
+      <rect x="0" y="12" width="64" height="6" fill="#e43d30"/>
+      <rect x="0" y="24" width="64" height="6" fill="#e43d30"/>
+      <rect x="0" y="36" width="64" height="6" fill="#e43d30"/>
+
+      <rect x="0" y="0" width="28" height="23" fill="#1f4aa8"/>
+      <g fill="#ffffff" opacity="0.95">
+        <circle cx="6"  cy="6"  r="1.2"/>
+        <circle cx="14" cy="6"  r="1.2"/>
+        <circle cx="22" cy="6"  r="1.2"/>
+        <circle cx="10" cy="12" r="1.2"/>
+        <circle cx="18" cy="12" r="1.2"/>
+        <circle cx="6"  cy="18" r="1.2"/>
+        <circle cx="14" cy="18" r="1.2"/>
+        <circle cx="22" cy="18" r="1.2"/>
+      </g>
+    </g>
+  </g>
+</svg>

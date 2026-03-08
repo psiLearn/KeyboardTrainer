@@ -7,6 +7,8 @@ open Fable.React.Props
 module KeyboardView =
     type KeyHighlights = {
         NextKey: string option
+        NextKeyFingerClass: string option
+        UseFingerColors: bool
         LastKey: string option
         LastKeyIsError: bool option
     }
@@ -56,6 +58,20 @@ module KeyboardView =
         | ')' -> Some "0"
         | _ -> None
 
+    let keyToFingerClass (key: string) =
+        let normalized = key.Trim().ToUpperInvariant()
+        match normalized with
+        | "SPACE" -> Some "finger-thumb"
+        | "`" | "1" | "Q" | "A" | "Z" -> Some "finger-left-pinky"
+        | "2" | "W" | "S" | "X" -> Some "finger-left-ring"
+        | "3" | "E" | "D" | "C" -> Some "finger-left-middle"
+        | "4" | "5" | "R" | "T" | "F" | "G" | "V" | "B" -> Some "finger-left-index"
+        | "6" | "7" | "Y" | "U" | "H" | "J" | "N" | "M" -> Some "finger-right-index"
+        | "8" | "I" | "K" | "," -> Some "finger-right-middle"
+        | "9" | "O" | "L" | "." -> Some "finger-right-ring"
+        | "0" | "-" | "=" | "P" | "[" | "]" | "\\" | ";" | "'" | "/" | "ENTER" -> Some "finger-right-pinky"
+        | _ -> None
+
     let view (highlights: KeyHighlights) =
         let isNext label =
             highlights.NextKey
@@ -82,6 +98,10 @@ module KeyboardView =
                         if isSpace then classes.Add("key-space")
                         if isEnter then classes.Add("key-enter")
                         if next then classes.Add("key-next")
+                        if next && highlights.UseFingerColors then
+                            match highlights.NextKeyFingerClass with
+                            | Some fingerClass -> classes.Add(fingerClass)
+                            | None -> ()
                         if last && lastIsError then
                             classes.Add("key-error")
                         elif last then

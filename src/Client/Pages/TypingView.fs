@@ -364,16 +364,23 @@ module TypingView =
                             // Display lesson text with character-by-character highlighting
                             for i in 0 .. model.Lesson.Content.Length - 1 do
                                 let char = model.Lesson.Content.[i]
-                                let className = 
+                                let className =
+                                    let classes = ResizeArray<string>()
+                                    classes.Add("char")
                                     if i < model.CurrentCharIndex then
                                         if Map.containsKey i model.Errors then
-                                            "char char-error"
+                                            classes.Add("char-error")
                                         else
-                                            "char char-correct"
+                                            classes.Add("char-correct")
                                     elif i = model.CurrentCharIndex then
-                                        "char char-current"
+                                        classes.Add("char-current")
+                                        if settings.EnableLetterColors then
+                                            match KeyboardView.charToKey char |> Option.bind KeyboardView.keyToFingerClass with
+                                            | Some fingerClass -> classes.Add(fingerClass)
+                                            | None -> ()
                                     else
-                                        "char char-next"
+                                        classes.Add("char-next")
+                                    String.concat " " classes
                                 
                                 span [ ClassName className ] [ str (string char) ]
                         ]
@@ -390,8 +397,15 @@ module TypingView =
                                         None
                                 else
                                     None
+                            let nextKeyFingerClass =
+                                if settings.EnableLetterColors then
+                                    nextKey |> Option.bind KeyboardView.keyToFingerClass
+                                else
+                                    None
                             let highlights: KeyboardView.KeyHighlights = {
                                 NextKey = nextKey
+                                NextKeyFingerClass = nextKeyFingerClass
+                                UseFingerColors = settings.EnableLetterColors
                                 LastKey = model.LastKey
                                 LastKeyIsError = model.LastKeyIsError
                             }

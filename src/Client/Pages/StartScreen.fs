@@ -2,6 +2,7 @@ namespace KeyboardTrainer.Client.Pages
 
 open System
 open Elmish
+open Fable.Core.JsInterop
 open Fable.React
 open Fable.React.Props
 open KeyboardTrainer.Client.Components
@@ -82,6 +83,11 @@ module StartScreen =
                 None
 
         div [ ClassName "start-screen" ] [
+            img [
+                ClassName "hero-logo"
+                Src "/logo.svg"
+                Alt "Keyboard Trainer logo"
+            ]
             h1 [ ClassName "title" ] [ str "Keyboard Trainer" ]
             p [ ClassName "subtitle" ] [ str "Improve your typing speed and accuracy" ]
 
@@ -121,8 +127,9 @@ module StartScreen =
                             input [
                                 Type "checkbox"
                                 Checked settings.EnableLetterColors
-                                OnChange (fun _ ->
-                                    onSettingsChange { settings with EnableLetterColors = not settings.EnableLetterColors })
+                                OnChange (fun ev ->
+                                    let isChecked: bool = ev.target?``checked``
+                                    onSettingsChange { settings with EnableLetterColors = isChecked })
                             ]
                             span [] [ str "Color letters" ]
                         ]
@@ -130,8 +137,8 @@ module StartScreen =
                             input [
                                 Type "checkbox"
                                 Checked settings.ShowKeyboard
-                                OnChange (fun _ ->
-                                    let nextShowKeyboard = not settings.ShowKeyboard
+                                OnChange (fun ev ->
+                                    let nextShowKeyboard: bool = ev.target?``checked``
                                     let nextHighlight =
                                         if nextShowKeyboard then settings.HighlightNextKey else false
                                     onSettingsChange { settings with ShowKeyboard = nextShowKeyboard; HighlightNextKey = nextHighlight })
@@ -143,10 +150,21 @@ module StartScreen =
                                 Type "checkbox"
                                 Checked settings.HighlightNextKey
                                 Disabled (not settings.ShowKeyboard)
-                                OnChange (fun _ ->
-                                    onSettingsChange { settings with HighlightNextKey = not settings.HighlightNextKey })
+                                OnChange (fun ev ->
+                                    let isChecked: bool = ev.target?``checked``
+                                    onSettingsChange { settings with HighlightNextKey = isChecked })
                             ]
                             span [] [ str "Highlight next key" ]
+                        ]
+                        label [ ClassName "settings-toggle" ] [
+                            input [
+                                Type "checkbox"
+                                Checked settings.ColorBlindPalette
+                                OnChange (fun ev ->
+                                    let isChecked: bool = ev.target?``checked``
+                                    onSettingsChange { settings with ColorBlindPalette = isChecked })
+                            ]
+                            span [] [ str "Color-blind palette" ]
                         ]
                     ]
 
@@ -209,8 +227,10 @@ module StartScreen =
                             else
                                 div [ ClassName "lessons-grid" ] [
                                     for lesson in filteredLessons do
-                                        div [
-                                            ClassName "lesson-card"
+                                        button [
+                                            Type "button"
+                                            ClassName "lesson-card lesson-card-button"
+                                            HTMLAttr.Custom ("aria-label", sprintf "Start lesson %s" lesson.Title)
                                             OnClick (fun _ -> dispatch (StartLesson lesson))
                                         ] [
                                             h4 [ ClassName "lesson-title" ] [ str lesson.Title ]

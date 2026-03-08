@@ -203,11 +203,24 @@ module App =
 
     let view model dispatch =
         ErrorBoundary.view [
-            div [ ClassName "app-container" ] [
+            let appClass =
+                if model.Settings.ColorBlindPalette then "app-container color-blind"
+                else "app-container"
+            div [ ClassName appClass ] [
                 // Navigation bar
                 nav [ ClassName "navbar" ] [
                     div [ ClassName "nav-brand" ] [
-                        h1 [ OnClick (fun _ -> dispatch NavigateToStartScreen) ] [ str "Keyboard Trainer" ]
+                        button [
+                            ClassName "brand-button"
+                            OnClick (fun _ -> dispatch NavigateToStartScreen)
+                        ] [
+                            img [
+                                ClassName "brand-logo"
+                                Src "/logoSmall.svg"
+                                Alt "Keyboard Trainer logo"
+                            ]
+                            span [ ClassName "brand-text" ] [ str "Keyboard Trainer" ]
+                        ]
                     ]
                     ul [ ClassName "nav-links" ] [
                         li [] [

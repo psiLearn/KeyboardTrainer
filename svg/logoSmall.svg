@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Keyboard language trainer logo (small)">
+  <defs>
+    <style>
+      .stroke { fill: none; stroke: #111; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+      .w { fill: none; stroke: #111; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+
+    <!-- Rounded-rect clip for all flags (keeps rounded corners without a border) -->
+    <clipPath id="clip-flag">
+      <rect x="0" y="0" width="64" height="44" rx="10" ry="10"/>
+    </clipPath>
+  </defs>
+
+  <!-- Keycap (single outline for small sizes) -->
+  <rect x="44" y="54" width="168" height="148" rx="28" ry="28" class="stroke"/>
+
+  <!-- W (chunkier for small sizes), slightly up -->
+  <path class="w" d="M90 104 L108 164 L128 132 L148 164 L166 104"/>
+
+  <!-- Top-left: France (no border) -->
+  <g transform="translate(18 38)" clip-path="url(#clip-flag)">
+    <rect x="0" y="0" width="22" height="44" fill="#1f4aa8"/>
+    <rect x="22" y="0" width="20" height="44" fill="#ffffff"/>
+    <rect x="42" y="0" width="22" height="44" fill="#e43d30"/>
+  </g>
+
+  <!-- Top-right: UK (small-friendly simplified Union Jack, no border) -->
+  <g transform="translate(174 38)" clip-path="url(#clip-flag)">
+    <rect x="0" y="0" width="64" height="44" fill="#1f4aa8"/>
+
+    <!-- White diagonals (largest cue for UK at small sizes) -->
+    <path d="M0 0 L12 0 L64 32 L64 44 L52 44 L0 12 Z" fill="#ffffff" opacity="0.95"/>
+    <path d="M64 0 L52 0 L0 32 L0 44 L12 44 L64 12 Z" fill="#ffffff" opacity="0.95"/>
+
+    <!-- Thin red diagonals (kept subtle to reduce aliasing) -->
+    <path d="M0 0 L8 0 L64 34 L64 44 L56 44 L0 10 Z" fill="#e43d30" opacity="0.85"/>
+    <path d="M64 0 L56 0 L0 34 L0 44 L8 44 L64 10 Z" fill="#e43d30" opacity="0.85"/>
+
+    <!-- Central white cross -->
+    <rect x="0" y="18" width="64" height="8" fill="#ffffff"/>
+    <rect x="28" y="0" width="8" height="44" fill="#ffffff"/>
+
+    <!-- Central red cross -->
+    <rect x="0" y="20" width="64" height="4" fill="#e43d30"/>
+    <rect x="30" y="0" width="4" height="44" fill="#e43d30"/>
+  </g>
+
+  <!-- Bottom-left: Netherlands-style tricolor (no border) -->
+  <g transform="translate(18 174)" clip-path="url(#clip-flag)">
+    <rect x="0" y="0" width="64" height="15" fill="#e43d30"/>
+    <rect x="0" y="15" width="64" height="14" fill="#ffffff"/>
+    <rect x="0" y="29" width="64" height="15" fill="#1f4aa8"/>
+  </g>
+
+  <!-- Bottom-right: USA simplified (no border) -->
+  <g transform="translate(174 174)" clip-path="url(#clip-flag)">
+    <rect x="0" y="0" width="64" height="44" fill="#ffffff"/>
+    <rect x="0" y="0"  width="64" height="6" fill="#e43d30"/>
+    <rect x="0" y="12" width="64" height="6" fill="#e43d30"/>
+    <rect x="0" y="24" width="64" height="6" fill="#e43d30"/>
+    <rect x="0" y="36" width="64" height="6" fill="#e43d30"/>
+    <rect x="0" y="0" width="28" height="23" fill="#1f4aa8"/>
+  </g>
+</svg>

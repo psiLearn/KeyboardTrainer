@@ -9,6 +9,7 @@ type UserSettings = {
     EnableLetterColors: bool
     ShowKeyboard: bool
     HighlightNextKey: bool
+    ColorBlindPalette: bool
 }
 
 module UserSettings =
@@ -18,6 +19,7 @@ module UserSettings =
         EnableLetterColors = true
         ShowKeyboard = true
         HighlightNextKey = true
+        ColorBlindPalette = false
     }
 
     let private isNullOrUndefined (value: obj) =
@@ -58,6 +60,9 @@ module UserSettings =
                     HighlightNextKey =
                         tryGetBool [ "highlightNextKey"; "HighlightNextKey" ] parsed
                         |> Option.defaultValue defaults.HighlightNextKey
+                    ColorBlindPalette =
+                        tryGetBool [ "colorBlindPalette"; "ColorBlindPalette" ] parsed
+                        |> Option.defaultValue defaults.ColorBlindPalette
                 }
         with _ ->
             defaults
