@@ -13,15 +13,15 @@ module Program =
             GET >=> route "/health" >=> text "OK"
             
             // Lesson endpoints
-            GET >=> route "/api/lessons" >=> LessonHandler.getAllLessons
-            GET >=> routef "/api/lessons/%O" LessonHandler.getLessonById
-            GET >=> routef "/api/lessons/%O/exercise" LessonHandler.getLessonExercise
-            POST >=> route "/api/lessons" >=> LessonHandler.postLesson
-            PUT >=> routef "/api/lessons/%O" LessonHandler.putLesson
-            DELETE >=> routef "/api/lessons/%O" LessonHandler.deleteLesson
+            GET >=> route "/api/lessons" >=> LessonHandlerCrud.getAllLessons
+            GET >=> routef "/api/lessons/%O" LessonHandlerCrud.getLessonById
+            GET >=> routef "/api/lessons/%O/exercise" LessonHandlerExercise.getLessonExercise
+            POST >=> route "/api/lessons" >=> LessonHandlerCrud.postLesson
+            PUT >=> routef "/api/lessons/%O" LessonHandlerCrud.putLesson
+            DELETE >=> routef "/api/lessons/%O" LessonHandlerCrud.deleteLesson
 
             // Exercise generation endpoints
-            POST >=> route "/api/exercises/probability" >=> LessonHandler.postProbabilityExercise
+            POST >=> route "/api/exercises/probability" >=> LessonHandlerExercise.postProbabilityExercise
             
             // Session endpoints
             POST >=> route "/api/sessions" >=> SessionHandler.postSession

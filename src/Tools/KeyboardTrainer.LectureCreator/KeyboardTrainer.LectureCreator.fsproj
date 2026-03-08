@@ -9,6 +9,9 @@
 
   <ItemGroup>
     <Compile Include="../../Shared/Domain.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="CliHelpers.fs" />
+    <Compile Include="InputBuilder.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

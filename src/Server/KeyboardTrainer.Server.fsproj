@@ -14,6 +14,9 @@
     <Compile Include="Database/LessonRepository.fs" />
     <Compile Include="Database/SessionRepository.fs" />
     <Compile Include="Services/ProbabilityExerciseGenerator.fs" />
+    <Compile Include="Handlers/LessonHandler.Common.fs" />
+    <Compile Include="Handlers/LessonHandler.Crud.fs" />
+    <Compile Include="Handlers/LessonHandler.Exercise.fs" />
     <Compile Include="Handlers/LessonHandler.fs" />
     <Compile Include="Handlers/SessionHandler.fs" />
     <Compile Include="Program.fs" />
