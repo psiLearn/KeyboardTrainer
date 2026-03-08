@@ -42,36 +42,50 @@ module InputBuilder =
                                 | None when interactive -> prompt "Source files (comma-separated): "
                                 | None -> ""
 
-                            let sourceFiles = splitCsvLike sourceFilesText
-                            if List.isEmpty sourceFiles then
-                                Error "Missing probability input. Use --source-files (or --content/--content-file)."
-                            else
-                                let mergeGroupsRaw =
-                                    match tryGetArg "--merge-groups" args with
-                                    | Some text -> Some text
-                                    | None when interactive ->
-                                        let input = prompt "Merge groups (optional, e.g. [È,E,è,e]=e|[À,à]=a): "
-                                        if String.IsNullOrWhiteSpace input then None else Some input
-                                    | None -> None
+                            match validateCsvLike "source-files" sourceFilesText with
+                            | Error message -> Error message
+                            | Ok () ->
+                                let sourceFiles = splitCsvLike sourceFilesText
+                                if List.isEmpty sourceFiles then
+                                    Error "Missing probability input. Use --source-files (or --content/--content-file)."
+                                else
+                                    let mergeGroupsRaw =
+                                        match tryGetArg "--merge-groups" args with
+                                        | Some text -> Some text
+                                        | None when interactive ->
+                                            let input = prompt "Merge groups (optional, e.g. [È,E,è,e]=e|[À,à]=a): "
+                                            if String.IsNullOrWhiteSpace input then None else Some input
+                                        | None -> None
 
-                                let alphabetSet =
-                                    match tryGetArg "--alphabet" args with
-                                    | Some raw -> splitCsvLike raw |> List.choose tryTokenToChar |> List.map Char.ToLowerInvariant |> Set.ofList |> Some
-                                    | None when interactive ->
-                                        let raw = prompt "Alphabet subset (optional, e.g. q,w,e,r): "
-                                        if String.IsNullOrWhiteSpace raw then None
-                                        else splitCsvLike raw |> List.choose tryTokenToChar |> List.map Char.ToLowerInvariant |> Set.ofList |> Some
-                                    | None -> None
+                                    let alphabetRaw =
+                                        match tryGetArg "--alphabet" args with
+                                        | Some raw -> Some raw
+                                        | None when interactive ->
+                                            let raw = prompt "Alphabet subset (optional, e.g. q,w,e,r): "
+                                            if String.IsNullOrWhiteSpace raw then None else Some raw
+                                        | None -> None
 
-                                match parsePositiveInt "generated-length" 280 (tryGetArg "--generated-length" args) with
-                                | Error message -> Error message
-                                | Ok generatedLength ->
-                                    match parsePositiveInt "word-length" 5 (tryGetArg "--word-length" args) with
+                                    let alphabetSetResult =
+                                        match alphabetRaw with
+                                        | Some raw ->
+                                            match validateCsvLike "alphabet" raw with
+                                            | Error message -> Error message
+                                            | Ok () ->
+                                                Ok (splitCsvLike raw |> List.choose tryTokenToChar |> List.map Char.ToLowerInvariant |> Set.ofList |> Some)
+                                        | None -> Ok None
+
+                                    match alphabetSetResult with
                                     | Error message -> Error message
-                                    | Ok wordLength ->
-                                        match parseMergeGroups mergeGroupsRaw with
+                                    | Ok alphabetSet ->
+                                        match parsePositiveInt "generated-length" 280 (tryGetArg "--generated-length" args) with
                                         | Error message -> Error message
-                                        | Ok mergeMap -> buildProbabilityContent sourceFiles mergeMap alphabetSet generatedLength wordLength
+                                        | Ok generatedLength ->
+                                            match parsePositiveInt "word-length" 5 (tryGetArg "--word-length" args) with
+                                            | Error message -> Error message
+                                            | Ok wordLength ->
+                                                match parseMergeGroups mergeGroupsRaw with
+                                                | Error message -> Error message
+                                                | Ok mergeMap -> buildProbabilityContent sourceFiles mergeMap alphabetSet generatedLength wordLength
                     | _ ->
                         match contentArg, contentFileArg with
                         | Some text, _ when not (String.IsNullOrWhiteSpace text) -> Ok text

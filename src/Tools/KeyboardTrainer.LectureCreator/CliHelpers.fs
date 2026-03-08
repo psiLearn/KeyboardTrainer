@@ -3,6 +3,7 @@ namespace KeyboardTrainer.LectureCreator
 open System
 open System.Collections.Generic
 open System.IO
+open System.Text
 open System.Text.Json
 open KeyboardTrainer.Shared
 
@@ -18,16 +19,87 @@ module CliHelpers =
     let hasArg (name: string) (args: string array) =
         args |> Array.exists (fun arg -> String.Equals(arg, name, StringComparison.OrdinalIgnoreCase))
 
+    let private unquoteToken (token: string) =
+        let trimmed = token.Trim()
+        if trimmed.Length >= 2 && trimmed[0] = '\'' && trimmed[trimmed.Length - 1] = '\'' then
+            trimmed.Substring(1, trimmed.Length - 2).Replace("''", "'").Trim()
+        else
+            trimmed
+
+
+    let private hasBalancedSingleQuotes (value: string) =
+        let mutable inQuotes = false
+        let mutable i = 0
+        while i < value.Length do
+            if value[i] = ''' then
+                if inQuotes && i + 1 < value.Length && value[i + 1] = ''' then
+                    i <- i + 1
+                else
+                    inQuotes <- not inQuotes
+            i <- i + 1
+        not inQuotes
+
+    let validateCsvLike (fieldName: string) (value: string) =
+        if hasBalancedSingleQuotes value then Ok ()
+        else Error(sprintf "Invalid %s: unmatched single quote in token list." fieldName)
+
     let splitCsvLike (value: string) =
-        value.Split([| ','; ';' |], StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
-        |> Array.toList
-        |> List.filter (fun item -> not (String.IsNullOrWhiteSpace item))
+        let items = ResizeArray<string>()
+        let current = StringBuilder()
+        let mutable inQuotes = false
+        let mutable i = 0
+
+        while i < value.Length do
+            let ch = value[i]
+            if ch = '\'' then
+                if inQuotes && i + 1 < value.Length && value[i + 1] = '\'' then
+                    current.Append('\'') |> ignore
+                    i <- i + 1
+                else
+                    inQuotes <- not inQuotes
+                    current.Append(ch) |> ignore
+            elif (ch = ',' || ch = ';') && not inQuotes then
+                let token = current.ToString().Trim()
+                if not (String.IsNullOrWhiteSpace token) then
+                    items.Add(token)
+                current.Clear() |> ignore
+            else
+                current.Append(ch) |> ignore
+            i <- i + 1
+
+        let last = current.ToString().Trim()
+        if not (String.IsNullOrWhiteSpace last) then
+            items.Add(last)
+
+        items
+        |> Seq.map unquoteToken
+        |> Seq.filter (fun item -> not (String.IsNullOrWhiteSpace item))
+        |> Seq.toList
 
     let tryTokenToChar (token: string) =
-        let t = token.Trim()
+        let t = token |> unquoteToken
         if String.IsNullOrWhiteSpace t then None
-        elif t.Equals("space", StringComparison.OrdinalIgnoreCase) then Some ' '
-        else Some t[0]
+        else
+            match t.Trim().ToLowerInvariant() with
+            | "space" -> Some ' '
+            | "comma" -> Some ','
+            | "dot"
+            | "period" -> Some '.'
+            | "dash"
+            | "minus"
+            | "hyphen" -> Some '-'
+            | "semicolon" -> Some ';'
+            | "colon" -> Some ':'
+            | "apostrophe"
+            | "singlequote"
+            | "quote" -> Some '\''
+            | "underscore" -> Some '_'
+            | "plus" -> Some '+'
+            | "star"
+            | "asterisk" -> Some '*'
+            | "hash" -> Some '#'
+            | normalized when normalized.Length = 1 -> Some normalized[0]
+            | _ -> None
 
     let parseDifficulty (value: string) =
         match value.Trim().ToUpperInvariant() with
@@ -68,6 +140,8 @@ module CliHelpers =
                 let right = parts[1].Trim()
                 if String.IsNullOrWhiteSpace left || String.IsNullOrWhiteSpace right then
                     Error(sprintf "Invalid merge group: %s. Empty side not allowed." spec)
+                elif not (hasBalancedSingleQuotes left) || not (hasBalancedSingleQuotes right) then
+                    Error(sprintf "Invalid merge group: %s. Unmatched single quote." spec)
                 else
                     match tryTokenToChar right with
                     | None -> Error(sprintf "Invalid merge target in group: %s" spec)
@@ -129,11 +203,21 @@ module CliHelpers =
         | Error message -> Error message
         | Ok texts ->
             let counts = Dictionary<char, int>()
+            let mergeTargets = mergeMap.Values |> Set.ofSeq
+
             let addCount ch = if counts.ContainsKey(ch) then counts[ch] <- counts[ch] + 1 else counts[ch] <- 1
+
             for text in texts do
                 for rawChar in text do
                     let c = rawChar |> Char.ToLowerInvariant
-                    if Char.IsLetter(c) || c = ' ' then
+                    let considerChar =
+                        Char.IsLetter(c)
+                        || c = ' '
+                        || mergeMap.ContainsKey(c)
+                        || mergeTargets.Contains(c)
+                        || (alphabet |> Option.map (fun allowed -> allowed.Contains(c)) |> Option.defaultValue false)
+
+                    if considerChar then
                         let merged = mergeMap.TryFind(c) |> Option.defaultValue c
                         let keep = alphabet |> Option.map (fun allowed -> allowed.Contains(merged)) |> Option.defaultValue true
                         if keep then addCount merged
