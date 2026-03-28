@@ -15,6 +15,8 @@ module InputBuilder =
         let languageText = tryGetArg "--language" args |> Option.defaultValue "French"
         let contentArg = tryGetArg "--content" args
         let contentFileArg = tryGetArg "--content-file" args
+        let vocabCsvFilesArg = tryGetArg "--vocab-csv-files" args
+        let vocabCsvColumnsArg = tryGetArg "--vocab-csv-columns" args
 
         let titleValue = if String.IsNullOrWhiteSpace title && interactive then prompt "Title: " else title
         let difficultyValue = if String.IsNullOrWhiteSpace difficultyText && interactive then prompt "Difficulty (A1|A2|B1|B2|C1): " else difficultyText
@@ -90,8 +92,34 @@ module InputBuilder =
                         match contentArg, contentFileArg with
                         | Some text, _ when not (String.IsNullOrWhiteSpace text) -> Ok text
                         | _, Some filePath when not (String.IsNullOrWhiteSpace filePath) -> readFileContent filePath
-                        | _ when interactive -> Ok(readMultilineContent ())
-                        | _ -> Error "Missing content. Use --content, --content-file, or --interactive."
+                        | _ ->
+                            let vocabCsvFilesText =
+                                match vocabCsvFilesArg with
+                                | Some text -> text
+                                | None when interactive -> prompt "Vocabulary CSV files (optional, comma-separated): "
+                                | None -> ""
+
+                            match validateCsvLike "vocab-csv-files" vocabCsvFilesText with
+                            | Error message -> Error message
+                            | Ok () ->
+                                let vocabCsvFiles = splitCsvLike vocabCsvFilesText
+                                if not (List.isEmpty vocabCsvFiles) then
+                                    let vocabColumnsResult =
+                                        match vocabCsvColumnsArg with
+                                        | Some raw ->
+                                            match validateCsvLike "vocab-csv-columns" raw with
+                                            | Ok () -> Ok(splitCsvLike raw)
+                                            | Error message -> Error message
+                                        | None -> Ok []
+
+                                    match vocabColumnsResult with
+                                    | Error message -> Error message
+                                    | Ok vocabColumns ->
+                                        buildContentFromVocabularyCsv vocabCsvFiles vocabColumns
+                                elif interactive then
+                                    Ok(readMultilineContent ())
+                                else
+                                    Error "Missing content. Use --content, --content-file, --vocab-csv-files, or --interactive."
 
                 match contentResult with
                 | Error message -> Error message

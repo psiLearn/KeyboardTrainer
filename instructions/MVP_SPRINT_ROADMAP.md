@@ -227,7 +227,7 @@
 
 **Success Criteria:**
 - ✅ `docker-compose up -d` starts all three services
-- ✅ PostgreSQL accessible on localhost:5432
+- ✅ PostgreSQL accessible on localhost:5434
 - ✅ Server accessible on localhost:5000
 - ✅ Client accessible on localhost:3000
 - ✅ Volumes persist data + enable hot reload

@@ -7,6 +7,37 @@ open Saturn
 open KeyboardTrainer.Shared
 
 module Program =
+    let private parseDotEnvLine (line: string) =
+        let trimmed = line.Trim()
+        if String.IsNullOrWhiteSpace trimmed || trimmed.StartsWith "#" then
+            None
+        else
+            match trimmed.IndexOf '=' with
+            | -1 -> None
+            | idx ->
+                let key = trimmed.Substring(0, idx).Trim()
+                let value =
+                    trimmed.Substring(idx + 1).Trim()
+                    |> fun v -> v.Trim('"')
+
+                if String.IsNullOrWhiteSpace key then None
+                else Some(key, value)
+
+    let private loadDevelopmentEnv () =
+        let envName = System.Environment.GetEnvironmentVariable "ASPNETCORE_ENVIRONMENT"
+        let shouldLoad =
+            String.IsNullOrWhiteSpace envName
+            || envName.Equals("Development", StringComparison.OrdinalIgnoreCase)
+
+        let envFile = ".env.development"
+
+        if shouldLoad && File.Exists envFile then
+            File.ReadLines envFile
+            |> Seq.choose parseDotEnvLine
+            |> Seq.iter (fun (key, value) ->
+                if String.IsNullOrWhiteSpace (System.Environment.GetEnvironmentVariable key) then
+                    System.Environment.SetEnvironmentVariable(key, value))
+
     let webApp: HttpHandler =
         choose [
             // Health check endpoint
@@ -43,6 +74,8 @@ module Program =
 
     [<EntryPoint>]
     let main _ =
+        loadDevelopmentEnv ()
+
         let port = 
             System.Environment.GetEnvironmentVariable "PORT"
             |> function

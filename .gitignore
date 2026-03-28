@@ -54,3 +54,5 @@ test-results/
 
 # OS Files
 Thumbs.db
+
+.fake

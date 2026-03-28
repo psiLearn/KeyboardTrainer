@@ -15,15 +15,25 @@ module DbContext =
                 | null | "" -> defaultValue
                 | value -> value
 
-        match System.Environment.GetEnvironmentVariable "DATABASE_URL" with
-        | null | "" ->
+        let hasExplicitDbEnv () =
+            [ "DB_HOST"; "DB_PORT"; "DB_NAME"; "DB_USER"; "DB_PASSWORD" ]
+            |> List.exists (fun name ->
+                match System.Environment.GetEnvironmentVariable name with
+                | null | "" -> false
+                | _ -> true)
+
+        let buildFromEnv () =
             let host = getEnv "DB_HOST" "localhost"
             let port = getEnv "DB_PORT" "5434"
             let database = getEnv "DB_NAME" "keyboardtrainer"
             let user = getEnv "DB_USER" "trainer"
             let password = getEnv "DB_PASSWORD" "trainer123"
             $"Host={host};Port={port};Database={database};Username={user};Password={password}"
-        | connStr -> connStr
+
+        match hasExplicitDbEnv (), System.Environment.GetEnvironmentVariable "DATABASE_URL" with
+        | true, _ -> buildFromEnv ()
+        | false, null | false, "" -> buildFromEnv ()
+        | false, connStr -> connStr
 
     /// Create a new database connection
     let createConnection () : IDbConnection =

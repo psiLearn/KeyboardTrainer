@@ -198,29 +198,135 @@ module CliHelpers =
         if missing.Count > 0 then Error(sprintf "Missing source files: %s" (String.Join(", ", missing)))
         else Ok contents
 
+    let analyzeTextList (texts: string list) (mergeMap: Map<char, char>) (alphabet: Set<char> option) =
+        let counts = Dictionary<char, int>()
+        let mergeTargets = mergeMap.Values |> Set.ofSeq
+
+        let addCount ch =
+            if counts.ContainsKey(ch) then counts[ch] <- counts[ch] + 1 else counts[ch] <- 1
+
+        for text in texts do
+            for rawChar in text do
+                let c = rawChar |> Char.ToLowerInvariant
+                let considerChar =
+                    Char.IsLetter(c)
+                    || c = ' '
+                    || mergeMap.ContainsKey(c)
+                    || mergeTargets.Contains(c)
+                    || (alphabet |> Option.map (fun allowed -> allowed.Contains(c)) |> Option.defaultValue false)
+
+                if considerChar then
+                    let merged = mergeMap.TryFind(c) |> Option.defaultValue c
+                    let keep =
+                        alphabet
+                        |> Option.map (fun allowed -> allowed.Contains(merged))
+                        |> Option.defaultValue true
+
+                    if keep then addCount merged
+
+        counts
+
+    let private parseCsvLine (line: string) =
+        let cells = ResizeArray<string>()
+        let current = StringBuilder()
+        let mutable inQuotes = false
+        let mutable index = 0
+
+        while index < line.Length do
+            let ch = line[index]
+            if ch = '"' then
+                if inQuotes && index + 1 < line.Length && line[index + 1] = '"' then
+                    current.Append('"') |> ignore
+                    index <- index + 1
+                else
+                    inQuotes <- not inQuotes
+            elif ch = ',' && not inQuotes then
+                cells.Add(current.ToString())
+                current.Clear() |> ignore
+            else
+                current.Append(ch) |> ignore
+            index <- index + 1
+
+        cells.Add(current.ToString())
+        cells |> Seq.toList
+
+    let private parseCsvFile (filePath: string) =
+        let lines = File.ReadAllLines(filePath) |> Array.toList
+        lines |> List.map parseCsvLine
+
+    let private tryResolveColumnIndex (header: string list) (selector: string) =
+        let trimmed = selector.Trim()
+        if String.IsNullOrWhiteSpace trimmed then
+            None
+        else
+            match Int32.TryParse(trimmed) with
+            | true, parsed when parsed > 0 && parsed <= header.Length -> Some(parsed - 1)
+            | _ ->
+                header
+                |> List.tryFindIndex (fun name -> String.Equals(name.Trim(), trimmed, StringComparison.OrdinalIgnoreCase))
+
+    let private resolveColumnIndices (header: string list) (selectors: string list) =
+        if List.isEmpty selectors then
+            Ok([ 0 .. max 0 (header.Length - 1) ])
+        else
+            let mutable missing = ResizeArray<string>()
+            let resolved =
+                selectors
+                |> List.choose (fun selector ->
+                    match tryResolveColumnIndex header selector with
+                    | Some idx -> Some idx
+                    | None -> missing.Add(selector); None)
+                |> List.distinct
+
+            if missing.Count > 0 then
+                Error(sprintf "CSV column(s) not found: %s" (String.Join(", ", missing)))
+            elif List.isEmpty resolved then
+                Error "No CSV columns selected."
+            else
+                Ok resolved
+
+    let buildContentFromVocabularyCsv (files: string list) (columnSelectors: string list) =
+        let mutable missing = ResizeArray<string>()
+        let allRows =
+            files
+            |> List.collect (fun filePath ->
+                if File.Exists(filePath) then
+                    parseCsvFile filePath
+                else
+                    missing.Add(filePath)
+                    [])
+
+        if missing.Count > 0 then
+            Error(sprintf "Missing vocabulary CSV file(s): %s" (String.Join(", ", missing)))
+        elif List.isEmpty allRows then
+            Error "Vocabulary CSV input is empty."
+        else
+            let header = allRows |> List.head
+            match resolveColumnIndices header columnSelectors with
+            | Error message -> Error message
+            | Ok columnIndices ->
+                let rows =
+                    allRows
+                    |> List.tail
+                    |> List.collect (fun row ->
+                        columnIndices
+                        |> List.choose (fun columnIndex ->
+                            if columnIndex < row.Length then
+                                let cell = row[columnIndex].Trim()
+                                if String.IsNullOrWhiteSpace cell then None else Some cell
+                            else
+                                None))
+
+                if List.isEmpty rows then
+                    Error "No vocabulary entries found in selected CSV columns."
+                else
+                    Ok(String.Join(Environment.NewLine, rows))
+
     let buildProbabilityContent (sourceFiles: string list) (mergeMap: Map<char, char>) (alphabet: Set<char> option) (generatedLength: int) (wordLength: int) =
         match readTextFiles sourceFiles with
         | Error message -> Error message
         | Ok texts ->
-            let counts = Dictionary<char, int>()
-            let mergeTargets = mergeMap.Values |> Set.ofSeq
-
-            let addCount ch = if counts.ContainsKey(ch) then counts[ch] <- counts[ch] + 1 else counts[ch] <- 1
-
-            for text in texts do
-                for rawChar in text do
-                    let c = rawChar |> Char.ToLowerInvariant
-                    let considerChar =
-                        Char.IsLetter(c)
-                        || c = ' '
-                        || mergeMap.ContainsKey(c)
-                        || mergeTargets.Contains(c)
-                        || (alphabet |> Option.map (fun allowed -> allowed.Contains(c)) |> Option.defaultValue false)
-
-                    if considerChar then
-                        let merged = mergeMap.TryFind(c) |> Option.defaultValue c
-                        let keep = alphabet |> Option.map (fun allowed -> allowed.Contains(merged)) |> Option.defaultValue true
-                        if keep then addCount merged
+            let counts = analyzeTextList texts mergeMap alphabet
 
             if counts.Count = 0 then
                 Error "No letters matched after applying source files, merge groups, and alphabet subset."
@@ -245,6 +351,9 @@ module CliHelpers =
         printfn "  --language <French>                     Default: French"
         printfn "  --content <value>                       Inline lecture content"
         printfn "  --content-file <path>                   Load lecture content from file"
+        printfn "  --analyze                               Analyze source files only (prints counts, no lecture creation)"
+        printfn "  --vocab-csv-files <f1,f2,...>           Build content from vocabulary CSV files"
+        printfn "  --vocab-csv-columns <German,French|1,2> Pick CSV columns by header or 1-based index"
         printfn "  --interactive                           Prompt for missing values"
         printfn "  --help                                  Show this message"
         printfn ""

@@ -697,7 +697,7 @@ services:
       POSTGRES_USER: trainer
       POSTGRES_PASSWORD: trainer123 # Change in production
     ports:
-      - "5432:5432"
+      - "5434:5434"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -712,7 +712,7 @@ services:
       dockerfile: Dockerfile.server
     container_name: keyboard-trainer-server
     environment:
-      DATABASE_URL: "postgresql://trainer:trainer123@db:5432/keyboardtrainer"
+      DATABASE_URL: "postgresql://trainer:trainer123@db:5434/keyboardtrainer"
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: "http://0.0.0.0:5000"
     ports:
@@ -828,7 +828,7 @@ docker-compose up --build
 # Access app
 # Client: http://localhost:3000
 # Server: http://localhost:5000
-# Database: localhost:5432
+# Database: localhost:5434
 
 # Stop services
 docker-compose down

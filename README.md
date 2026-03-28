@@ -89,6 +89,17 @@ dotnet run --project src/Tools/KeyboardTrainer.LectureCreator/KeyboardTrainer.Le
 Probability lessons store the probability model JSON (`content_type = probability`).
 The backend generates fresh exercise text each time a probability lesson is started (`GET /api/lessons/{id}/exercise`).
 
+Vocabulary lesson from CSV files:
+
+```powershell
+dotnet run --project src/Tools/KeyboardTrainer.LectureCreator/KeyboardTrainer.LectureCreator.fsproj -- `
+  --title "German/French Vocabulary Drill" `
+  --difficulty A1 `
+  --content-type words `
+  --vocab-csv-files "data\\WordLists\\german_french_vocab_second_pass.csv" `
+  --vocab-csv-columns "German,French"
+```
+
 Example using files in `data\texts`, with alphabet `[q,w,e,r, ]` and merges:
 - `Q,q -> q`
 - `W,w -> w`
@@ -105,6 +116,20 @@ dotnet run --project src/Tools/KeyboardTrainer.LectureCreator/KeyboardTrainer.Le
   --generated-length 320 `
   --word-length 4
 ```
+
+## Analyze text files (no lecture)
+
+Use `--analyze` when you only need the letter distribution that feeds a probability lesson. The CLI still accepts `--source-files`, `--merge-groups`, and `--alphabet` and prints the counts instead of writing a lecture.
+
+```powershell
+dotnet run --project src/Tools/KeyboardTrainer.LectureCreator/KeyboardTrainer.LectureCreator.fsproj -- `
+  --analyze `
+  --source-files "data\texts\Fortnite.txt,data\texts\Minecraft.txt" `
+  --merge-groups "[Q,q]=q|[W,w]=w|[E,é,è,ê,É,È,Ê]=e" `
+  --alphabet "q,w,e,r,space"
+```
+
+You will see `Letter counts (after merge/alphabet rules):` followed by each letter (spaces are reported as `space`), the raw count, and its percent share.
 
 Connection uses `DATABASE_URL` or `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`.
 Defaults match local Docker setup (`localhost:5434`, `keyboardtrainer`, `keyboardtrainer_dev`).

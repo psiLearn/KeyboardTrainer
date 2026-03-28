@@ -503,7 +503,7 @@ Each story is DONE when:
    - [ ] `server`: build from Dockerfile.server, depends_on db (healthcheck condition)
    - [ ] `client`: build from Dockerfile.client, dev mode (npm run dev)
    - [ ] Environment variables: DATABASE_URL, ASPNETCORE_ENVIRONMENT, etc.
-   - [ ] Port mappings: db:5432, server:5000, client:3000
+   - [ ] Port mappings: db:5434, server:5000, client:3000
    - [ ] Network: single default network
    - [ ] Volume: postgres_data volume for persistence
    - **Acceptance:** docker-compose up -d starts all services; no errors
