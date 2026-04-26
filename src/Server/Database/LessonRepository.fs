@@ -32,6 +32,8 @@ module LessonRepository =
         | "words" -> Words
         | "sentences" -> Sentences
         | "probability" -> Probability
+        | "gem_game"
+        | "gemgame" -> GemGame
         | _ -> Words
 
     let private parseLanguage (value: string) =
@@ -56,6 +58,7 @@ module LessonRepository =
         | Words -> "words"
         | Sentences -> "sentences"
         | Probability -> "probability"
+        | GemGame -> "gem_game"
 
     /// Get all lessons from database
     let getAllLessons () : Async<Lesson list> =

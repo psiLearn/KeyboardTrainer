@@ -34,6 +34,7 @@ let private contentTypeToDb (value: ContentType) =
     | ContentType.Words -> "words"
     | ContentType.Sentences -> "sentences"
     | ContentType.Probability -> "probability"
+    | ContentType.GemGame -> "gem_game"
 
 let private insertLecture (input: Input) =
     use conn = createConnection()

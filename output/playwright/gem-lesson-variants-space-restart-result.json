@@ -1,0 +1,155 @@
+{
+  "variantCount": 8,
+  "variantChecks": [
+    {
+      "title": "Gem Game: Fast Rows",
+      "expected": {
+        "moveRows": true,
+        "showLettersInGems": false,
+        "tickMs": 400
+      },
+      "actual": {
+        "moveRows": true,
+        "showLettersInGems": false,
+        "tickMs": 400
+      },
+      "pass": true
+    },
+    {
+      "title": "Gem Game: Fast Rows + Letters",
+      "expected": {
+        "moveRows": true,
+        "showLettersInGems": true,
+        "tickMs": 400
+      },
+      "actual": {
+        "moveRows": true,
+        "showLettersInGems": true,
+        "tickMs": 400
+      },
+      "pass": true
+    },
+    {
+      "title": "Gem Game: Medium Rows",
+      "expected": {
+        "moveRows": true,
+        "showLettersInGems": false,
+        "tickMs": 850
+      },
+      "actual": {
+        "moveRows": true,
+        "showLettersInGems": false,
+        "tickMs": 850
+      },
+      "pass": true
+    },
+    {
+      "title": "Gem Game: Medium Rows + Letters",
+      "expected": {
+        "moveRows": true,
+        "showLettersInGems": true,
+        "tickMs": 850
+      },
+      "actual": {
+        "moveRows": true,
+        "showLettersInGems": true,
+        "tickMs": 850
+      },
+      "pass": true
+    },
+    {
+      "title": "Gem Game: Slow Rows",
+      "expected": {
+        "moveRows": true,
+        "showLettersInGems": false,
+        "tickMs": 1600
+      },
+      "actual": {
+        "moveRows": true,
+        "showLettersInGems": false,
+        "tickMs": 1600
+      },
+      "pass": true
+    },
+    {
+      "title": "Gem Game: Slow Rows + Letters",
+      "expected": {
+        "moveRows": true,
+        "showLettersInGems": true,
+        "tickMs": 1600
+      },
+      "actual": {
+        "moveRows": true,
+        "showLettersInGems": true,
+        "tickMs": 1600
+      },
+      "pass": true
+    },
+    {
+      "title": "Gem Game: Still Rows",
+      "expected": {
+        "moveRows": false,
+        "showLettersInGems": false,
+        "tickMs": 850
+      },
+      "actual": {
+        "moveRows": false,
+        "showLettersInGems": false,
+        "tickMs": 850
+      },
+      "pass": true
+    },
+    {
+      "title": "Gem Game: Still Rows + Letters",
+      "expected": {
+        "moveRows": false,
+        "showLettersInGems": true,
+        "tickMs": 850
+      },
+      "actual": {
+        "moveRows": false,
+        "showLettersInGems": true,
+        "tickMs": 850
+      },
+      "pass": true
+    }
+  ],
+  "openedLesson": "Gem Game: Still Rows + Letters",
+  "initial": {
+    "hint": "left green: s | right yellow: j",
+    "showLettersChecked": true,
+    "moveRowsChecked": false,
+    "intervalValue": "850",
+    "gemLetterCount": 90,
+    "lives": "1",
+    "score": "0",
+    "isFinished": false,
+    "finishButton": null
+  },
+  "wrongKeyPressed": "a",
+  "afterGameOver": {
+    "hint": "left green: s | right yellow: j",
+    "showLettersChecked": true,
+    "moveRowsChecked": false,
+    "intervalValue": "850",
+    "gemLetterCount": 90,
+    "lives": "0",
+    "score": "0",
+    "isFinished": true,
+    "finishButton": "Play Again (R or Space)"
+  },
+  "afterSpaceRestart": {
+    "hint": "left green: s | right red: l",
+    "showLettersChecked": true,
+    "moveRowsChecked": false,
+    "intervalValue": "850",
+    "gemLetterCount": 90,
+    "lives": "1",
+    "score": "0",
+    "isFinished": false,
+    "finishButton": null
+  },
+  "spaceRestartPassed": true,
+  "consoleErrors": [],
+  "pageErrors": []
+}

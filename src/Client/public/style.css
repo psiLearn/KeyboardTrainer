@@ -75,6 +75,11 @@ body::before {
   flex-direction: column;
 }
 
+.app-container.game-mode {
+  height: 100vh;
+  overflow: hidden;
+}
+
 .app-container.color-blind {
   --accent: #005f73;
   --accent-strong: #0a9396;
@@ -178,6 +183,15 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.game-main-content {
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  animation: none;
+  display: flex;
 }
 
 .hero-logo {
@@ -650,18 +664,118 @@ body::before {
   background: #60a5fa;
 }
 
-.confetti span:nth-child(1) { left: 12%; animation-delay: 0.05s; }
-.confetti span:nth-child(2) { left: 22%; animation-delay: 0.12s; }
-.confetti span:nth-child(3) { left: 32%; animation-delay: 0.18s; }
-.confetti span:nth-child(4) { left: 44%; animation-delay: 0.08s; }
-.confetti span:nth-child(5) { left: 56%; animation-delay: 0.22s; }
-.confetti span:nth-child(6) { left: 66%; animation-delay: 0.15s; }
-.confetti span:nth-child(7) { left: 78%; animation-delay: 0.26s; }
-.confetti span:nth-child(8) { left: 88%; animation-delay: 0.1s; }
-.confetti span:nth-child(9) { left: 18%; animation-delay: 0.2s; }
-.confetti span:nth-child(10) { left: 36%; animation-delay: 0.27s; }
-.confetti span:nth-child(11) { left: 58%; animation-delay: 0.3s; }
-.confetti span:nth-child(12) { left: 72%; animation-delay: 0.24s; }
+.confetti span:nth-child(4n) {
+  background: #f472b6;
+}
+
+.confetti span:nth-child(5n) {
+  background: #34d399;
+}
+
+.confetti span:nth-child(1) { left: 5%; animation-delay: 0.05s; }
+.confetti span:nth-child(2) { left: 10%; animation-delay: 0.12s; }
+.confetti span:nth-child(3) { left: 15%; animation-delay: 0.18s; }
+.confetti span:nth-child(4) { left: 20%; animation-delay: 0.08s; }
+.confetti span:nth-child(5) { left: 25%; animation-delay: 0.22s; }
+.confetti span:nth-child(6) { left: 30%; animation-delay: 0.15s; }
+.confetti span:nth-child(7) { left: 35%; animation-delay: 0.26s; }
+.confetti span:nth-child(8) { left: 40%; animation-delay: 0.1s; }
+.confetti span:nth-child(9) { left: 45%; animation-delay: 0.2s; }
+.confetti span:nth-child(10) { left: 50%; animation-delay: 0.27s; }
+.confetti span:nth-child(11) { left: 55%; animation-delay: 0.3s; }
+.confetti span:nth-child(12) { left: 60%; animation-delay: 0.24s; }
+.confetti span:nth-child(13) { left: 65%; animation-delay: 0.05s; }
+.confetti span:nth-child(14) { left: 70%; animation-delay: 0.14s; }
+.confetti span:nth-child(15) { left: 75%; animation-delay: 0.19s; }
+.confetti span:nth-child(16) { left: 80%; animation-delay: 0.07s; }
+.confetti span:nth-child(17) { left: 85%; animation-delay: 0.23s; }
+.confetti span:nth-child(18) { left: 90%; animation-delay: 0.16s; }
+.confetti span:nth-child(19) { left: 12%; animation-delay: 0.32s; }
+.confetti span:nth-child(20) { left: 22%; animation-delay: 0.11s; }
+.confetti span:nth-child(21) { left: 32%; animation-delay: 0.25s; }
+.confetti span:nth-child(22) { left: 42%; animation-delay: 0.09s; }
+.confetti span:nth-child(23) { left: 52%; animation-delay: 0.28s; }
+.confetti span:nth-child(24) { left: 62%; animation-delay: 0.13s; }
+.confetti span:nth-child(25) { left: 72%; animation-delay: 0.31s; }
+.confetti span:nth-child(26) { left: 82%; animation-delay: 0.06s; }
+.confetti span:nth-child(27) { left: 18%; animation-delay: 0.21s; }
+.confetti span:nth-child(28) { left: 38%; animation-delay: 0.29s; }
+.confetti span:nth-child(29) { left: 58%; animation-delay: 0.17s; }
+.confetti span:nth-child(30) { left: 78%; animation-delay: 0.33s; }
+
+.celebration-fireworks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.firework {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  animation: firework-burst 1.2s ease-out forwards;
+}
+
+.firework:nth-child(1) {
+  left: 25%;
+  top: 30%;
+  background: #fbbf24;
+  animation-delay: 0.2s;
+}
+
+.firework:nth-child(2) {
+  left: 75%;
+  top: 30%;
+  background: #34d399;
+  animation-delay: 0.3s;
+}
+
+.firework:nth-child(3) {
+  left: 35%;
+  top: 25%;
+  background: #60a5fa;
+  animation-delay: 0.15s;
+}
+
+.firework:nth-child(4) {
+  left: 65%;
+  top: 25%;
+  background: #f472b6;
+  animation-delay: 0.35s;
+}
+
+.firework:nth-child(5) {
+  left: 20%;
+  top: 60%;
+  background: #fbbf24;
+  animation-delay: 0.25s;
+}
+
+.firework:nth-child(6) {
+  left: 80%;
+  top: 60%;
+  background: #34d399;
+  animation-delay: 0.1s;
+}
+
+.completion-heading {
+  animation: bounce-celebration 0.8s ease-out 1s both;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--accent-strong);
+  text-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+  margin: 20px 0 10px 0;
+}
+
+.achievement-message {
+  animation: slide-in-up 0.6s ease-out 0.3s both;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #d97706;
+  text-align: center;
+  margin: 12px 0 20px 0;
+}
 
 .results-summary {
   display: grid;
@@ -887,6 +1001,45 @@ body::before {
   }
 }
 
+@keyframes bounce-celebration {
+  0% {
+    transform: scale(0.5) translateY(-20px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  75% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-up {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes firework-burst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx, 100px), var(--ty, 100px)) scale(0);
+    opacity: 0;
+  }
+}
+
 @media (max-width: 900px) {
   .main-content {
     padding: 32px 20px 48px;
@@ -920,6 +1073,37 @@ body::before {
   .sessions-table table {
     font-size: 0.85rem;
   }
+}
+
+.game-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 0;
+}
+
+.game-view-header {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.game-status-message {
+  margin-top: 8px;
+  color: #1f3c77;
+}
+
+.game-frame {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: #050b16;
+  display: block;
 }
 
 @media (max-width: 720px) {

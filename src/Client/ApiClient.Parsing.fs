@@ -26,6 +26,8 @@ module ApiClientParsing =
         | Some "words" -> Some ContentType.Words
         | Some "sentences" -> Some ContentType.Sentences
         | Some "probability" -> Some ContentType.Probability
+        | Some "gem_game"
+        | Some "gemgame" -> Some ContentType.GemGame
         | _ -> None
 
     let private parseLanguage (value: obj) =

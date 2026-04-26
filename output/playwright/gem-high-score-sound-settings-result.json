@@ -1,0 +1,80 @@
+{
+  "initial": {
+    "settingsClass": "gem-game-settings collapsed",
+    "settingsText": "Game Settings\nSHOW",
+    "settingsBodyExists": false,
+    "soundChecked": null,
+    "highScoreHeading": "High Scores",
+    "currentScoreLabel": "This round: 0",
+    "highRows": [
+      [
+        "Finish a round to record a score."
+      ]
+    ],
+    "finishVisible": false,
+    "finishText": null,
+    "lives": "1",
+    "hitsMisses": "0 / 0",
+    "localStorage": ""
+  },
+  "expanded": {
+    "settingsClass": "gem-game-settings expanded",
+    "settingsText": "Game Settings\nHIDE\nShow letters inside colored gems\nMove rows\nSounds\nRow movement interval: 850 ms",
+    "settingsBodyExists": true,
+    "soundChecked": true,
+    "highScoreHeading": "High Scores",
+    "currentScoreLabel": "This round: 0",
+    "highRows": [
+      [
+        "Finish a round to record a score."
+      ]
+    ],
+    "finishVisible": false,
+    "finishText": null,
+    "lives": "1",
+    "hitsMisses": "0 / 0",
+    "localStorage": ""
+  },
+  "soundOff": {
+    "settingsClass": "gem-game-settings expanded",
+    "settingsText": "Game Settings\nHIDE\nShow letters inside colored gems\nMove rows\nSounds\nRow movement interval: 850 ms",
+    "settingsBodyExists": true,
+    "soundChecked": false,
+    "highScoreHeading": "High Scores",
+    "currentScoreLabel": "This round: 0",
+    "highRows": [
+      [
+        "Finish a round to record a score."
+      ]
+    ],
+    "finishVisible": false,
+    "finishText": null,
+    "lives": "1",
+    "hitsMisses": "0 / 0",
+    "localStorage": ""
+  },
+  "finished": {
+    "settingsClass": "gem-game-settings expanded",
+    "settingsText": "Game Settings\nHIDE\nShow letters inside colored gems\nMove rows\nSounds\nRow movement interval: 850 ms",
+    "settingsBodyExists": true,
+    "soundChecked": false,
+    "highScoreHeading": "High Scores",
+    "currentScoreLabel": "This round: 0",
+    "highRows": [
+      [
+        "1",
+        "0",
+        "0/1",
+        "2026-04-26 21:49"
+      ]
+    ],
+    "finishVisible": true,
+    "finishText": "🎉 Round Complete! 🎉\n\nFinal Score: 0\n\nNew score added to the high-score table!\n\nKeep going! You need 500 more points to reach the target.\n\nStarting new round in 4 seconds...\n\nPlay Again (R or Space)",
+    "lives": "0",
+    "hitsMisses": "0 / 1",
+    "localStorage": "0|0|1|2026-04-26 21:49"
+  },
+  "pass": true,
+  "consoleErrors": [],
+  "pageErrors": []
+}

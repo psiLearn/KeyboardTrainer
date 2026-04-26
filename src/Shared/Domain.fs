@@ -18,11 +18,13 @@ type ContentType =
     | Words
     | Sentences
     | Probability
+    | GemGame
     override this.ToString() =
         match this with
         | Words -> "words"
         | Sentences -> "sentences"
         | Probability -> "probability"
+        | GemGame -> "gem_game"
 
 /// Language (French for MVP)
 type Language =

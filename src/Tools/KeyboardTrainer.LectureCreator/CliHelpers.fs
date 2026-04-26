@@ -115,6 +115,8 @@ module CliHelpers =
         | "words" -> Some ContentType.Words
         | "sentences" -> Some ContentType.Sentences
         | "probability" -> Some ContentType.Probability
+        | "gem_game"
+        | "gemgame" -> Some ContentType.GemGame
         | _ -> None
 
     let parseLanguage (value: string) =
@@ -347,7 +349,7 @@ module CliHelpers =
         printfn "Options:"
         printfn "  --title <value>                         Lecture title"
         printfn "  --difficulty <A1|A2|B1|B2|C1>          Difficulty level"
-        printfn "  --content-type <words|sentences|probability>"
+        printfn "  --content-type <words|sentences|probability|gem_game>"
         printfn "  --language <French>                     Default: French"
         printfn "  --content <value>                       Inline lecture content"
         printfn "  --content-file <path>                   Load lecture content from file"

@@ -241,6 +241,8 @@ module StartScreen =
                                                 match lesson.ContentType with
                                                 | ContentType.Probability ->
                                                     str "Probability exercise (generated at start)"
+                                                | ContentType.GemGame ->
+                                                    str "Gem game exercise (side + color matching)"
                                                 | _ ->
                                                     str (if lesson.Content.Length > 50 then lesson.Content.[0..47] + "..." else lesson.Content)
                                             ]

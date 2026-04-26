@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <AssemblyName>KeyboardTrainer.Client</AssemblyName>
-    <RootNamespace>KeyboardTrainer.Client</RootNamespace>
+    <AssemblyName>KeyboardTrainer.GemGame</AssemblyName>
+    <RootNamespace>KeyboardTrainer.GemGame</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(FABLE_COMPILER)' == 'true'">
@@ -31,26 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="../Shared/Domain.fs" />
-    <Compile Include="Errors.fs" />
-    <Compile Include="UserSettings.fs" />
-    <Compile Include="LocalSessions.fs" />
-    <Compile Include="Components/LoadingSpinner.fs" />
-    <Compile Include="Components/ErrorAlert.fs" />
-    <Compile Include="Components/ErrorBoundary.fs" />
-    <Compile Include="Components/KeyboardView.fs" />
-    <Compile Include="ApiClient.Infrastructure.fs" />
-    <Compile Include="ApiClient.Parsing.fs" />
-    <Compile Include="ApiClient.fs" />
-    <Compile Include="SessionSync.fs" />
-    <Compile Include="Pages/StartScreen.fs" />
-    <Compile Include="Pages/TypingView.Types.fs" />
-    <Compile Include="Pages/TypingView.State.fs" />
-    <Compile Include="Pages/TypingView.View.fs" />
-    <Compile Include="Pages/TypingView.fs" />
-    <Compile Include="Pages/GameView.fs" />
-    <Compile Include="Pages/Metrics.fs" />
-    <Compile Include="App.Types.fs" />
+    <Compile Include="Game.Types.fs" />
+    <Compile Include="Game.Logic.fs" />
     <Compile Include="App.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>

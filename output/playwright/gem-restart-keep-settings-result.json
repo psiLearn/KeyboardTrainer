@@ -1,0 +1,35 @@
+{
+  "initial": {
+    "showLettersChecked": false,
+    "moveRowsChecked": true,
+    "intervalValue": "850",
+    "settingsText": "Game Settings\nShow letters inside colored gems\nMove rows\nRow movement interval: 850 ms",
+    "gemLetterCount": 0,
+    "score": "0",
+    "lives": "10",
+    "isFinished": false
+  },
+  "beforeRestart": {
+    "showLettersChecked": true,
+    "moveRowsChecked": false,
+    "intervalValue": "1600",
+    "settingsText": "Game Settings\nShow letters inside colored gems\nMove rows\nRow movement interval: 1600 ms",
+    "gemLetterCount": 90,
+    "score": "0",
+    "lives": "10",
+    "isFinished": false
+  },
+  "afterRestart": {
+    "showLettersChecked": true,
+    "moveRowsChecked": false,
+    "intervalValue": "1600",
+    "settingsText": "Game Settings\nShow letters inside colored gems\nMove rows\nRow movement interval: 1600 ms",
+    "gemLetterCount": 90,
+    "score": "0",
+    "lives": "10",
+    "isFinished": false
+  },
+  "restartKeptSettings": true,
+  "consoleErrors": [],
+  "pageErrors": []
+}

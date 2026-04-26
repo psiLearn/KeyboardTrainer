@@ -1,0 +1,37 @@
+{
+  "before": {
+    "rows": 10,
+    "columns": 10,
+    "playerColumn": 5,
+    "colorCounts": {
+      "red": 28,
+      "yellow": 29,
+      "green": 23,
+      "blue": 20
+    },
+    "score": 0,
+    "hint": "left blue: a | right yellow: j"
+  },
+  "action": {
+    "side": "Left",
+    "column": 4,
+    "color": "blue",
+    "groupSize": 2,
+    "displayedKey": "a",
+    "pressedKey": "a",
+    "expectedScoreGain": 2
+  },
+  "after": {
+    "playerColumn": 4,
+    "score": 2,
+    "scoreGain": 2,
+    "hitsMisses": "1 / 0",
+    "lastHint": "Moved left. Collapsed 2 gems! +2 points."
+  },
+  "expectedMatchesActual": true,
+  "consoleErrors": [],
+  "pageErrors": [],
+  "screenshots": [
+    "output/playwright/gem-connected-collapse-after-hit.png"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "initial": {
+    "rows": 10,
+    "columns": 10,
+    "playerColumn": 5,
+    "bottomClasses": [
+      "gem-cell gem-blue bottom-row",
+      "gem-cell gem-red bottom-row",
+      "gem-cell gem-blue bottom-row",
+      "gem-cell gem-green bottom-row",
+      "gem-cell gem-blue bottom-row active-target",
+      "gem-cell gem-green bottom-row player-cell-on-board",
+      "gem-cell gem-green bottom-row active-target",
+      "gem-cell gem-green bottom-row",
+      "gem-cell gem-yellow bottom-row",
+      "gem-cell gem-green bottom-row"
+    ],
+    "controls": [
+      "Left side: a blue, s green, d red, f yellow",
+      "Right side: ö blue, k green, l red, j yellow",
+      "Move into the neighboring gem by pressing its side and color key."
+    ],
+    "hint": "left blue: a | right green: k",
+    "score": "0",
+    "lives": "10",
+    "hitsMisses": "0 / 0",
+    "lastHint": "Move into the neighboring gem by pressing its side and color key."
+  },
+  "rightAction": {
+    "rightColor": "green",
+    "displayedKey": "k",
+    "pressedKey": "k",
+    "expectedColumn": 6
+  },
+  "afterRight": {
+    "rows": 10,
+    "columns": 10,
+    "playerColumn": 6,
+    "bottomClasses": [
+      "gem-cell gem-red bottom-row",
+      "gem-cell gem-red bottom-row",
+      "gem-cell gem-blue bottom-row",
+      "gem-cell gem-blue bottom-row",
+      "gem-cell gem-red bottom-row",
+      "gem-cell gem-red bottom-row active-target",
+      "gem-cell gem-red bottom-row player-cell-on-board",
+      "gem-cell gem-yellow bottom-row active-target",
+      "gem-cell gem-green bottom-row",
+      "gem-cell gem-green bottom-row"
+    ],
+    "controls": [
+      "Left side: a blue, s green, d red, f yellow",
+      "Right side: ö blue, k green, l red, j yellow",
+      "Moved right. Crash x1! +10 points."
+    ],
+    "hint": "left red: d | right yellow: j",
+    "score": "10",
+    "lives": "10",
+    "hitsMisses": "1 / 0",
+    "lastHint": "Moved right. Crash x1! +10 points."
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "screenshots": [
+    "output/playwright/lesson-flow-after-switch-initial.png",
+    "output/playwright/lesson-flow-after-switch-right-key.png"
+  ]
+}

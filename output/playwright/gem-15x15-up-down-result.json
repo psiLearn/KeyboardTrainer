@@ -1,0 +1,87 @@
+{
+  "initial": {
+    "rows": 15,
+    "columns": 15,
+    "player": {
+      "row": 7,
+      "column": 7
+    },
+    "hint": "left red: d | right yellow: j | up green: w/o | down red: c/,",
+    "controls": [
+      "Left side: a blue, s green, d red, f yellow",
+      "Right side: ö blue, l green, k red, j yellow",
+      "Up: q/p blue, w/o green, e/i red, r/u yellow",
+      "Down: y/- blue, x/. green, c/, red, v/m yellow",
+      "Move into the neighboring gem by pressing its side and color key."
+    ],
+    "gemLetterCount": 224,
+    "activeTargets": 4,
+    "hitsMisses": "0 / 0",
+    "score": "0"
+  },
+  "upKey": "w",
+  "afterUp": {
+    "rows": 15,
+    "columns": 15,
+    "player": {
+      "row": 6,
+      "column": 7
+    },
+    "hint": "left blue: a | right yellow: j | up red: e/i | down red: c/,",
+    "controls": [
+      "Left side: a blue, s green, d red, f yellow",
+      "Right side: ö blue, l green, k red, j yellow",
+      "Up: q/p blue, w/o green, e/i red, r/u yellow",
+      "Down: y/- blue, x/. green, c/, red, v/m yellow",
+      "Moved up. Collapsed 1 gems! +1 points."
+    ],
+    "gemLetterCount": 224,
+    "activeTargets": 4,
+    "hitsMisses": "1 / 0",
+    "score": "1"
+  },
+  "reset": {
+    "rows": 15,
+    "columns": 15,
+    "player": {
+      "row": 7,
+      "column": 7
+    },
+    "hint": "left blue: a | right yellow: j | up red: e/i | down red: c/,",
+    "controls": [
+      "Left side: a blue, s green, d red, f yellow",
+      "Right side: ö blue, l green, k red, j yellow",
+      "Up: q/p blue, w/o green, e/i red, r/u yellow",
+      "Down: y/- blue, x/. green, c/, red, v/m yellow",
+      "Move into the neighboring gem by pressing its side and color key."
+    ],
+    "gemLetterCount": 224,
+    "activeTargets": 4,
+    "hitsMisses": "0 / 0",
+    "score": "0"
+  },
+  "downKey": "c",
+  "afterDown": {
+    "rows": 15,
+    "columns": 15,
+    "player": {
+      "row": 8,
+      "column": 7
+    },
+    "hint": "left blue: a | right yellow: j | up red: e/i | down green: x/.",
+    "controls": [
+      "Left side: a blue, s green, d red, f yellow",
+      "Right side: ö blue, l green, k red, j yellow",
+      "Up: q/p blue, w/o green, e/i red, r/u yellow",
+      "Down: y/- blue, x/. green, c/, red, v/m yellow",
+      "Moved down. Collapsed 7 gems! +64 points."
+    ],
+    "gemLetterCount": 224,
+    "activeTargets": 4,
+    "hitsMisses": "1 / 0",
+    "score": "64"
+  },
+  "pass": true,
+  "consoleErrors": [],
+  "pageErrors": []
+}

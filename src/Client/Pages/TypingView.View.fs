@@ -166,6 +166,20 @@ module TypingViewView =
             button [ ClassName "btn btn-danger"; OnClick (fun _ -> dispatch CancelTyping) ] [ str "Cancel" ]
         ]
 
+    let private achievementMessage accuracy errorCount =
+        if accuracy >= 99.0 && errorCount = 0 then
+            "🏆 Perfect! Flawless execution!"
+        elif accuracy >= 98.0 then
+            "🥇 Excellent! Outstanding accuracy!"
+        elif accuracy >= 95.0 then
+            "🥈 Great! Very impressive!"
+        elif accuracy >= 90.0 then
+            "🥉 Good job! Well done!"
+        elif accuracy >= 85.0 then
+            "✨ Nice! Keep practicing!"
+        else
+            "💪 Nice effort! Keep improving!"
+
     let private completedView model dispatch =
         let wpm, cpm, accuracy, errorCount =
             match model.StartTime, model.EndTime with
@@ -173,8 +187,16 @@ module TypingViewView =
             | _ -> 0, 0, 0.0, 0
 
         div [ ClassName "completion-section" ] [
-            div [ ClassName "confetti" ] [ for index in 1 .. 12 do span [ Key (sprintf "confetti-%d" index) ] [] ]
-            h3 [] [ str "Typing Complete!" ]
+            div [ ClassName "confetti" ] [ 
+                for index in 1 .. 30 do 
+                    span [ Key (sprintf "confetti-%d" index) ] [] 
+            ]
+            div [ ClassName "celebration-fireworks" ] [
+                for index in 1 .. 6 do
+                    span [ Key (sprintf "firework-%d" index); ClassName "firework" ] []
+            ]
+            h3 [ ClassName "completion-heading" ] [ str "🎉 Typing Complete! 🎉" ]
+            p [ ClassName "achievement-message" ] [ str (achievementMessage accuracy errorCount) ]
             match model.SubmitError with
             | Some error -> ErrorAlert.view error (Some (fun () -> dispatch SubmitSession)) (Some (fun () -> dispatch ClearSubmitError))
             | None -> ()

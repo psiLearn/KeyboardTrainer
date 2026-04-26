@@ -20,7 +20,7 @@ module InputBuilder =
 
         let titleValue = if String.IsNullOrWhiteSpace title && interactive then prompt "Title: " else title
         let difficultyValue = if String.IsNullOrWhiteSpace difficultyText && interactive then prompt "Difficulty (A1|A2|B1|B2|C1): " else difficultyText
-        let contentTypeValue = if String.IsNullOrWhiteSpace contentTypeText && interactive then prompt "Content type (words|sentences|probability): " else contentTypeText
+        let contentTypeValue = if String.IsNullOrWhiteSpace contentTypeText && interactive then prompt "Content type (words|sentences|probability|gem_game): " else contentTypeText
         let languageValue = if String.IsNullOrWhiteSpace languageText && interactive then prompt "Language (French): " else languageText
 
         match parseDifficulty difficultyValue, parseContentType contentTypeValue, parseLanguage languageValue with

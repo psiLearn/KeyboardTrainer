@@ -1,0 +1,67 @@
+{
+  "initialControls": [
+    "Left side: a blue, s green, d red, f yellow",
+    "Right side: ö blue, l green, k red, j yellow",
+    "Move into the neighboring gem by pressing its side and color key."
+  ],
+  "controlTextUpdated": true,
+  "green": {
+    "color": "green",
+    "key": "l",
+    "attempt": 0,
+    "before": {
+      "hint": "left yellow: f | right green: l",
+      "controls": [
+        "Left side: a blue, s green, d red, f yellow",
+        "Right side: ö blue, l green, k red, j yellow",
+        "Move into the neighboring gem by pressing its side and color key."
+      ],
+      "hitsMisses": "0 / 0",
+      "score": "0",
+      "playerColumn": 5
+    },
+    "after": {
+      "hint": "left yellow: f | right yellow: j",
+      "controls": [
+        "Left side: a blue, s green, d red, f yellow",
+        "Right side: ö blue, l green, k red, j yellow",
+        "Moved right. Collapsed 2 gems! +2 points."
+      ],
+      "hitsMisses": "1 / 0",
+      "score": "2",
+      "playerColumn": 6
+    },
+    "pass": true
+  },
+  "red": {
+    "color": "red",
+    "key": "k",
+    "attempt": 7,
+    "before": {
+      "hint": "left yellow: f | right red: k",
+      "controls": [
+        "Left side: a blue, s green, d red, f yellow",
+        "Right side: ö blue, l green, k red, j yellow",
+        "Move into the neighboring gem by pressing its side and color key."
+      ],
+      "hitsMisses": "0 / 0",
+      "score": "0",
+      "playerColumn": 5
+    },
+    "after": {
+      "hint": "left red: d | right green: l",
+      "controls": [
+        "Left side: a blue, s green, d red, f yellow",
+        "Right side: ö blue, l green, k red, j yellow",
+        "Moved right. Collapsed 1 gems! +1 points."
+      ],
+      "hitsMisses": "1 / 0",
+      "score": "1",
+      "playerColumn": 6
+    },
+    "pass": true
+  },
+  "pass": true,
+  "consoleErrors": [],
+  "pageErrors": []
+}

@@ -1,0 +1,29 @@
+{
+  "appClass": "app-container game-mode",
+  "navbarVisible": true,
+  "footerVisible": false,
+  "outerGameHeaderVisible": false,
+  "nav": {
+    "x": 0,
+    "y": 0,
+    "width": 1280,
+    "height": 70
+  },
+  "main": {
+    "x": 0,
+    "y": 70,
+    "width": 1280,
+    "height": 830
+  },
+  "frame": {
+    "x": 0,
+    "y": 70,
+    "width": 1280,
+    "height": 830
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "errors": []
+}

@@ -2,8 +2,10 @@
   "name": "keyboardtrainer-client",
   "private": true,
   "scripts": {
-    "build:client": "dotnet tool restore && dotnet fable src/Client/KeyboardTrainer.Client.fsproj --outDir src/Client/obj/fable --define PRODUCTION --noCache && esbuild src/Client/obj/fable/Main.js --bundle --minify --outfile=src/Client/public/app.js --format=iife",
-    "build:client:dev": "dotnet tool restore && dotnet fable src/Client/KeyboardTrainer.Client.fsproj --outDir src/Client/obj/fable --define DEBUG --noCache && esbuild src/Client/obj/fable/Main.js --bundle --sourcemap --outfile=src/Client/public/app.js --format=iife",
+    "build:gem-game": "dotnet tool restore && dotnet fable src/Games/KeyboardTrainer.GemGame/KeyboardTrainer.GemGame.fsproj --outDir src/Games/KeyboardTrainer.GemGame/obj/fable --define PRODUCTION --noCache && esbuild src/Games/KeyboardTrainer.GemGame/obj/fable/Main.js --bundle --minify --outfile=src/Client/public/games/gem-game/game.js --format=iife",
+    "build:gem-game:dev": "dotnet tool restore && dotnet fable src/Games/KeyboardTrainer.GemGame/KeyboardTrainer.GemGame.fsproj --outDir src/Games/KeyboardTrainer.GemGame/obj/fable --define DEBUG --noCache && esbuild src/Games/KeyboardTrainer.GemGame/obj/fable/Main.js --bundle --sourcemap --outfile=src/Client/public/games/gem-game/game.js --format=iife",
+    "build:client": "npm run build:gem-game && dotnet tool restore && dotnet fable src/Client/KeyboardTrainer.Client.fsproj --outDir src/Client/obj/fable --define PRODUCTION --noCache && esbuild src/Client/obj/fable/Main.js --bundle --minify --outfile=src/Client/public/app.js --format=iife",
+    "build:client:dev": "npm run build:gem-game:dev && dotnet tool restore && dotnet fable src/Client/KeyboardTrainer.Client.fsproj --outDir src/Client/obj/fable --define DEBUG --noCache && esbuild src/Client/obj/fable/Main.js --bundle --sourcemap --outfile=src/Client/public/app.js --format=iife",
     "pretest:e2e": "npm run build:client",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",

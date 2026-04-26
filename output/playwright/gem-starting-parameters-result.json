@@ -1,0 +1,53 @@
+{
+  "url": "http://localhost/games/gem-game/index.html?lessonId=00000000-0000-0000-0000-000000000000&config=%7B%22rows%22%3A10%2C%22columns%22%3A10%2C%22tickMs%22%3A850%2C%22durationSeconds%22%3A75%2C%22targetScore%22%3A500%2C%22lives%22%3A10%2C%22showLettersInGems%22%3Atrue%2C%22moveRows%22%3Afalse%7D",
+  "config": {
+    "rows": 10,
+    "columns": 10,
+    "tickMs": 850,
+    "durationSeconds": 75,
+    "targetScore": 500,
+    "lives": 10,
+    "showLettersInGems": true,
+    "moveRows": false
+  },
+  "initial": {
+    "rows": 10,
+    "columns": 10,
+    "boardSignature": "gem-cell gem-green|gem-cell gem-blue|gem-cell gem-green|gem-cell gem-green|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-green|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-red|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-green|gem-cell gem-green|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-green|gem-cell gem-green|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-green|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red bottom-row|gem-cell gem-blue bottom-row|gem-cell gem-red bottom-row|gem-cell gem-yellow bottom-row|gem-cell gem-red bottom-row active-target|gem-cell gem-green bottom-row player-cell-on-board|gem-cell gem-green bottom-row active-target|gem-cell gem-red bottom-row|gem-cell gem-green bottom-row|gem-cell gem-green bottom-row",
+    "showLettersChecked": true,
+    "moveRowsChecked": false,
+    "gemLetterCount": 90,
+    "intervalValue": "850",
+    "time": "01:15",
+    "lastHint": "Move into the neighboring gem by pressing its side and color key.",
+    "settingsText": "Game Settings\nShow letters inside colored gems\nMove rows\nRow movement interval: 850 ms"
+  },
+  "afterNoMoveTick": {
+    "rows": 10,
+    "columns": 10,
+    "boardSignature": "gem-cell gem-green|gem-cell gem-blue|gem-cell gem-green|gem-cell gem-green|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-green|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-red|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-green|gem-cell gem-green|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-green|gem-cell gem-green|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-green|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red bottom-row|gem-cell gem-blue bottom-row|gem-cell gem-red bottom-row|gem-cell gem-yellow bottom-row|gem-cell gem-red bottom-row active-target|gem-cell gem-green bottom-row player-cell-on-board|gem-cell gem-green bottom-row active-target|gem-cell gem-red bottom-row|gem-cell gem-green bottom-row|gem-cell gem-green bottom-row",
+    "showLettersChecked": true,
+    "moveRowsChecked": false,
+    "gemLetterCount": 90,
+    "intervalValue": "850",
+    "time": "01:13",
+    "lastHint": "Move into the neighboring gem by pressing its side and color key.",
+    "settingsText": "Game Settings\nShow letters inside colored gems\nMove rows\nRow movement interval: 850 ms"
+  },
+  "afterMoveEnabled": {
+    "rows": 10,
+    "columns": 10,
+    "boardSignature": "gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-green|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-green|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-green|gem-cell gem-green|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-green|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-red|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-green|gem-cell gem-green|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red|gem-cell gem-red|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-yellow|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-green|gem-cell gem-green|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-red|gem-cell gem-yellow|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-yellow|gem-cell gem-green|gem-cell gem-red|gem-cell gem-green|gem-cell gem-red|gem-cell gem-red|gem-cell gem-green|gem-cell gem-blue|gem-cell gem-blue|gem-cell gem-green|gem-cell gem-green|gem-cell gem-red bottom-row|gem-cell gem-red bottom-row|gem-cell gem-green bottom-row|gem-cell gem-red bottom-row|gem-cell gem-red bottom-row active-target|gem-cell gem-red bottom-row player-cell-on-board|gem-cell gem-green bottom-row active-target|gem-cell gem-red bottom-row|gem-cell gem-green bottom-row|gem-cell gem-red bottom-row",
+    "showLettersChecked": true,
+    "moveRowsChecked": true,
+    "gemLetterCount": 90,
+    "intervalValue": "850",
+    "time": "01:12",
+    "lastHint": "Rows will move.",
+    "settingsText": "Game Settings\nShow letters inside colored gems\nMove rows\nRow movement interval: 850 ms"
+  },
+  "boardStayedStillWithMoveRowsFalse": true,
+  "boardMovedAfterEnablingMoveRows": true,
+  "consoleErrors": [],
+  "pageErrors": []
+}

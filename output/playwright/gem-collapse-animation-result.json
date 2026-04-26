@@ -1,0 +1,44 @@
+{
+  "before": {
+    "rows": 10,
+    "columns": 10,
+    "playerColumn": 5,
+    "score": 0,
+    "hint": "left yellow: f | right green: k"
+  },
+  "action": {
+    "side": "Right",
+    "column": 6,
+    "color": "green",
+    "groupSize": 4,
+    "displayedKey": "k",
+    "pressedKey": "k",
+    "expectedScoreGain": 8
+  },
+  "duringAnimation": {
+    "collapsingCount": 4,
+    "lastHint": "Collapsing 4 connected green gems...",
+    "sampleClasses": [
+      "gem-cell gem-green collapsing-gem",
+      "gem-cell gem-green collapsing-gem bottom-row active-target",
+      "gem-cell gem-green collapsing-gem bottom-row",
+      "gem-cell gem-green collapsing-gem bottom-row"
+    ]
+  },
+  "after": {
+    "playerColumn": 6,
+    "score": 8,
+    "scoreGain": 8,
+    "hitsMisses": "1 / 0",
+    "collapsingCount": 0,
+    "lastHint": "Moved right. Collapsed 4 gems! +8 points."
+  },
+  "animationCountMatchesGroup": true,
+  "scoreMatchesExpected": true,
+  "consoleErrors": [],
+  "pageErrors": [],
+  "screenshots": [
+    "output/playwright/gem-collapse-animation-active.png",
+    "output/playwright/gem-collapse-animation-after.png"
+  ]
+}

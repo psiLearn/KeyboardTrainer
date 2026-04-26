@@ -1,0 +1,138 @@
+{
+  "lessonText": "Gem Game: Color Rush\n\nA2\n\ngem_game\n\nFrench\n\nGem game exercise (side + color matching)",
+  "urlAfterClick": "http://localhost/",
+  "iframeSrc": "/games/gem-game/index.html?lessonId=90f024fa-0e13-4cb7-a9ce-ce32d8ccbe29&config=%7B%22rows%22%3A10%2C%22columns%22%3A10%2C%22tickMs%22%3A850%2C%22durationSeconds%22%3A75%2C%22targetScore%22%3A500%2C%22lives%22%3A10%7D",
+  "initial": {
+    "rows": 10,
+    "columns": 10,
+    "playerColumn": 5,
+    "bottomClasses": [
+      "gem-cell gem-red bottom-row",
+      "gem-cell gem-yellow bottom-row",
+      "gem-cell gem-blue bottom-row",
+      "gem-cell gem-blue bottom-row",
+      "gem-cell gem-blue bottom-row active-target",
+      "gem-cell gem-blue bottom-row player-cell-on-board",
+      "gem-cell gem-yellow bottom-row active-target",
+      "gem-cell gem-red bottom-row",
+      "gem-cell gem-blue bottom-row",
+      "gem-cell gem-blue bottom-row"
+    ],
+    "colorCounts": {
+      "gem-blue": 30,
+      "gem-yellow": 30,
+      "gem-red": 22,
+      "gem-green": 18
+    },
+    "score": "0",
+    "lives": "10",
+    "hitsMisses": "0 / 0",
+    "time": "01:15",
+    "hint": "left blue: a | right yellow: ö",
+    "lastHint": "Move into the neighboring gem by pressing its side and color key.",
+    "boardRect": {
+      "width": 473,
+      "height": 433,
+      "left": 308.5,
+      "right": 781.5
+    }
+  },
+  "validAction": {
+    "side": "Left",
+    "color": "blue",
+    "displayedKey": "a",
+    "pressedKey": "a",
+    "expectedColumn": 4
+  },
+  "afterValid": {
+    "rows": 10,
+    "columns": 10,
+    "playerColumn": 4,
+    "bottomClasses": [
+      "gem-cell gem-yellow bottom-row",
+      "gem-cell gem-red bottom-row",
+      "gem-cell gem-green bottom-row",
+      "gem-cell gem-red bottom-row active-target",
+      "gem-cell gem-green bottom-row player-cell-on-board",
+      "gem-cell gem-yellow bottom-row active-target",
+      "gem-cell gem-yellow bottom-row",
+      "gem-cell gem-red bottom-row",
+      "gem-cell gem-yellow bottom-row",
+      "gem-cell gem-yellow bottom-row"
+    ],
+    "colorCounts": {
+      "gem-red": 24,
+      "gem-yellow": 29,
+      "gem-green": 22,
+      "gem-blue": 25
+    },
+    "score": "10",
+    "lives": "10",
+    "hitsMisses": "1 / 0",
+    "time": "01:14",
+    "hint": "left red: d | right yellow: ö",
+    "lastHint": "Moved left. Crash x1! +10 points.",
+    "boardRect": {
+      "width": 473,
+      "height": 433,
+      "left": 308.5,
+      "right": 781.5
+    }
+  },
+  "mismatchAction": {
+    "side": "Left",
+    "actualAdjacentColor": "red",
+    "pressedColor": "blue",
+    "displayedKey": "a",
+    "pressedKey": "a"
+  },
+  "afterMismatch": {
+    "rows": 10,
+    "columns": 10,
+    "playerColumn": 4,
+    "bottomClasses": [
+      "gem-cell gem-yellow bottom-row",
+      "gem-cell gem-green bottom-row",
+      "gem-cell gem-blue bottom-row",
+      "gem-cell gem-green bottom-row active-target",
+      "gem-cell gem-yellow bottom-row player-cell-on-board",
+      "gem-cell gem-yellow bottom-row active-target",
+      "gem-cell gem-blue bottom-row",
+      "gem-cell gem-yellow bottom-row",
+      "gem-cell gem-red bottom-row",
+      "gem-cell gem-blue bottom-row"
+    ],
+    "colorCounts": {
+      "gem-blue": 27,
+      "gem-red": 27,
+      "gem-green": 22,
+      "gem-yellow": 24
+    },
+    "score": "10",
+    "lives": "9",
+    "hitsMisses": "1 / 1",
+    "time": "01:13",
+    "hint": "left green: s | right yellow: ö",
+    "lastHint": "Miss. Match side and color of the highlighted bottom gem.",
+    "boardRect": {
+      "width": 473,
+      "height": 433,
+      "left": 308.5,
+      "right": 781.5
+    }
+  },
+  "mobileBoard": {
+    "width": 311.28125,
+    "viewportWidth": 348,
+    "fits": true
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "screenshots": [
+    "output/playwright/lesson-flow-start.png",
+    "output/playwright/lesson-flow-game-initial.png",
+    "output/playwright/lesson-flow-after-valid-key.png",
+    "output/playwright/lesson-flow-after-mismatch.png",
+    "output/playwright/lesson-flow-mobile.png"
+  ]
+}

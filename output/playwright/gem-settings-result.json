@@ -1,0 +1,62 @@
+{
+  "initial": {
+    "settingsText": "Game Settings\nShow letters inside colored gems\nRow movement interval: 850 ms",
+    "showLettersChecked": false,
+    "intervalValue": "850",
+    "gemLetterCount": 0,
+    "sampleLetters": [],
+    "time": "01:15",
+    "lastHint": "Move into the neighboring gem by pressing its side and color key."
+  },
+  "afterLetters": {
+    "settingsText": "Game Settings\nShow letters inside colored gems\nRow movement interval: 850 ms",
+    "showLettersChecked": true,
+    "intervalValue": "850",
+    "gemLetterCount": 90,
+    "sampleLetters": [
+      "s",
+      "d",
+      "s",
+      "a",
+      "s",
+      "l",
+      "l",
+      "k",
+      "l",
+      "d",
+      "a",
+      "a"
+    ],
+    "time": "01:14",
+    "lastHint": "Move into the neighboring gem by pressing its side and color key."
+  },
+  "afterIntervalChange": {
+    "settingsText": "Game Settings\nShow letters inside colored gems\nRow movement interval: 2000 ms",
+    "showLettersChecked": true,
+    "intervalValue": "2000",
+    "gemLetterCount": 90,
+    "sampleLetters": [
+      "s",
+      "d",
+      "s",
+      "a",
+      "s",
+      "l",
+      "l",
+      "k",
+      "l",
+      "d",
+      "a",
+      "a"
+    ],
+    "time": "01:14",
+    "lastHint": "Row movement interval set to 2000 ms."
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "screenshots": [
+    "output/playwright/gem-settings-initial.png",
+    "output/playwright/gem-settings-letters-on.png",
+    "output/playwright/gem-settings-interval-2000.png"
+  ]
+}

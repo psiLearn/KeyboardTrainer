@@ -1,5 +1,6 @@
 namespace KeyboardTrainer.Client
 
+open System
 open Elmish
 open Elmish.React
 open Browser.Dom
@@ -38,6 +39,9 @@ module App =
             StartScreenModel = startScreenModel
             TypingViewModel = None
             MetricsModel = metricsModel
+            GameSubmitError = None
+            GameStatusMessage = None
+            GameSessionPending = false
             SyncState = SessionSync.init
             Settings = settings
         },
@@ -55,17 +59,31 @@ module App =
             
             match startScreenMsg with
             | StartScreen.Msg.StartLesson lesson ->
-                let typingModel, typingCmd = TypingView.init lesson
-                {
-                    model with
-                        CurrentPage = TypingView lesson
-                        StartScreenModel = startScreenModel
-                        TypingViewModel = Some typingModel
-                },
-                Cmd.batch [
-                    Cmd.map StartScreenMsg cmd
-                    Cmd.map TypingViewMsg typingCmd
-                ]
+                match lesson.ContentType with
+                | ContentType.GemGame ->
+                    // Route to game view for gem game content
+                    {
+                        model with
+                            CurrentPage = GameView lesson
+                            StartScreenModel = startScreenModel
+                            GameStatusMessage = Some "Loading game..."
+                    },
+                    Cmd.batch [
+                        Cmd.map StartScreenMsg cmd
+                    ]
+                | _ ->
+                    // Route to typing view for other content types (Words, Sentences, Probability)
+                    let typingModel, typingCmd = TypingView.init lesson
+                    {
+                        model with
+                            CurrentPage = TypingView lesson
+                            StartScreenModel = startScreenModel
+                            TypingViewModel = Some typingModel
+                    },
+                    Cmd.batch [
+                        Cmd.map StartScreenMsg cmd
+                        Cmd.map TypingViewMsg typingCmd
+                    ]
             | _ ->
                 { model with StartScreenModel = startScreenModel },
                 Cmd.map StartScreenMsg cmd
@@ -140,6 +158,25 @@ module App =
             },
             Cmd.map TypingViewMsg typingCmd
 
+        | NavigateToGameView lesson ->
+            { model with CurrentPage = GameView lesson },
+            Cmd.none
+
+        | GameMessageReceived msg ->
+            // Handle messages from the embedded game iframe
+            model, Cmd.none
+
+        | GameSessionSubmitted (sessionId, session) ->
+            { model with GameSessionPending = false; GameStatusMessage = Some "Session saved" },
+            Cmd.batch [
+                Cmd.ofMsg (MetricsMsg (Metrics.Msg.LoadSessions (Guid.Empty)))
+                Cmd.ofMsg SyncPendingSessions
+            ]
+
+        | GameSessionSubmitFailed (sessionId, error) ->
+            { model with GameSessionPending = false; GameSubmitError = Some error },
+            Cmd.none
+
         | SyncPendingSessions ->
             let now = System.DateTime.UtcNow
             let pending = LocalSessions.pending ()
@@ -177,9 +214,17 @@ module App =
 
     let view model dispatch =
         ErrorBoundary.view [
+            let isGameMode =
+                match model.CurrentPage with
+                | GameView _ -> true
+                | _ -> false
             let appClass =
-                if model.Settings.ColorBlindPalette then "app-container color-blind"
-                else "app-container"
+                [
+                    "app-container"
+                    if model.Settings.ColorBlindPalette then "color-blind"
+                    if isGameMode then "game-mode"
+                ]
+                |> String.concat " "
             div [ ClassName appClass ] [
                 // Navigation bar
                 nav [ ClassName "navbar" ] [
@@ -213,7 +258,7 @@ module App =
                 ]
 
                 // Main content area
-                main [ ClassName "main-content" ] [
+                main [ ClassName (if isGameMode then "main-content game-main-content" else "main-content") ] [
                     match model.CurrentPage with
                     | StartScreen ->
                         let pendingCount = LocalSessions.pending () |> List.length
@@ -232,12 +277,37 @@ module App =
                             TypingView.view model.Settings typingModel (TypingViewMsg >> dispatch)
                         | None -> div [] [ str "Loading..." ]
 
+                    | GameView lesson ->
+                        let iframeSource =
+                            let encodedConfig = Uri.EscapeDataString lesson.Content
+                            $"/games/gem-game/index.html?lessonId={lesson.Id}&config={encodedConfig}"
+
+                        div [ ClassName "game-view" ] [
+                            match model.GameSubmitError with
+                            | Some error ->
+                                div [ ClassName "game-error alert alert-danger" ] [
+                                    p [] [ str (AppError.toMessage error) ]
+                                    button [
+                                        ClassName "btn btn-sm"
+                                        OnClick (fun _ -> dispatch NavigateToStartScreen)
+                                    ] [ str "Back to Lessons" ]
+                                ]
+                            | None -> ()
+
+                            iframe [
+                                Src iframeSource
+                                ClassName "game-frame"
+                                Title "Gem Game Exercise"
+                                HTMLAttr.Custom ("allow", "fullscreen")
+                            ] []
+                        ]
+
                     | Metrics ->
                         Metrics.view model.MetricsModel (MetricsMsg >> dispatch)
                 ]
-                // Footer
-                footer [ ClassName "footer" ] [
-                    p [] [ str "© 2024 Keyboard Trainer. Master your typing skills!" ]
-                ]
+                if not isGameMode then
+                    footer [ ClassName "footer" ] [
+                        p [] [ str "© 2024 Keyboard Trainer. Master your typing skills!" ]
+                    ]
             ]
         ]
