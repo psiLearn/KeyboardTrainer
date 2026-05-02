@@ -9,56 +9,56 @@ WITH variants (title, difficulty, content_type, language, content) AS (
             'A1',
             'gem_game',
             'French',
-            '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":false}'
+            '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":false,"scoreMode":"exponential"}'
         ),
         (
             'Gem Game: Still Rows',
             'A1',
             'gem_game',
             'French',
-            '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":false}'
+            '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":false,"scoreMode":"exponential"}'
         ),
         (
             'Gem Game: Slow Rows + Letters',
             'A2',
             'gem_game',
             'French',
-            '{"rows":15,"columns":15,"tickMs":1600,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true}'
+            '{"rows":15,"columns":15,"tickMs":1600,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true,"scoreMode":"exponential"}'
         ),
         (
             'Gem Game: Medium Rows + Letters',
             'A2',
             'gem_game',
             'French',
-            '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true}'
+            '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true,"scoreMode":"exponential"}'
         ),
         (
             'Gem Game: Fast Rows + Letters',
             'B1',
             'gem_game',
             'French',
-            '{"rows":15,"columns":15,"tickMs":400,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true}'
+            '{"rows":15,"columns":15,"tickMs":400,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true,"scoreMode":"exponential"}'
         ),
         (
             'Gem Game: Slow Rows',
             'A2',
             'gem_game',
             'French',
-            '{"rows":15,"columns":15,"tickMs":1600,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true}'
+            '{"rows":15,"columns":15,"tickMs":1600,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true,"scoreMode":"exponential"}'
         ),
         (
             'Gem Game: Medium Rows',
             'A2',
             'gem_game',
             'French',
-            '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true}'
+            '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true,"scoreMode":"exponential"}'
         ),
         (
             'Gem Game: Fast Rows',
             'B1',
             'gem_game',
             'French',
-            '{"rows":15,"columns":15,"tickMs":400,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true}'
+            '{"rows":15,"columns":15,"tickMs":400,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true,"scoreMode":"exponential"}'
         )
 )
 INSERT INTO lessons (title, difficulty, content_type, language, content)
@@ -73,18 +73,19 @@ WHERE NOT EXISTS (
 
 WITH variants (title, content_type, content) AS (
     VALUES
-        ('Gem Game: Still Rows + Letters', 'gem_game', '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":false}'),
-        ('Gem Game: Still Rows', 'gem_game', '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":false}'),
-        ('Gem Game: Slow Rows + Letters', 'gem_game', '{"rows":15,"columns":15,"tickMs":1600,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true}'),
-        ('Gem Game: Medium Rows + Letters', 'gem_game', '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true}'),
-        ('Gem Game: Fast Rows + Letters', 'gem_game', '{"rows":15,"columns":15,"tickMs":400,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true}'),
-        ('Gem Game: Slow Rows', 'gem_game', '{"rows":15,"columns":15,"tickMs":1600,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true}'),
-        ('Gem Game: Medium Rows', 'gem_game', '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true}'),
-        ('Gem Game: Fast Rows', 'gem_game', '{"rows":15,"columns":15,"tickMs":400,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true}')
+        ('Gem Game: Still Rows + Letters', 'gem_game', '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":false,"scoreMode":"exponential"}'),
+        ('Gem Game: Still Rows', 'gem_game', '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":false,"scoreMode":"exponential"}'),
+        ('Gem Game: Slow Rows + Letters', 'gem_game', '{"rows":15,"columns":15,"tickMs":1600,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true,"scoreMode":"exponential"}'),
+        ('Gem Game: Medium Rows + Letters', 'gem_game', '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true,"scoreMode":"exponential"}'),
+        ('Gem Game: Fast Rows + Letters', 'gem_game', '{"rows":15,"columns":15,"tickMs":400,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":true,"moveRows":true,"scoreMode":"exponential"}'),
+        ('Gem Game: Slow Rows', 'gem_game', '{"rows":15,"columns":15,"tickMs":1600,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true,"scoreMode":"exponential"}'),
+        ('Gem Game: Medium Rows', 'gem_game', '{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true,"scoreMode":"exponential"}'),
+        ('Gem Game: Fast Rows', 'gem_game', '{"rows":15,"columns":15,"tickMs":400,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true,"scoreMode":"exponential"}')
 )
 UPDATE lessons
 SET content = variants.content
 FROM variants
 WHERE lessons.title = variants.title
   AND lessons.content_type = variants.content_type::content_type;
+
 

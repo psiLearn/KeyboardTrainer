@@ -6,7 +6,7 @@ Test date: 2026-04-26
 
 The game behaves as expected when started from the real lesson card `Gem Game: Color Rush`.
 
-The app opened the lesson as a game iframe, loaded the lesson config, rendered a 15 x 15 board, displayed the switched right-side key mapping, and accepted the correct side/color key. Current rules use weighted gem colors, connected same-color collapse, `2^(n-1)` scoring for `n` collapsed gems, startup settings for gem letters and row movement, local high scores, collapsible settings, optional generated sounds, and four-way movement from the center.
+The app opened the lesson as a game iframe, loaded the lesson config, rendered a 15 x 15 board, displayed the switched right-side key mapping, and accepted the correct side/color key. Current rules use weighted gem colors, connected same-color collapse, switchable `2^(n-1)` or `n^2` scoring for `n` collapsed gems, separate level/page and game scores, startup settings for gem letters, scoring mode, and row movement, local high scores, collapsible settings, optional generated sounds, and four-way movement from the center. Row movement now moves existing gems by rotating columns instead of deleting and creating gems. Correct player moves swap with the neighboring colored gem, then score from that moved gem at the player's previous position.
 
 ## Playwright MCP Status
 
@@ -50,15 +50,78 @@ The app now seeds eight additional game lessons so learners can start from a spe
 | Green | 23% |
 | Blue | 19% |
 
-| Collapsing gems `n` | Points `2^(n-1)` |
-| --- | --- |
-| 1 | 1 |
-| 2 | 2 |
-| 3 | 4 |
-| 4 | 8 |
-| 5 | 16 |
+| Collapsing gems `n` | Exponential points `2^(n-1)` | Square points `n^2` |
+| --- | --- | --- |
+| 1 | 1 | 1 |
+| 2 | 2 | 4 |
+| 3 | 4 | 9 |
+| 4 | 8 | 16 |
+| 5 | 16 | 25 |
 
 Valid moves collapse the connected neighboring group of the same color, using horizontal and vertical neighbors.
+
+The point calculation can be changed in settings and can also start from lesson JSON with `scoreMode: "exponential"` or `scoreMode: "square"`.
+
+## Score Layers
+
+The game now shows separate `Level Score` and `Game Score` values.
+
+| Score | Behavior |
+| --- | --- |
+| Level/page score | Resets when the level/page restarts and is used for `targetScore` completion. |
+| Game score | Accumulates across restarted levels in the same game session and is used for high-score ranking. |
+
+Verified result:
+
+```json
+{
+  "before": { "Level Score": "0", "Game Score": "0" },
+  "afterMove": { "Level Score": "1", "Game Score": "1" },
+  "afterRestart": { "Level Score": "0", "Game Score": "1" },
+  "pass": true
+}
+```
+
+Screenshot:
+
+![Separated scores](output/playwright/gem-separated-scores.png)
+
+## Score Mode Switch
+
+The game was opened with exponential scoring, then the settings panel changed `Point calculation` to `n^2`.
+
+```json
+{
+  "pointsLabel": "n^2",
+  "chosen": {
+    "direction": "left",
+    "color": "yellow",
+    "groupCount": 5
+  },
+  "expectedSquareScore": 25,
+  "oldExponentialScore": 16,
+  "statsAfter": {
+    "Level Score": "25",
+    "Game Score": "25",
+    "Points": "n^2"
+  },
+  "pass": true
+}
+```
+
+Starting with `scoreMode: "square"` also selected `n^2` immediately:
+
+```json
+{
+  "selectValue": "square",
+  "pointsLabel": "n^2",
+  "pass": true
+}
+```
+
+Screenshot:
+
+![Square score mode](output/playwright/gem-score-mode-square.png)
 
 ## Screenshots
 
@@ -134,6 +197,14 @@ High-score table, sound setting, and collapsed settings:
 
 ![15 x 15 up/down movement](output/playwright/gem-15x15-up-down.png)
 
+Row movement rotates existing gems:
+
+![Row movement rotates](output/playwright/gem-row-movement-rotates.png)
+
+Scoring from the moved gem:
+
+![Moved gem score](output/playwright/gem-moved-gem-score.png)
+
 Expanded game layout with only the top Keyboard Trainer bar:
 
 ![Expanded game layout](output/playwright/game-more-space-layout.png)
@@ -153,7 +224,7 @@ flowchart TD
   E --> F[Press matching side and color key]
   F --> G[Connected same-color gems get collapse animation]
   G --> H[Animated gems disappear and replacements come from top]
-  H --> I[Score gain = 2^(n-1)]
+  H --> I[Score gain uses selected formula]
   I --> J[Turn on gem letters]
   J --> K[Colored gems display their matching letters]
   K --> L[Set row interval to 2000 ms]
@@ -219,6 +290,9 @@ Note: the on-screen key for right blue is `ö`.
 | High-score table | Pass | The side table starts empty, then records completed round score, hits, misses, and timestamp in local storage. |
 | Center start | Pass | Player starts at row 7, column 7 on the 15 x 15 field. |
 | Four-way movement | Pass | Up and down controls work in addition to left/right; latest run moved up with `w` and down with `c`. |
+| Row movement preserves gems | Pass | With row movement enabled, color counts stayed the same and rows rotated instead of dropping/creating gems. |
+| Moved gem scoring | Pass | A left yellow move scored from the moved gem at the old player position: moved group size 2 scored 2, while the old target-location group size 16 would have scored 32768. |
+| Switchable score mode | Pass | Settings can switch from `2^(n-1)` to `n^2`; a 5-gem collapse scored 25 instead of the old 16. |
 | Expanded game layout | Pass | Game mode keeps the top navbar, removes the footer and outer game header, and lets the iframe fill the remaining viewport. |
 | Console errors | Pass | No browser console errors were captured during the final lesson flow. |
 | Page errors | Pass | No page errors were captured during the final lesson flow. |
@@ -436,6 +510,52 @@ High-score table and sound setting:
 }
 ```
 
+Row movement preserves existing gems:
+
+```json
+{
+  "beforeCounts": {
+    "green": 59,
+    "red": 60,
+    "yellow": 69,
+    "blue": 37
+  },
+  "afterCounts": {
+    "yellow": 69,
+    "red": 60,
+    "green": 59,
+    "blue": 37
+  },
+  "countsSame": true,
+  "rotationRows": 3,
+  "rotated": true
+}
+```
+
+Moved gem scoring:
+
+```json
+{
+  "chosen": {
+    "direction": "left",
+    "color": "yellow",
+    "key": "f",
+    "oldGroupCount": 16,
+    "movedGroupCount": 2,
+    "expectedScore": 2,
+    "oldScore": 32768
+  },
+  "after": {
+    "player": {
+      "row": 7,
+      "column": 6
+    },
+    "score": 2,
+    "hitsMisses": "1 / 0"
+  }
+}
+```
+
 Full machine-readable result:
 
 `output/playwright/lesson-flow-after-switch-result.json`
@@ -468,6 +588,26 @@ High-score, sound, and collapsible settings result:
 
 `output/playwright/gem-15x15-up-down-result.json`
 
+Row movement rotation result:
+
+`output/playwright/gem-row-movement-rotates-result.json`
+
+Moved gem scoring result:
+
+`output/playwright/gem-moved-gem-score-result.json`
+
+Separated level/page and game score result:
+
+`output/playwright/gem-separated-scores-result.json`
+
+Score mode square result:
+
+`output/playwright/gem-score-mode-square-result.json`
+
+Score mode starting parameter result:
+
+`output/playwright/gem-score-mode-starting-parameter-result.json`
+
 Connected collapse result:
 
 `output/playwright/gem-connected-collapse-result.json`
@@ -482,7 +622,7 @@ Expanded layout result:
 
 ## Conclusion
 
-The game behaves as expected when started from the lesson. The pressed letter must match both the movement direction and the adjacent gem color. The board is now 15 x 15, and the player starts in the center. The right-side mapping is `ö` blue, `l` green, `k` red, and `j` yellow. Up uses `q/p`, `w/o`, `e/i`, `r/u`; down uses `y/-`, `x/.`, `c/,`, `v/m`. The latest movement run successfully moved up with `w` and down with `c`. The settings also work as startup parameters and runtime controls: letters can be shown inside colored gems, rows can be stopped or restarted, sounds can be muted, settings can collapse, and the row movement interval can be changed while the game is running. The eight additional lesson variants load the requested settings, the side table keeps high scores per lesson in browser local storage, and Space restarts the game like `R`.
+The game behaves as expected when started from the lesson. The pressed letter must match both the movement direction and the adjacent gem color. The board is now 15 x 15, and the player starts in the center. The right-side mapping is `ö` blue, `l` green, `k` red, and `j` yellow. Up uses `q/p`, `w/o`, `e/i`, `r/u`; down uses `y/-`, `x/.`, `c/,`, `v/m`. Correct moves swap the player with the neighboring gem, then calculate connected neighbors and score from the moved colored gem at the player's old position. Level/page score now resets on restart and drives `targetScore`, while game score persists across restarted levels and feeds the high-score table. Point calculation can be switched between `2^(n-1)` and `n^2`, including from startup parameters. Row movement rotates existing gems, preserving color counts instead of deleting and creating gems. The settings also work as startup parameters and runtime controls: letters can be shown inside colored gems, rows can be stopped or restarted, sounds can be muted, settings can collapse, and the row movement interval can be changed while the game is running. The eight additional lesson variants load the requested settings, the side table keeps high scores per lesson in browser local storage, and Space restarts the game like `R`.
 
 The remaining issue is only with Playwright MCP startup on this machine. MCP needs Chrome installed at the expected path or configured to use an available browser such as Edge or Playwright Chromium.
 

@@ -15,6 +15,10 @@ module GameTypes =
         | Red
         | Yellow
 
+    type ScoreMode =
+        | Exponential
+        | Square
+
     type GameConfig = {
         Rows: int
         Columns: int
@@ -24,11 +28,13 @@ module GameTypes =
         Lives: int
         ShowLettersInGems: bool
         MoveRows: bool
+        ScoreMode: ScoreMode
     }
 
     type CompletionPayload = {
         LessonId: Guid option
         Score: int
+        GameScore: int
         Hits: int
         Misses: int
         DurationSeconds: int
@@ -37,6 +43,7 @@ module GameTypes =
 
     type HighScore = {
         Score: int
+        LevelScore: int
         Hits: int
         Misses: int
         PlayedAt: string
@@ -45,6 +52,7 @@ module GameTypes =
     type CollapsePlan = {
         Side: Side
         TargetColumn: int
+        TargetRow: int
         CollapsedCells: Set<int * int>
         CollapsedCount: int
         Points: int
@@ -59,7 +67,8 @@ module GameTypes =
         PlayerColumn: int
         PlayerRow: int
         Seed: int
-        Score: int
+        LevelScore: int
+        GameScore: int
         Combo: int
         Lives: int
         Hits: int
@@ -88,6 +97,7 @@ module GameTypes =
         | SetShowLettersInGems of bool
         | SetMoveRows of bool
         | SetSoundsEnabled of bool
+        | SetScoreMode of ScoreMode
         | ToggleSettings
         | SetTickMs of int
         | ApplyCollapse

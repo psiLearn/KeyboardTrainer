@@ -41,6 +41,7 @@ TestResults/
 *.trx
 playwright-report/
 test-results/
+output/playwright/
 
 # Database files
 *.db

@@ -28,20 +28,37 @@ the pressed letter must fit the gem color on the side:
 example: red gem on the left means press d.
 example: green gem on the right means press l.
 collapse neighbouring gems with the same color, bringing new gems from the top.
+after a correct move, swap the player with the matched neighboring gem.
+calculate neighbours and score from the moved colored gem at the player's previous position, not from the gem's old position.
 animate the collapsing gems before the new gems appear.
-points for n collapsing gems: 2^(n-1)
+point calculation is switchable:
+    current/exponential mode: 2^(n-1)
+    square mode: n^2
 
 settings:
     show letters inside colored gems
     move rows on/off
     sounds on/off
+    point calculation: 2^(n-1) or n^2
     interval time in milliseconds for each frame / gems moving one row
     settings are collapsable
     restart with r or space bar
     restart keeps the current settings
+row movement:
+    moving rows rotates existing gems instead of deleting one and creating a new one
+    when rows move down, the bottom gem wraps to the top of its column
+collapse refill:
+    non-collapsed gems move down into gaps
+    replacement gems enter from the top
 score:
-    keep track of round score
-    show a high score table at the side
+    keep track of level/page score for the current lesson page
+    use level/page score for targetScore and finish conditions
+    keep a separate game score that accumulates across restarted levels in the same game session
+    each collapse adds the same points to level/page score and game score
+    point calculation mode controls how the collapse size becomes points
+    manual restart or auto-restart resets level/page score but keeps game score
+    show both level/page score and game score in the top stats
+    show a high score table at the side using game score, with the level/page score beside it
     store high scores in browser local storage per lesson
 sounds:
     play sound for valid hit
@@ -57,6 +74,7 @@ starting parameters:
     lives
     showLettersInGems
     moveRows
+    scoreMode: exponential or square
 
 game lessons:
     Gem Game: Still Rows + Letters

@@ -19,6 +19,7 @@ module GameLogic =
         Lives = 10
         ShowLettersInGems = false
         MoveRows = true
+        ScoreMode = Exponential
     }
 
     let private nextSeed seed =
@@ -57,6 +58,31 @@ module GameLogic =
 
     let clampTickMs value =
         max 300 (min 2000 value)
+
+    let scoreModeToValue scoreMode =
+        match scoreMode with
+        | Exponential -> "exponential"
+        | Square -> "square"
+
+    let scoreModeToLabel scoreMode =
+        match scoreMode with
+        | Exponential -> "2^(n-1)"
+        | Square -> "n^2"
+
+    let parseScoreMode (raw: string) =
+        match raw.Trim().ToLowerInvariant() with
+        | "square"
+        | "squared"
+        | "n2"
+        | "n^2"
+        | "nsquared"
+        | "n-squared" -> Some Square
+        | "exponential"
+        | "power"
+        | "2^(n-1)"
+        | "2n"
+        | "default" -> Some Exponential
+        | _ -> None
 
     let private parseQueryString (search: string) =
         if String.IsNullOrWhiteSpace search then Map.empty
@@ -114,6 +140,10 @@ module GameLogic =
                                 | true, flag -> Some flag
                                 | _ -> None
                             | _ -> None
+                    let tryGetString (name: string) =
+                        let value: obj = parsed?(name)
+                        if isNull value || obj.ReferenceEquals(value, JS.undefined) then None
+                        else Some (string value)
                     #else
                     use parsed = JsonDocument.Parse(raw)
                     let root = parsed.RootElement
@@ -149,6 +179,17 @@ module GameLogic =
                             | _ -> None
                         else
                             None
+                    let tryGetString (name: string) =
+                        let mutable node = Unchecked.defaultof<JsonElement>
+                        if root.TryGetProperty(name, &node) then
+                            match node.ValueKind with
+                            | JsonValueKind.String -> Some (node.GetString())
+                            | JsonValueKind.Number
+                            | JsonValueKind.True
+                            | JsonValueKind.False -> Some (node.ToString())
+                            | _ -> None
+                        else
+                            None
                     #endif
 
                     let rows = tryGetInt "rows" |> Option.defaultValue defaultConfig.Rows
@@ -159,6 +200,10 @@ module GameLogic =
                     let lives = tryGetInt "lives" |> Option.defaultValue defaultConfig.Lives
                     let showLettersInGems = tryGetBool "showLettersInGems" |> Option.defaultValue defaultConfig.ShowLettersInGems
                     let moveRows = tryGetBool "moveRows" |> Option.defaultValue defaultConfig.MoveRows
+                    let scoreMode =
+                        tryGetString "scoreMode"
+                        |> Option.bind parseScoreMode
+                        |> Option.defaultValue defaultConfig.ScoreMode
 
                     Some {
                         Rows = normalizePositive 4 20 defaultConfig.Rows rows
@@ -169,6 +214,7 @@ module GameLogic =
                         Lives = normalizePositive 1 25 defaultConfig.Lives lives
                         ShowLettersInGems = showLettersInGems
                         MoveRows = moveRows
+                        ScoreMode = scoreMode
                     }
                 with _ ->
                     None)
@@ -246,6 +292,22 @@ module GameLogic =
     let private colorAt board column row =
         board |> List.item column |> List.item row
 
+    let private setColorAt board targetColumn targetRow color =
+        board
+        |> List.mapi (fun columnIndex column ->
+            if columnIndex = targetColumn then
+                column
+                |> List.mapi (fun rowIndex existing ->
+                    if rowIndex = targetRow then color else existing)
+            else
+                column)
+
+    let private swapColors board firstColumn firstRow secondColumn secondRow =
+        let firstColor = colorAt board firstColumn firstRow
+        let secondColor = colorAt board secondColumn secondRow
+        let movedBoard = setColorAt board firstColumn firstRow secondColor
+        setColorAt movedBoard secondColumn secondRow firstColor
+
     let private neighbors columns rows (column, row) =
         [
             column - 1, row
@@ -287,9 +349,9 @@ module GameLogic =
             current <- next
         List.rev generated, current
 
-    let private collapseConnectedGroup rows columns board startColumn startRow playerColumn playerRow seed =
+    let collapseConnectedGroup rows columns board startColumn startRow blockedColumn blockedRow seed =
         let targetColor = colorAt board startColumn startRow
-        let blockedCells = Set.singleton (playerColumn, playerRow)
+        let blockedCells = Set.singleton (blockedColumn, blockedRow)
         let collapsed = connectedSameColorGroup rows columns board blockedCells startColumn startRow targetColor
         let mutable current = seed
 
@@ -313,29 +375,27 @@ module GameLogic =
                         |> List.map snd
                     let newColors, nextSeed = generateColors collapsedRows.Length current
                     current <- nextSeed
-                    keep @ newColors)
+                    newColors @ keep)
 
         collapsed, nextBoard, current
 
-    let private collapsePoints collapsedCount =
-        if collapsedCount <= 1 then 1
-        elif collapsedCount >= 30 then Int32.MaxValue
-        else pown 2 (collapsedCount - 1)
+    let private collapsePoints scoreMode collapsedCount =
+        match scoreMode with
+        | Square ->
+            if collapsedCount >= 46341 then Int32.MaxValue
+            else collapsedCount * collapsedCount
+        | Exponential ->
+            if collapsedCount <= 1 then 1
+            elif collapsedCount >= 30 then Int32.MaxValue
+            else pown 2 (collapsedCount - 1)
 
-    let private shiftColumn rows column seed =
-        let color, next = randomColor seed
-        let shifted = color :: (column |> List.take (rows - 1))
-        shifted, next
+    let private shiftColumn column =
+        match List.rev column with
+        | bottom :: restReversed -> bottom :: List.rev restReversed
+        | [] -> []
 
-    let private shiftBoard rows board seed =
-        let mutable current = seed
-        let shifted =
-            board
-            |> List.map (fun column ->
-                let nextColumn, nextSeed = shiftColumn rows column current
-                current <- nextSeed
-                nextColumn)
-        shifted, current
+    let shiftBoard board seed =
+        board |> List.map shiftColumn, seed
 
     let private registerMiss keyCode model =
         { model with
@@ -398,7 +458,7 @@ module GameLogic =
         | _ -> None
 
     let private finishIfNeeded model =
-        if model.Lives <= 0 || model.RemainingMs <= 0 || model.Score >= model.Config.TargetScore then
+        if model.Lives <= 0 || model.RemainingMs <= 0 || model.LevelScore >= model.Config.TargetScore then
             { model with IsRunning = false; IsFinished = true; FinishDelayMs = 3000 }
         else
             model
@@ -414,7 +474,8 @@ module GameLogic =
             PlayerColumn = config.Columns / 2
             PlayerRow = config.Rows / 2
             Seed = seed1
-            Score = 0
+            LevelScore = 0
+            GameScore = 0
             Combo = 0
             Lives = config.Lives
             Hits = 0
@@ -450,13 +511,16 @@ module GameLogic =
                     registerMiss (keyCodeForSideColor side color) { model with LastHint = "No column on that side." }
                     |> finishIfNeeded
                 elif color = positionColor (columnIndex, rowIndex) model then
+                    let movedBoard =
+                        swapColors model.Board model.PlayerColumn model.PlayerRow columnIndex rowIndex
                     let collapsedCells, updatedBoard, nextSeed =
-                        collapseConnectedGroup model.Config.Rows model.Config.Columns model.Board columnIndex rowIndex model.PlayerColumn model.PlayerRow model.Seed
+                        collapseConnectedGroup model.Config.Rows model.Config.Columns movedBoard model.PlayerColumn model.PlayerRow columnIndex rowIndex model.Seed
                     let collapsedCount = Set.count collapsedCells
-                    let points = collapsePoints collapsedCount
+                    let points = collapsePoints model.Config.ScoreMode collapsedCount
                     let plan = {
                         Side = side
                         TargetColumn = columnIndex
+                        TargetRow = rowIndex
                         CollapsedCells = collapsedCells
                         CollapsedCount = collapsedCount
                         Points = points
@@ -483,14 +547,10 @@ module GameLogic =
                 model with
                     Board = plan.NextBoard
                     PlayerColumn = plan.TargetColumn
-                    PlayerRow =
-                        match plan.Side with
-                        | Left
-                        | Right -> model.PlayerRow
-                        | Up -> model.PlayerRow - 1
-                        | Down -> model.PlayerRow + 1
+                    PlayerRow = plan.TargetRow
                     Seed = plan.NextSeed
-                    Score = model.Score + plan.Points
+                    LevelScore = model.LevelScore + plan.Points
+                    GameScore = model.GameScore + plan.Points
                     Combo = combo
                     Hits = model.Hits + 1
                     IsCollapsing = false
@@ -506,7 +566,7 @@ module GameLogic =
         else
             let next =
                 if model.Config.MoveRows then
-                    let shiftedBoard, seed1 = shiftBoard model.Config.Rows model.Board model.Seed
+                    let shiftedBoard, seed1 = shiftBoard model.Board model.Seed
                     { model with
                         Board = shiftedBoard
                         Seed = seed1
@@ -521,7 +581,8 @@ module GameLogic =
             max 1 (model.Config.DurationSeconds - (model.RemainingMs / 1000))
         {
             LessonId = model.LessonId
-            Score = model.Score
+            Score = model.LevelScore
+            GameScore = model.GameScore
             Hits = model.Hits
             Misses = model.Misses
             DurationSeconds = elapsedSeconds

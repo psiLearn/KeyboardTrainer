@@ -94,15 +94,27 @@ module App =
         |> Option.defaultValue "gem-game-high-scores:standalone"
 
     let private serializeHighScore (score: HighScore) =
-        sprintf "%d|%d|%d|%s" score.Score score.Hits score.Misses score.PlayedAt
+        sprintf "%d|%d|%d|%d|%s" score.Score score.LevelScore score.Hits score.Misses score.PlayedAt
 
     let private deserializeHighScore (raw: string) : HighScore option =
         match raw.Split('|') with
+        | [| gameScore; levelScore; hits; misses; playedAt |] ->
+            match Int32.TryParse gameScore, Int32.TryParse levelScore, Int32.TryParse hits, Int32.TryParse misses with
+            | (true, parsedGameScore), (true, parsedLevelScore), (true, parsedHits), (true, parsedMisses) ->
+                Some {
+                    Score = parsedGameScore
+                    LevelScore = parsedLevelScore
+                    Hits = parsedHits
+                    Misses = parsedMisses
+                    PlayedAt = playedAt
+                }
+            | _ -> None
         | [| score; hits; misses; playedAt |] ->
             match Int32.TryParse score, Int32.TryParse hits, Int32.TryParse misses with
             | (true, parsedScore), (true, parsedHits), (true, parsedMisses) ->
                 Some {
                     Score = parsedScore
+                    LevelScore = parsedScore
                     Hits = parsedHits
                     Misses = parsedMisses
                     PlayedAt = playedAt
@@ -137,7 +149,8 @@ module App =
     let private addHighScoreIfNeeded (model: Model) =
         if model.IsFinished && not model.ScoreRecorded then
             let entry: HighScore = {
-                Score = model.Score
+                Score = model.GameScore
+                LevelScore = model.LevelScore
                 Hits = model.Hits
                 Misses = model.Misses
                 PlayedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm")
@@ -269,12 +282,14 @@ module App =
                 { fresh.Config with
                     TickMs = model.Config.TickMs
                     ShowLettersInGems = model.Config.ShowLettersInGems
-                    MoveRows = model.Config.MoveRows }
+                    MoveRows = model.Config.MoveRows
+                    ScoreMode = model.Config.ScoreMode }
             let next =
                 { fresh with
                     Config = keptConfig
                     ShowLettersInGems = keptConfig.ShowLettersInGems
                     TickVersion = model.TickVersion + 1
+                    GameScore = model.GameScore
                     HighScores = model.HighScores
                     SettingsExpanded = model.SettingsExpanded
                     SoundsEnabled = model.SoundsEnabled }
@@ -306,6 +321,12 @@ module App =
                 SoundsEnabled = soundsEnabled
                 LastHint = if soundsEnabled then "Sounds are on." else "Sounds are muted." },
             if soundsEnabled then playSoundCmd true "hit" else Cmd.none
+
+        | SetScoreMode scoreMode ->
+            { model with
+                Config = { model.Config with ScoreMode = scoreMode }
+                LastHint = sprintf "Point calculation set to %s." (scoreModeToLabel scoreMode) },
+            Cmd.none
 
         | ToggleSettings ->
             { model with SettingsExpanded = not model.SettingsExpanded }, Cmd.none
@@ -374,12 +395,19 @@ module App =
         let raw: string = target?value
         dispatch (SetTickMs (parseIntOr model.Config.TickMs raw))
 
+    let private dispatchScoreModeFromEvent dispatch (ev: Event) =
+        let target: obj = ev.target
+        let raw: string = target?value
+        raw
+        |> parseScoreMode
+        |> Option.iter (fun scoreMode -> dispatch (SetScoreMode scoreMode))
+
     let private highScoreRows (scores: HighScore list) =
         match scores with
         | [] ->
             [
                 tr [] [
-                    td [ ColSpan 4; ClassName "empty-high-score" ] [
+                    td [ ColSpan 5; ClassName "empty-high-score" ] [
                         str "Finish a round to record a score."
                     ]
                 ]
@@ -390,6 +418,7 @@ module App =
                 tr [ Key (sprintf "high-score-%d" index) ] [
                     td [] [ str (sprintf "%d" (index + 1)) ]
                     td [] [ str (string score.Score) ]
+                    td [] [ str (string score.LevelScore) ]
                     td [] [ str (sprintf "%d/%d" score.Hits score.Misses) ]
                     td [] [ str score.PlayedAt ]
                 ])
@@ -419,12 +448,14 @@ module App =
             ]
 
             div [ ClassName "gem-game-stats" ] [
-                div [ ClassName "stat-card" ] [ span [] [ str "Score" ]; strong [] [ str (string model.Score) ] ]
+                div [ ClassName "stat-card" ] [ span [] [ str "Level Score" ]; strong [] [ str (string model.LevelScore) ] ]
+                div [ ClassName "stat-card" ] [ span [] [ str "Game Score" ]; strong [] [ str (string model.GameScore) ] ]
                 div [ ClassName "stat-card" ] [ span [] [ str "Lives" ]; strong [] [ str (string model.Lives) ] ]
                 div [ ClassName "stat-card" ] [ span [] [ str "Combo" ]; strong [] [ str (string model.Combo) ] ]
                 div [ ClassName "stat-card" ] [ span [] [ str "Hits / Misses" ]; strong [] [ str (sprintf "%d / %d" model.Hits model.Misses) ] ]
                 div [ ClassName "stat-card" ] [ span [] [ str "Time" ]; strong [] [ str (sprintf "%02d:%02d" minutes seconds) ] ]
-                div [ ClassName "stat-card" ] [ span [] [ str "Target Score" ]; strong [] [ str (string model.Config.TargetScore) ] ]
+                div [ ClassName "stat-card" ] [ span [] [ str "Level Target" ]; strong [] [ str (string model.Config.TargetScore) ] ]
+                div [ ClassName "stat-card" ] [ span [] [ str "Points" ]; strong [] [ str (scoreModeToLabel model.Config.ScoreMode) ] ]
             ]
 
             div [ ClassName "gem-game-play-area" ] [
@@ -436,12 +467,15 @@ module App =
 
                 aside [ ClassName "gem-game-high-scores" ] [
                     h2 [] [ str "High Scores" ]
-                    p [ ClassName "current-score-label" ] [ str (sprintf "This round: %d" model.Score) ]
+                    p [ ClassName "current-score-label" ] [
+                        str (sprintf "Game: %d | Level: %d" model.GameScore model.LevelScore)
+                    ]
                     table [ ClassName "high-score-table"; CellPadding 0; CellSpacing 0 ] [
                         thead [] [
                             tr [] [
                                 th [] [ str "#" ]
-                                th [] [ str "Score" ]
+                                th [] [ str "Game" ]
+                                th [] [ str "Level" ]
                                 th [] [ str "H/M" ]
                                 th [] [ str "When" ]
                             ]
@@ -506,6 +540,16 @@ module App =
                                 OnChange (dispatchTickMsFromEvent model dispatch)
                             ]
                         ]
+                        label [ ClassName "settings-field" ] [
+                            span [] [ str "Point calculation" ]
+                            select [
+                                Value (scoreModeToValue model.Config.ScoreMode)
+                                OnChange (dispatchScoreModeFromEvent dispatch)
+                            ] [
+                                option [ Value "exponential" ] [ str "2^(n-1)" ]
+                                option [ Value "square" ] [ str "n^2" ]
+                            ]
+                        ]
                     ]
             ]
 
@@ -524,13 +568,14 @@ module App =
                             span [ Key (sprintf "game-confetti-%d" index) ] [] 
                     ]
                     h2 [ ClassName "finish-heading" ] [ str "🎉 Round Complete! 🎉" ]
-                    p [ ClassName "final-score" ] [ str (sprintf "Final Score: %d" model.Score) ]
-                    if model.HighScores |> List.tryHead |> Option.exists (fun score -> score.Score = model.Score) then
+                    p [ ClassName "final-score" ] [ str (sprintf "Level Score: %d" model.LevelScore) ]
+                    p [ ClassName "final-score" ] [ str (sprintf "Game Score: %d" model.GameScore) ]
+                    if model.HighScores |> List.tryHead |> Option.exists (fun score -> score.Score = model.GameScore && score.LevelScore = model.LevelScore) then
                         p [ ClassName "score-message high-score-message" ] [ str "New score added to the high-score table!" ]
                     p [ ClassName "score-message" ] [ 
-                        str (if model.Score >= model.Config.TargetScore 
+                        str (if model.LevelScore >= model.Config.TargetScore 
                              then "🏆 Target Reached! Excellent!"
-                             else sprintf "Keep going! You need %d more points to reach the target." (model.Config.TargetScore - model.Score))
+                             else sprintf "Keep going! You need %d more level points to reach the target." (model.Config.TargetScore - model.LevelScore))
                     ]
                     if model.FinishDelayMs > 0 then
                         p [ ClassName "auto-restart-message" ] [ 

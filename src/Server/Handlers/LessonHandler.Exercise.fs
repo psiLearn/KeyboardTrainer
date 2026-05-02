@@ -21,7 +21,7 @@ module LessonHandlerExercise =
                             | ContentType.Probability -> ProbabilityExerciseGenerator.generateFromProbabilityJson value.Content None None
                             | ContentType.GemGame ->
                                 if String.IsNullOrWhiteSpace value.Content then
-                                    Ok("""{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true}""")
+                                    Ok("""{"rows":15,"columns":15,"tickMs":850,"durationSeconds":75,"targetScore":500,"lives":10,"showLettersInGems":false,"moveRows":true,"scoreMode":"exponential"}""")
                                 else
                                     Ok value.Content
                             | _ -> Ok value.Content
@@ -62,4 +62,5 @@ module LessonHandlerExercise =
                     ctx.SetStatusCode 500
                     return! json (apiError 500 "Failed to generate probability exercise" (Some [ { Field = "server"; Message = ex.Message } ])) next ctx
             }
+
 

@@ -20,12 +20,20 @@ Implement a candy-crush-inspired typing game as a separate project, then link it
 - Right match keys: `ö` blue, `l` green, `k` red, `j` yellow.
 - Up match keys: `q` or `p` blue, `w` or `o` green, `e` or `i` red, `r` or `u` yellow.
 - Down match keys: `y` or `-` blue, `x` or `.` green, `c` or `,` red, `v` or `m` yellow.
-- Matching same color animates and collapses the connected neighboring same-color group, increases score with `2^(n-1)` for `n` collapsed gems, and spawns new gems from top.
-- Game settings allow showing letters inside gems, turning row movement on/off, and changing the row movement interval in milliseconds.
+- Matching same color animates and collapses the connected neighboring same-color group, increases score with the selected formula, and spawns new gems from top.
+- Point calculation is switchable between the current `2^(n-1)` formula and `n^2`.
+- Correct movement swaps the player with the matched neighboring colored gem.
+- Neighbor detection and scoring start from the moved colored gem at the player's previous position, not from the neighbor's original position.
+- Row movement preserves gems by rotating columns; it does not delete a bottom gem and create a new top gem.
+- Collapse refill moves existing non-collapsed gems down into gaps, then creates replacement gems at the top.
+- Game settings allow showing letters inside gems, turning row movement on/off, choosing the point calculation, and changing the row movement interval in milliseconds.
 - Game settings are collapsible to preserve playfield space.
 - Game settings include a sound on/off toggle.
 - These settings are also accepted as starting parameters in the lesson config JSON: `showLettersInGems` and `moveRows`.
 - High scores are tracked per lesson in browser local storage and shown in a side table.
+- Scoring has two layers:
+  - level/page score resets for each lesson page and is used for `targetScore` completion.
+  - game score accumulates across restarted levels in the same game session and is used for the high-score table.
 - Seed multiple game lessons for guided practice:
   - still rows with letters
   - still rows without letters
@@ -100,13 +108,17 @@ Tasks:
 - Apply color-key mapping and scoring by connected collapse size.
 - Collapse connected neighbouring same-color gems.
 - Animate collapsing gems before replacing them.
-- Score collapsed groups with `2^(n-1)`.
+- Score collapsed groups with the selected mode: `2^(n-1)` or `n^2`.
 - Spawn replacement gems from top after collapse.
 - Add settings for letter overlays, row movement on/off, and row movement interval.
 - Add collapsible settings UI.
 - Add generated Web Audio sounds for hit, miss, and finish states.
 - Add sound on/off setting.
 - Add side high-score table and persist completed scores locally.
+- Separate level/page score from game score in the model and UI.
+- Use level/page score for target completion and completion payload score.
+- Use game score for high-score ranking, while showing the level/page score beside each high-score row.
+- Preserve the selected point calculation on restart and allow `scoreMode` as a starting parameter.
 - Read `showLettersInGems` and `moveRows` from the game config so lessons can define the initial setting state.
 - Add Space bar as a restart shortcut in addition to `R`.
 - Keep the current runtime settings when restarting: letter overlays, row movement on/off, row movement interval, sound setting, and settings expanded/collapsed state.
@@ -115,7 +127,7 @@ Acceptance:
 - Key presses map to expected color channels.
 - Correct hits increase score and refresh board consistently.
 - Wrong hits produce penalty or miss feedback.
-- Letter overlay, movement on/off, and movement interval settings update the running game.
+- Letter overlay, movement on/off, scoring mode, and movement interval settings update the running game.
 
 ### Step 5: Embed game in main app as an exercise
 Files:
